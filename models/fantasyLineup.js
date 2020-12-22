@@ -1,0 +1,20 @@
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const fantasyLineupSchema = new Schema(
+    {
+        name_team: { type: String, required: true } ,
+        user_id: { type: String, required: true } ,
+        league_id: { type: String, required: true } ,
+        season_id: { type: String, required: true } ,
+        number_match: { type: Number, required: true },
+        fantasyLineup: [ { 
+            player_id: { type: Number, required: true },
+            player_name : { type: String, required: true },
+            position: { type: String, required: true },
+            avatar: { type: String, required: true },
+            order :  { type: Number, required: true }
+        } ]
+    }
+);
+module.exports = mongoose.model('fantasylineup', fantasyLineupSchema);
