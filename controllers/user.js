@@ -4,6 +4,8 @@ const bcrypt = require("bcrypt-nodejs");
 const jwt = require("../services/jwt");
 const User = require("../models/user");
 const { UPLOADPATH } = require("../config");
+const Registro = require("../models/registro");
+
 
 function signUp(req, res) {
     const user = new User;
@@ -35,8 +37,28 @@ function signUp(req, res) {
                     else {
                         if(!userStored)
                             res.status(404).send({message: "Error al crear el usuario."});
-                        else
-                            res.status(200).send({userStored});
+                        else{
+                            //res.status(200).send({userStored});
+
+                            const registro = new Registro();
+                            registro.tabla = "user";
+                            registro.tipo = "add"; 
+                            registro.usuario = user.email; 
+                            registro.mensaje = "Usuario creado";
+
+                            registro.save((err, registroCreated) => {
+                                if(err){
+                                    res.status(500).send({ message: "Error del servidor."});
+                                } else {
+                                    if(!registroCreated) {
+                                        res.status(404).send({ message: "Error al crear el registro."});
+                                        } else {
+                                            res.status(200).send({userStored});
+                                        }
+                                }
+                            });
+
+                        }
                     }
                 })
             }   
@@ -226,7 +248,23 @@ function deleteUser(req, res){
             if(!userDeleted) {
                 res.status(404).send({ message: "Usuario no encontrado."});
             } else {
-                res.status(200).send({ message: "Usuario eliminado correctamente."});
+                const registro = new Registro();
+                registro.tabla = "user";
+                registro.tipo = "delete"; 
+                registro.usuario = id; 
+                registro.mensaje = "Usuario eliminado";
+
+                registro.save((err, registroCreated) => {
+                    if(err){
+                        res.status(500).send({ message: "Error del servidor."});
+                    } else {
+                        if(!registroCreated) {
+                            res.status(404).send({ message: "Error al crear el registro."});
+                        } else {
+                            res.status(200).send({ message: "Usuario eliminado correctamente"});
+                        }
+                    }
+                });
             }
         }
     })
@@ -257,7 +295,23 @@ function createUser(req, res){
                         if(!userStored) {
                             res.status(500).send({ message: "Error al crear el nuevo usuario." });
                         } else {
-                            res.status(200).send({ message: "Usuario creado correctamente."});
+                            const registro = new Registro();
+                            registro.tabla = "user";
+                            registro.tipo = "add"; 
+                            registro.usuario = user.email; 
+                            registro.mensaje = "Usuario creado";
+
+                            registro.save((err, registroCreated) => {
+                                if(err){
+                                    res.status(500).send({ message: "Error del servidor."});
+                                } else {
+                                    if(!registroCreated) {
+                                        res.status(404).send({ message: "Error al crear el registro."});
+                                        } else {
+                                            res.status(200).send({ message: "Usuario creado correctamente."});
+                                        }
+                                }
+                            });
                         }
                     }
                 })
