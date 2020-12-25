@@ -1,4 +1,6 @@
 const FantasyLineup = require("../models/fantasyLineup");
+const Registro = require("../models/registro");
+
 
 function addLineup(req,res){
     const body = req.body;   
@@ -18,7 +20,8 @@ function addLineup(req,res){
 }
 
 function addPlayerLineup(req,res){
-    let lineupData = req.body.fantasyLineup;
+    let lineupData = req.body.fantasyPlayer.fantasyLineup;
+    let fantasyUser = req.body.fantasyUser
     const params = req.params;
 
     FantasyLineup.findById({ _id: params.id })
@@ -41,7 +44,23 @@ function addPlayerLineup(req,res){
                                 if(!fantasyLineup) {
                                     res.status(404).send({ code: 404, message: "No se ha encontrado la fantasy lineup."});
                                 } else {
-                                    res.status(200).send({ code: 200, message: "Jugador añadido correctamente." });
+                                    const registro = new Registro();
+                                    registro.tabla = "fantasyLineup";
+                                    registro.tipo = "add"; 
+                                    registro.usuario = fantasyUser 
+                                    registro.mensaje = lineupData.player_name;
+
+                                    registro.save((err, registroCreated) => {
+                                        if(err){
+                                            res.status(500).send({ message: "Error del servidor."});
+                                        } else {
+                                            if(!registroCreated) {
+                                                res.status(404).send({ message: "Error al crear el registro."});
+                                            } else {
+                                                res.status(200).send({ code: 200, message: "Jugador añadido correctamente." });
+                                            }
+                                        }
+                                    });
                                 }
                             }
                         });
@@ -158,7 +177,7 @@ function deletePlayerFantasyLineup(req, res) {
     const { id } = req.params;
 
     const {
-        fantasyPlayerId
+        fantasyPlayerId, fantasyPlayerName, fantasyUser
     } = req.body;
 
     FantasyLineup.updateOne( {_id: id}, { $pull: { fantasyLineup: { _id : [ fantasyPlayerId ] } } } )
@@ -170,7 +189,23 @@ function deletePlayerFantasyLineup(req, res) {
                     if(!fantasyLineup) {
                         res.status(404).send({ message: "No se ha encontrado la fantasy lineup."});
                     } else {
-                        res.status(200).send({ message: "Lineup actualizada correctamente." });
+                        const registro = new Registro();
+                        registro.tabla = "fantasyLineup";
+                        registro.tipo = "delete"; 
+                        registro.usuario = fantasyUser 
+                        registro.mensaje = fantasyPlayerName;
+
+                        registro.save((err, registroCreated) => {
+                            if(err){
+                                res.status(500).send({ message: "Error del servidor."});
+                            } else {
+                                if(!registroCreated) {
+                                    res.status(404).send({ message: "Error al crear el registro."});
+                                } else {
+                                    res.status(200).send({ message: "Lineup actualizada correctamente." });
+                                }
+                            }
+                        });
                     }
                 }
             }
