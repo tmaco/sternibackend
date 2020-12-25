@@ -212,6 +212,29 @@ function deletePlayerFantasyLineup(req, res) {
         );
 }
 
+function getUsersFantasyLineups(req,res){
+
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+
+    FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId ,number_match: 0}},
+        { $unwind: "$fantasyLineup" },
+        { $sort: { "fantasyLineup.order": 1 } },
+        { $group: { _id: "$_id", playersList: { $push: { player_id: "$fantasyLineup.player_id", name_team : "$name_team" } } }}])
+        .exec((err, fantasyLineup) => {
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+                if(!fantasyLineup || fantasyLineup.length === 0 || !fantasyLineup[0] ) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado fantasy lineups."});
+                } else {
+                    res.status(200).send({ code: 200, fantasyLineup: fantasyLineup });
+                }
+            }
+        });
+
+    }
+
 
 module.exports = {
     addLineup,
@@ -222,4 +245,5 @@ module.exports = {
     getUserFantasyLineup,
     updateFantasyLineup,
     deletePlayerFantasyLineup,
+    getUsersFantasyLineups
 };
