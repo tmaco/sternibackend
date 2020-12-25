@@ -12,6 +12,8 @@ const fantasyLineupSchema = new Schema(
             player_id: { type: Number, required: true },
             player_name : { type: String, required: true },
             position: { type: String, required: true },
+            numMatches :  { type: Number, default: 0 },
+            fScoring :  { type: Number, default: 0 },
             avatar: { type: String, required: true },
             order :  { type: Number, required: true }
         } ]

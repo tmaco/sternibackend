@@ -1,5 +1,7 @@
 const utiles = require("../utils/normalizationNames");
 const EventsTeam = require("../models/eventsTeam");
+const FantasyCalendar = require("../models/fantasyCalendar");
+
 
 function getEventsTeamRegularData(req,res){
     console.log(req.params.team);
@@ -323,8 +325,114 @@ function getEventsTeamPlayoffsSeason1920Data(req,res){
       });	
 }
 
+
+function getEventsDate(req,res){
+    const dateFrom = req.query.from;
+    const dateTo = req.query.to;
+
+    EventsTeam.find({ event_start_date_time: {
+        $gte: dateFrom,
+        $lt: dateTo}})
+        .sort({event_start_date_time: "asc"})
+        .exec((err, eventsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(eventsStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado eventos."});
+                } else {
+                    res.status(200).send({ code: 200, events: eventsStored });
+                }
+            }
+        });
+}
+
+function updateEventsDate(req,res){
+    const dateFrom = req.query.from;
+    const dateTo = req.query.to;
+
+    var MySportsFeeds = require("mysportsfeeds-node");
+
+    var msf = new MySportsFeeds("2.1", true);
+    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+    msf.getData('nba', '2020-2021-regular', 'seasonal_games', 'json', {status: 'final',  date: 'from-yesterday-to-tomorrow', force: 'true', sort: 'game.starttime'})
+    .then(async response => {
+        const fs = require('fs');
+        var path = require('path');
+                
+        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2020-2021-regular-from-yesterday-to-tomorrow.json');
+                
+        await fs.readFile(jsonPath, (err, data) => {
+            if (err) throw err;
+            let eventsData = JSON.parse(data);
+
+            console.log(utiles.count(eventsData.games));
+            for(var i=0; i<utiles.count(eventsData.games); i++){
+
+                var event = eventsData.games[i];
+
+                var homeTeam= utiles.checkAbv(event.schedule.homeTeam.abbreviation);
+                var awayTeam= utiles.checkAbv(event.schedule.awayTeam.abbreviation);
+
+                var team_points_scored = event.score.homeScoreTotal;
+                var opponent_points_scored = event.score.awayScoreTotal;
+                    
+                var team_event_result=null;
+                if( team_points_scored > opponent_points_scored ){
+                    team_event_result = "win";
+                } else if (team_points_scored && opponent_points_scored){
+                    team_event_result = "loss";
+                }
+
+                EventsTeam.updateOne({event_id: event.schedule.id, team_id: homeTeam, event_status: 'UNPLAYED'},
+                { $set: { team_event_result: team_event_result, team_points_scored: team_points_scored, 
+                    opponent_points_scored: opponent_points_scored, event_status: 'COMPLETED' }})
+                .exec((err, eventStored) => {
+                    if(err){
+                        res.status(500).send({ message: "Error del servidor."});
+                    } else {
+                        console.log(eventStored);
+                        //res.status(200).send({ code: 200, fantasyCalendar: calendarStored });
+                    }
+                });      
+
+                var team_points_scored_away = event.score.awayScoreTotal;
+                var opponent_points_scored_away = event.score.homeScoreTotal;
+
+                if( team_points_scored > opponent_points_scored ){
+                    team_event_result = "win";
+                } else if (team_points_scored && opponent_points_scored){
+                    team_event_result = "loss";
+                }
+
+                EventsTeam.updateOne({event_id: event.schedule.id, team_id: awayTeam, event_status: 'UNPLAYED'},
+                { $set: { team_event_result: team_event_result, team_points_scored: team_points_scored_away, 
+                    opponent_points_scored: opponent_points_scored_away, event_status: 'COMPLETED' }})
+                .exec((err, eventStored) => {
+                    if(err){
+                        res.status(500).send({ message: "Error del servidor."});
+                    } else {
+                        console.log(eventStored);
+                        //res.status(200).send({ code: 200, fantasyCalendar: calendarStored });
+                    }
+                }); 
+
+
+            }
+        });
+    });
+
+    res.status(200).jsonp({
+        "status": 200,
+        "message": `Events update into Database`
+      });	
+
+}
+
 module.exports = {
     getEventsTeamRegularData,
     getEventsTeamRegularSeason1920Data,
-    getEventsTeamPlayoffsSeason1920Data
+    getEventsTeamPlayoffsSeason1920Data,
+    getEventsDate,
+    updateEventsDate
 };

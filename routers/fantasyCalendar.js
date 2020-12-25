@@ -5,7 +5,8 @@ const md_auth = require("../middleware/authenticate");
 
 const api = express.Router();
 
-api.get("/get-fantasy-calendar/", [md_auth.ensureAdmin], FantasyCalendarController.getFantasyCalendar);
+api.get("/get-fantasy-calendar/", FantasyCalendarController.getFantasyCalendar);
+api.get("/get-calendar-events/", FantasyCalendarController.getFantasyCalendarEvents);
 api.post("/add-fantasy-calendar/", [md_auth.ensureAdmin], FantasyCalendarController.addFantasyCalendar);
 
 

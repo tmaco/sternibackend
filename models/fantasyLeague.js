@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const fantasyLeagueSchema = new Schema(
     {
       season_id: { type: String, required: true } ,
-      league_id: { type: String, unique: true} ,
+      league_id: { type: String, required: true} ,
       name_league: { type: String, required: true } ,
       theme: { type: String, required: true } ,
       password_league: { type: String, required: true } ,

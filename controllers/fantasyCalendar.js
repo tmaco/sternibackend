@@ -7,6 +7,39 @@ const EventsTeam = require("../models/eventsTeam");
 function getFantasyCalendar(req,res){
     const seasonId = req.query.season;
     const leagueID = req.query.league;
+
+    FantasyCalendar.find({ season_id: seasonId, league_id: leagueID})
+        .sort({ league_id: "asc"})
+        .exec((err, calendarStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(calendarStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado el calendario fantasy."});
+                } else {
+                    res.status(200).send({ code: 200, fantasyCalendar: calendarStored });
+                }
+            }
+        });
+}
+
+function getFantasyCalendarEvents(req,res){
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+    const numJornada = req.query.match;
+
+
+    FantasyCalendar.aggregate([{$match: { league_id: leagueId , season_id: seasonId , jornada: parseInt(numJornada)}},
+        { $unwind: "$eventos" },
+        { $group: { _id: "$_id", eventos: { $push: "$eventos" } } }])
+        .exec((err, eventosData) => {
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+
+                    res.status(200).send({ code: 200, eventos: eventosData[0] });
+                }
+        });
 }
 
 function addFantasyCalendar(req,res){
@@ -78,5 +111,6 @@ function addFantasyCalendar(req,res){
 
 module.exports = {
     getFantasyCalendar,
+    getFantasyCalendarEvents,
     addFantasyCalendar
 };
