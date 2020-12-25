@@ -43,6 +43,7 @@ function signUp(req, res) {
                             const registro = new Registro();
                             registro.tabla = "user";
                             registro.tipo = "add"; 
+                            registro.fecha = Date.now();
                             registro.usuario = user.email; 
                             registro.mensaje = "Usuario creado";
 
@@ -251,6 +252,7 @@ function deleteUser(req, res){
                 const registro = new Registro();
                 registro.tabla = "user";
                 registro.tipo = "delete"; 
+                registro.fecha = Date.now();
                 registro.usuario = id; 
                 registro.mensaje = "Usuario eliminado";
 
@@ -298,6 +300,7 @@ function createUser(req, res){
                             const registro = new Registro();
                             registro.tabla = "user";
                             registro.tipo = "add"; 
+                            registro.fecha = Date.now();
                             registro.usuario = user.email; 
                             registro.mensaje = "Usuario creado";
 

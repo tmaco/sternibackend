@@ -6,6 +6,7 @@ const RegistroSchema = new Schema(
         tabla: String,
         tipo: String,
         usuario: String,
+        fecha: Date,
         mensaje: String
     }
 );

@@ -47,6 +47,7 @@ function addPlayerLineup(req,res){
                                     const registro = new Registro();
                                     registro.tabla = "fantasyLineup";
                                     registro.tipo = "add"; 
+                                    registro.fecha = Date.now();
                                     registro.usuario = fantasyUser 
                                     registro.mensaje = lineupData.player_name;
 
@@ -192,8 +193,9 @@ function deletePlayerFantasyLineup(req, res) {
                         const registro = new Registro();
                         registro.tabla = "fantasyLineup";
                         registro.tipo = "delete"; 
-                        registro.usuario = fantasyUser 
-                        registro.mensaje = fantasyPlayerName;
+                        registro.fecha = Date.now();
+                        registro.usuario = fantasyUser; 
+                        registro.mensaje = fantasyPlayerName;                        
 
                         registro.save((err, registroCreated) => {
                             if(err){
