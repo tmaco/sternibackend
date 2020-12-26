@@ -104,7 +104,7 @@ function getStatsBySeason(req,res){
     const eventID = req.query.event;
 
 
-    PlayerStat.aggregate([{$match: { season_id: seasonId, event_season_type: eventID }},
+    PlayerStat.aggregate([{$match: { season_id: seasonId, event_season_type: eventID, seconds: { $gt: 0} }},
             { $group: { "_id": { player_id: "$player_id" , display_name: "$display_name", position:"$position",team_abbreviation:"$team_abbreviation" }, 
                 "totalMatches" : { "$sum": 1},
                 "totalMinutes" : { "$sum": "$minutes"},

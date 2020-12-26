@@ -4,8 +4,6 @@ const FantasyLeague = require("../models/fantasyLeague");
 const PlayerStat = require("../models/playerStat");
 
 
-
-
 function getTotalFantasyStatsByPlayer(req,res){
     const playerName = req.params.playerName;
 
@@ -353,7 +351,9 @@ function getFantasyStatsBySeason(req,res){
 	const eventID = req.query.event;
 
 
-	FantasyStat.aggregate([{$match: { league_id: leagueId, season_id: seasonId, type_match: eventID }},
+    FantasyStat.aggregate([{$match: { league_id: leagueId, season_id: seasonId, type_match: eventID, 
+        minutes: { $gt: 0}
+            }},
             { $group: { "_id": { player_id: "$player_id" , player_name: "$player_name" }, 
                 "totalMatches" : { "$sum": 1},
                 "totalMinutes" : { "$sum": "$minutes"},
@@ -374,6 +374,34 @@ function getFantasyStatsBySeason(req,res){
         });
 }
 
+function getFantasyScoringByPlayer(req,res){
+	const playerId = parseInt(req.params.player);
+	const seasonId = req.query.season;
+    const eventID = req.query.event;
+    const leagueId = req.query.league;
+
+    FantasyStat.aggregate([{$match: { league_id: leagueId, season_id: seasonId, type_match: eventID, 
+        player_id: playerId, minutes: { $gt: 0}
+            }},
+            { $group: { "_id": { player_id: "$player_id" , player_name: "$player_name" }, 
+                "totalMatches" : { "$sum": 1},
+                "totalMinutes" : { "$sum": "$minutes"},
+                "totalFantasyScoring" : { "$sum": "$fantasy_scoring"},                           
+            } },
+            { $sort: { "totalFantasyScoring": -1 } },
+        ])
+        .exec((err, fstatsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(fstatsStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado estadisticas fantasy de " + playerId + " para la temporada " + seasonId +"."});
+                } else {
+                    res.status(200).send({ code: 200, fstats: fstatsStored[0] });
+                }
+            }
+        });
+}
 
 
 module.exports = {
@@ -384,5 +412,6 @@ module.exports = {
 	getFantasyStatsByPlayerAndMatch,
 	getFantasyStatsBySeason,
     updateFantasyDisplayName,
-    getFantasyStatsData
+    getFantasyStatsData,
+    getFantasyScoringByPlayer
 }

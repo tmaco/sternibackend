@@ -1,5 +1,6 @@
 const FantasyLineup = require("../models/fantasyLineup");
 const Registro = require("../models/registro");
+const utiles = require("../utils/normalizationNames");
 
 
 function addLineup(req,res){
@@ -58,6 +59,7 @@ function addPlayerLineup(req,res){
                                             if(!registroCreated) {
                                                 res.status(404).send({ message: "Error al crear el registro."});
                                             } else {
+                                                utiles.sleepFor(2000);
                                                 res.status(200).send({ code: 200, message: "Jugador añadido correctamente." });
                                             }
                                         }
@@ -204,6 +206,7 @@ function deletePlayerFantasyLineup(req, res) {
                                 if(!registroCreated) {
                                     res.status(404).send({ message: "Error al crear el registro."});
                                 } else {
+                                    utiles.sleepFor(2000);
                                     res.status(200).send({ message: "Lineup actualizada correctamente." });
                                 }
                             }
