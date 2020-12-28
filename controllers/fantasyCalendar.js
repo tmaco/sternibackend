@@ -9,7 +9,7 @@ function getFantasyCalendar(req,res){
     const leagueID = req.query.league;
 
     FantasyCalendar.find({ season_id: seasonId, league_id: leagueID})
-        .sort({ league_id: "asc"})
+        .sort({ jornada: "asc"})
         .exec((err, calendarStored) => {
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
@@ -37,7 +37,7 @@ function getFantasyCalendarEvents(req,res){
                 res.status(500).send({ code: 500, message: "Error del servidor."});
             } else {
 
-                    res.status(200).send({ code: 200, eventos: eventosData[0] });
+                    res.status(200).send({ code: 200, eventos: eventosData[0].eventos });
                 }
         });
 }

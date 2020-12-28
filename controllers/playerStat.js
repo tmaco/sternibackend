@@ -393,7 +393,7 @@ function addStatsEventData(req,res){
                     var event = eventsStored;
 
                     msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
-                    msf.getData('nba', '2020-2021-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
+                    msf.getData('nba', '2020-2021-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'false' })
                     .then( async response => {
 
                         const fs = require('fs');

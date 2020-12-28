@@ -264,7 +264,10 @@ function getFantasyStatsData(req,res){
 
 						var scoring = calculateScoring(stat, db, isDobleDoble, isTripleDoble);
 						
-						var ppm = scoring/stat.minutes;
+                        var ppm = 0;
+                        
+                        if(stat.minutes!==0)
+                            ppm = scoring/stat.minutes;
 
 						var fantasyStat = new FantasyStat({
                           season_id: seasonId,
@@ -403,6 +406,47 @@ function getFantasyScoringByPlayer(req,res){
         });
 }
 
+function getFantasyScoringByEvent(req,res){
+
+    const eventID = req.params.event;
+    const leagueID = req.query.league;
+
+
+    FantasyStat.aggregate([{$match: { event_id : eventID, league_id : leagueID,
+        minutes: { $gt: 0}
+            }},
+            { $group: { "_id": { player_id: "$player_id" , player_name: "$player_name",league_id: "$league_id",
+            fantasy_scoring: "$fantasy_scoring", minutes: "$minutes", points_per_minute: "$points_per_minute"        },                           
+            } },
+            { $sort: { fantasy_scoring: 1 } },
+        ])
+        .exec((err, fstatsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(fstatsStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado estadisticas fantasy de " + leagueID + " para el evento " + eventID +"."});
+                } else {
+                    res.status(200).send({ code: 200, fstats: fstatsStored });
+                }
+            }
+        });
+
+         /*FantasyStat.find({ event_id : eventID})
+        .exec((err, statsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(statsStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado estadisticas del evento " + eventID+ "."});
+                } else {
+                    res.status(200).send({ code: 200, fantasy: statsStored });
+                }
+            }
+        });*/
+
+}
+
 
 module.exports = {
     getTotalFantasyStatsByPlayer,
@@ -413,5 +457,6 @@ module.exports = {
 	getFantasyStatsBySeason,
     updateFantasyDisplayName,
     getFantasyStatsData,
-    getFantasyScoringByPlayer
+    getFantasyScoringByPlayer,
+    getFantasyScoringByEvent
 }
