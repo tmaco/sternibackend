@@ -196,7 +196,7 @@ function deletePlayerFantasyLineup(req, res) {
                     } else {
                         const registro = new Registro();
                         registro.tabla = "fantasyLineup";
-                        registro.tipo = "delete"; 
+                        registro.tipo = "drop"; 
                         registro.fecha = Date.now();
                         registro.usuario = fantasyUser; 
                         registro.mensaje = fantasyPlayerName;                        

@@ -18,7 +18,7 @@ const fantasyPlayersRoutes = require("./routers/fantasyPlayer");
 const eventsTeamRoutes = require("./routers/eventsTeam");
 const fantasyCalendarRoutes = require("./routers/fantasyCalendar");
 const fantasyLeagueRoutes = require("./routers/fantasyLeague");
-
+const registroRoutes = require("./routers/registro");
 
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -49,6 +49,6 @@ app.use(`/api/${API_VERSION}`, fantasyPlayersRoutes);
 app.use(`/api/${API_VERSION}`, eventsTeamRoutes);
 app.use(`/api/${API_VERSION}`, fantasyCalendarRoutes);
 app.use(`/api/${API_VERSION}`, fantasyLeagueRoutes);
-
+app.use(`/api/${API_VERSION}`, registroRoutes);
 
 module.exports = app;
