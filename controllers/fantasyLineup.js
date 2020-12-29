@@ -352,7 +352,7 @@ function getTotalScoringByLeague(req,res) {
     const leagueId = req.query.league;
 
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, number_match : {
-        $gte: 1
+        $gte: 2
     }}},
         { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id"},
         "totalFScoring" : { "$sum": "$fantasy_scoring"}}},
@@ -377,7 +377,7 @@ function getTotalScoringGroupByJornada(req,res) {
     const leagueId = req.query.league;
 
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, number_match : {
-        $gte: 0
+        $gte: 2
     } }},
         { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", number_match: "$number_match", fantasy_scoring:"$fantasy_scoring"}}},
         { $sort: { "_id.number_match": 1, "_id.fantasy_scoring": -1,  } }
