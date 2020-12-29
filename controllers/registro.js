@@ -2,7 +2,7 @@ const Registro = require("../models/registro");
 const utiles = require("../utils/normalizationNames");
 
 function getRegistros(req, res) {
-    Registro.find({
+    Registro.find({tabla: "fantasyLineup",
         fecha : {
             $gte: "2020-12-28T00:00:00.000Z"        
         }
