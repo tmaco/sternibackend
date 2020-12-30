@@ -302,11 +302,11 @@ function updateScoringLineupUser(req,res) {
 function updateTotalScoringLineupUser(req,res) {
     const FantasyLineupId = req.params.id;
     const {
-        fantasy_scoring
+        fantasy_scoring, total_minutes
     } = req.body;
         
     FantasyLineup.updateOne({"_id": FantasyLineupId},
-    { $set: {"fantasy_scoring": fantasy_scoring }})
+    { $set: {"fantasy_scoring": fantasy_scoring, "total_minutes": total_minutes }})
     .exec(
             (err, fantasyLineup) => {
                 if(err){
@@ -321,7 +321,6 @@ function updateTotalScoringLineupUser(req,res) {
             }
         );
 }
-
 
 function getTotalScoringByJornada(req,res) {
 

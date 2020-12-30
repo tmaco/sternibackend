@@ -9,6 +9,7 @@ const fantasyLineupSchema = new Schema(
         season_id: { type: String, required: true } ,
         number_match: { type: Number, required: true },
         fantasy_scoring :  { type: Number, default: 0 },
+        total_minutes :  { type: Number, default: 0 },
         fantasyLineup: [ { 
             player_id: { type: Number, required: true },
             player_name : { type: String, required: true },
