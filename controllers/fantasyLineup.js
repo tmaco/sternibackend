@@ -329,7 +329,7 @@ function getTotalScoringByJornada(req,res) {
     const numJornada = req.query.match;
 
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId ,number_match: parseInt(numJornada)}},
-        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", fantasy_scoring:"$fantasy_scoring"}}},
+        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes"}}},
         { $sort: { "_id.fantasy_scoring": -1 } }
     ])
         .exec((err, fantasyScoring) => {
@@ -378,7 +378,7 @@ function getTotalScoringGroupByJornada(req,res) {
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, number_match : {
         $gte: 2
     } }},
-        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", number_match: "$number_match", fantasy_scoring:"$fantasy_scoring"}}},
+        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", number_match: "$number_match", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes"}}},
         { $sort: { "_id.number_match": 1, "_id.fantasy_scoring": -1,  } }
     ])
         .exec((err, fantasyScoring) => {
