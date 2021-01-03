@@ -1,6 +1,6 @@
 {
   "name": "sterni2k21-backend",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Backend para Sterni2k21",
   "main": "index.js",
   "author": "tmacarra",

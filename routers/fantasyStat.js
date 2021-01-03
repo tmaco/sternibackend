@@ -16,6 +16,8 @@ api.get("/get-fantasy-scoring/:player", FantasyStatController.getFantasyScoringB
 api.get("/get-fantasy-event/:event", FantasyStatController.getFantasyScoringByEvent);
 api.put("/update-fantasy-name", [md_auth.ensureAdmin], FantasyStatController.updateFantasyDisplayName);
 api.post("/add-fantasy/:league", [md_auth.ensureAdmin], FantasyStatController.getFantasyStatsData);
+api.post("/add-fantasy-event/:league", [md_auth.ensureAdmin], FantasyStatController.addFantasyStatsDataEvent);
+
 
 
 module.exports = api;

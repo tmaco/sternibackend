@@ -13,7 +13,7 @@ var options = {
 };
 
 //mongoose.connect(`mongodb://${IP_SERVER}:${PORT_DB}/${DB}?authSource=admin`, options, (err, res) => {
-mongoose.connect(`mongodb+srv://ydb55lol:${PASS_DB}@sterni2k21.cczox.mongodb.net/${DB}?retryWrites=true&w=majority`, options, (err, res) => {
+mongoose.connect(`mongodb+srv://${USER_DB}:${PASS_DB}@${HOST_DB}/${DB}?retryWrites=true&w=majority`, options, (err, res) => {
   if (err) {
     throw err;
   } else {
@@ -24,7 +24,7 @@ mongoose.connect(`mongodb+srv://ydb55lol:${PASS_DB}@sterni2k21.cczox.mongodb.net
       console.log("######### API REST  ###########");
       console.log("###############################");
       //console.log(`http://${IP_SERVER}:${PORT_SERVER}/api/${API_VERSION}/`);
-      console.log(`mongodb+srv://sterni2k21.cczox.mongodb.net/api/${API_VERSION}/`);
+      console.log(`mongodb+srv://${HOST_DB}/api/${API_VERSION}/`);
     });
   }
 });

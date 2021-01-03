@@ -330,16 +330,42 @@ function getEventsDate(req,res){
     const dateFrom = req.query.from;
     const dateTo = req.query.to;
 
-    EventsTeam.find({ event_start_date_time: {
+    EventsTeam.find({ event_status: "COMPLETED", event_start_date_time: {
         $gte: dateFrom,
         $lt: dateTo}})
-        .sort({event_start_date_time: "asc"})
+        .sort({event_id: "asc"})
         .exec((err, eventsStored) => {
             if(err){
-                res.status(500).send({ message: "Error del servidor."});
+                res.status(500).send({ code: 500, message: "Error del servidor."});
             } else {
                 if(eventsStored.length <= 0) {
-                    res.status(404).send({ message: "No se ha encontrado eventos."});
+                    res.status(404).send({ code: 404, message: "No se ha encontrado eventos."});
+                } else {
+                    res.status(200).send({ code: 200, events: eventsStored });
+                }
+            }
+        });
+}
+
+function getEventsDateById(req,res){
+    const dateFrom = req.query.from;
+    const dateTo = req.query.to;
+
+    EventsTeam.aggregate([{$match: { event_start_date_time: {
+                $gte: dateFrom,
+                $lt: dateTo}
+            }},
+            { $group: { "_id": { event_id: "$event_id", event_start_date_time: "$event_start_date_time", event_status: "$event_status" },                           
+            } },
+            { $sort: { "_id.event_id": 1 } },
+        ])
+        .exec((err, eventsStored) => {
+            console.log(eventsStored);
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+                if(eventsStored.length <= 0) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado eventos."});
                 } else {
                     res.status(200).send({ code: 200, events: eventsStored });
                 }
@@ -410,7 +436,7 @@ function updateEventsDate(req,res){
                     opponent_points_scored: opponent_points_scored_away, event_status: 'COMPLETED' }})
                 .exec((err, eventStored) => {
                     if(err){
-                        res.status(500).send({ message: "Error del servidor."});
+                        res.status(500).send({ code: 500, message: "Error del servidor."});
                     } else {
                         console.log(eventStored);
                         //res.status(200).send({ code: 200, fantasyCalendar: calendarStored });
@@ -422,10 +448,8 @@ function updateEventsDate(req,res){
         });
     });
 
-    res.status(200).jsonp({
-        "status": 200,
-        "message": `Events update into Database`
-      });	
+    res.status(200).send({ code: 200, message: "Events actualizados en la BD"});
+
 
 }
 
@@ -434,5 +458,6 @@ module.exports = {
     getEventsTeamRegularSeason1920Data,
     getEventsTeamPlayoffsSeason1920Data,
     getEventsDate,
-    updateEventsDate
+    updateEventsDate,
+    getEventsDateById
 };
