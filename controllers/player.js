@@ -3,7 +3,7 @@ const utiles = require("../utils/normalizationNames");
 const Player = require("../models/player");
 
 function getPlayers(req,res) {
-    Player.find({season_id: "20_21"})
+    Player.find({season_id: "20_21", roster_status: "active"})
         .sort({ team_id: "asc", last_name: "asc"})
         .exec((err, playersStored) => {
             if(err){
@@ -23,7 +23,7 @@ function getPlayersByTeam(req,res) {
 
     const TeamName = req.params.teamName;
 
-    Player.find({ season_id: "20_21", team_id : TeamName})
+    Player.find({ season_id: "20_21", team_id : TeamName, roster_status: "active"})
         .sort({ last_name: "asc"})
         .exec((err, playersStored) => {
             if(err){
@@ -68,7 +68,7 @@ function getPlayersData(req,res){
 
     var msf = new MySportsFeeds("2.1", true);
     msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
-    msf.getData('nba', '2020-2021-regular', 'players', 'json', {team: TeamName,  force: 'true' })
+    msf.getData('nba', '2020-2021-regular', 'players', 'json', {team: TeamName,  force: 'false' })
     .then(async response => {
         const fs = require('fs');
         var path = require('path');
@@ -100,7 +100,7 @@ function getPlayersData(req,res){
                     weight_kg: ply.weight,
                     position: ply.primaryPosition, 
                     uniform_number: ply.jerseyNumber,
-                    roster_status: "active",
+                    roster_status: ply.currentRosterStatus === "ROSTER" ? "active" : "inactive",
                     avatar: ply.officialImageSrc
                 });
 
