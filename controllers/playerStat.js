@@ -326,8 +326,8 @@ function getStatsData(req,res){
                                         three_point_field_goals_made: fieldGoals.fg3PtMade,
                                         free_throws_attempted: freeThrows.ftAtt,
                                         free_throws_made: freeThrows.ftMade,
-                                        defensive_rebounds: rebounds.offReb,
-                                        offensive_rebounds: rebounds.defReb,
+                                        defensive_rebounds: rebounds.defReb,
+                                        offensive_rebounds: rebounds.offReb,
                                         personal_fouls: miscellaneous.fouls,
                                         is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
                                         field_goal_percentage: fieldGoals.fgPct,
@@ -549,8 +549,8 @@ function addStatsEventData(req,res){
                                             three_point_field_goals_made: fieldGoals.fg3PtMade,
                                             free_throws_attempted: freeThrows.ftAtt,
                                             free_throws_made: freeThrows.ftMade,
-                                            defensive_rebounds: rebounds.offReb,
-                                            offensive_rebounds: rebounds.defReb,
+                                            defensive_rebounds: rebounds.defReb,
+                                            offensive_rebounds: rebounds.offReb,
                                             personal_fouls: miscellaneous.fouls,
                                             is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
                                             field_goal_percentage: fieldGoals.fgPct,
@@ -751,6 +751,43 @@ function addStatsEventData(req,res){
     });    	
 }
 
+function UpdateReboundsLocal(req,res){
+
+    PlayerStat.find({
+        season_id:"20_21", 
+        event_season_type:"regular",
+        team_event_location_type:"h"
+    })
+        .sort({ team_id: "asc" })
+        .exec((err, playersStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(playersStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado ningun jugador."});
+                } else {
+                    for(var i=0; i<playersStored.length; i++){
+                       PlayerStat.update({_id: playersStored[i].id },  { $set: {
+                                defensive_rebounds: playersStored[i].offensive_rebounds, 
+                                offensive_rebounds: playersStored[i].defensive_rebounds, 
+                            } }, (err, statUpdate) => {
+                            if(err) {
+                                err.status(500).send({ message: "Error del servidor."});
+                            } else {
+                                if(!statUpdate) {
+                                    err.status(404).send({ message: "Jugador no encontrado."});
+                                }
+                            }
+                        });
+                        
+                    }
+                    res.status(200).send({ message: "Jugadores actualizados correctamente."});
+                }
+            }
+        });
+    
+}
+
 module.exports = {
     getTotalStatsByPlayer,
     getTotalStatsBySeasonPlayerApi,
@@ -760,6 +797,7 @@ module.exports = {
     getStatsData,
     getStatsBySeason,
     addStatsEventData,
-    getStatsEventData
+    getStatsEventData,
+    UpdateReboundsLocal
     
 };

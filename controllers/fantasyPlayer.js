@@ -76,7 +76,7 @@ function addFantasyPlayers(req,res){
                             //return console.error(err);
                             console.warn("Duplicado");
                         } else {
-                            console.log("Fantasy Player inserted to Collection");
+                            //console.log("Fantasy Player inserted to Collection");
                         }
                     });
                 }
@@ -90,8 +90,53 @@ function addFantasyPlayers(req,res){
       });	
 }
 
+function updateAvatarFantasyPlayer(req,res){
+    Player.find({season_id: "20_21"})
+    .sort({ team_id: "asc", last_name: "asc"})
+    .exec((err, playersStored) => {
+        if(err){
+            res.status(500).send({ message: "Error del servidor."});
+        } else {
+            if(playersStored.length <= 0) {
+                res.status(404).send({ message: "No se ha encontrado ningun jugador."});
+            } else {
+                console.log(playersStored.length);
+                for(var i=0; i<utiles.count(playersStored); i++){
+                    var fp = playersStored[i];
+                    var fplayer = new FantasyPlayer({
+                        player_id: fp.player_id,
+                        player_name: utiles.removeDiacritics(fp.display_name),
+                        season_id: "20_21",
+                        league_id: "fa-league",
+                        salary: 1,
+                        cost: 1,
+                        available: true,
+                        position: fp.position,
+                        avatar: fp.avatar
+                    });
+                    //console.log(fplayer);
+
+                    FantasyPlayer.collection.updateOne({player_id: fplayer.player_id, season_id: fplayer.season_id, league_id: fplayer.league_id}, { $set: { avatar: fp.avatar }}, {upsert:true}, function (err, docs) {
+                        if (err){ 
+                            //return console.error(err);
+                            console.warn("Duplicado");
+                        } else {
+                            //console.log("Fantasy Player inserted to Collection");
+                        }
+                    });
+                }
+            }
+        }
+    });
+
+    res.status(200).send({ message: "Avatares  Fantasy actualizados correctamente."});
+
+}
+
+
 module.exports = {
     getFantasyPlayers,
     activateFantasyPlayer,
-    addFantasyPlayers
+    addFantasyPlayers,
+    updateAvatarFantasyPlayer
 };

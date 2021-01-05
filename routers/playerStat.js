@@ -16,4 +16,5 @@ api.get("/add-stats/:team", [md_auth.ensureAdmin], PlayerStatController.getStats
 api.get("/add-stats-event/:event",[md_auth.ensureAdmin],PlayerStatController.addStatsEventData);
 api.get("/get-stats-event/:event",[md_auth.ensureAdmin],PlayerStatController.getStatsEventData);
 
+
 module.exports = api;
