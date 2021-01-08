@@ -33,10 +33,10 @@ function addPlayerLineup(req,res){
                 res.status(500).send({ code: 500, message: "Error del servidor."});
             } else {
                 if(!fantasyLimit || fantasyLimit.length === 0) {
-                    res.status(404).send({ code: 404, message: "No se ha encontrado la fantasy lineup."});
+                    res.status(404).send({ code: 404, message: "No se ha encontrado la alineación fantasy."});
                 } else {
                     if(Object.keys(fantasyLimit.fantasyLineup).length  >= 12){
-                        res.status(403).send({ code: 403, message: "Ya tiene 12 jugadores fanasy en su alineación."});
+                        res.status(403).send({ code: 403, message: "Ya tiene 12 jugadores en su alineación."});
                     } else {
 
                         FantasyLineup.findByIdAndUpdate({ _id: params.id }, { $push: { fantasyLineup: lineupData } })
@@ -45,7 +45,7 @@ function addPlayerLineup(req,res){
                                 res.status(500).send({ code: 500, message: "Error del servidor."});
                             } else {
                                 if(!fantasyLineup) {
-                                    res.status(404).send({ code: 404, message: "No se ha encontrado la fantasy lineup."});
+                                    res.status(404).send({ code: 404, message: "No se ha encontrado la alineación fantasy."});
                                 } else {
                                     const registro = new Registro();
                                     registro.tabla = "fantasyLineup";
@@ -171,7 +171,7 @@ function updateFantasyLineup(req,res) {
                     if(!fantasyLineup) {
                         res.status(404).send({ message: "No se ha encontrado la fantasy lineup."});
                     } else {
-                        res.status(200).send({ message: "Lineup actualizada correctamente." });
+                        res.status(200).send({ message: "Alineación actualizada correctamente." });
                     }
                 }
             }
@@ -192,7 +192,7 @@ function deletePlayerFantasyLineup(req, res) {
                     res.status(500).send({ message: "Error del servidor."});
                 } else {
                     if(!fantasyLineup) {
-                        res.status(404).send({ message: "No se ha encontrado la fantasy lineup."});
+                        res.status(404).send({ message: "No se ha encontrado la alineación fantasy."});
                     } else {
                         const registro = new Registro();
                         registro.tabla = "fantasyLineup";
@@ -209,7 +209,7 @@ function deletePlayerFantasyLineup(req, res) {
                                     res.status(404).send({ message: "Error al crear el registro."});
                                 } else {
                                     utiles.sleepFor(2000);
-                                    res.status(200).send({ message: "Lineup actualizada correctamente." });
+                                    res.status(200).send({ message: "Alineación actualizada correctamente." });
                                 }
                             }
                         });

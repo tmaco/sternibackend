@@ -14,9 +14,11 @@
     "jwt-simple": "^0.5.6",
     "moment": "^2.29.1",
     "mongoose": "^5.10.15",
+    "mongoose-paginate": "^5.0.3",
+    "morgan": "^1.10.0",
     "mysportsfeeds-node": "^2.1.2"
   },
-  "devDependencies":{
+  "devDependencies": {
     "nodemon": "^2.0.6"
   },
   "scripts": {

@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-
+const morgan = require('morgan');
 
 const app = express();
 const { API_VERSION } = require('./config');
@@ -19,10 +19,11 @@ const eventsTeamRoutes = require("./routers/eventsTeam");
 const fantasyCalendarRoutes = require("./routers/fantasyCalendar");
 const fantasyLeagueRoutes = require("./routers/fantasyLeague");
 const registroRoutes = require("./routers/registro");
-
+const postRoutes = require("./routers/post");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(morgan('dev'));
 
 // Configure Header HTTP
 app.use((req, res, next) => {
@@ -50,5 +51,7 @@ app.use(`/api/${API_VERSION}`, eventsTeamRoutes);
 app.use(`/api/${API_VERSION}`, fantasyCalendarRoutes);
 app.use(`/api/${API_VERSION}`, fantasyLeagueRoutes);
 app.use(`/api/${API_VERSION}`, registroRoutes);
+app.use(`/api/${API_VERSION}`, postRoutes);
+
 
 module.exports = app;
