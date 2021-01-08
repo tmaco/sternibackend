@@ -2,6 +2,7 @@ const FantasyLineup = require("../models/fantasyLineup");
 const Registro = require("../models/registro");
 const utiles = require("../utils/normalizationNames");
 const FantasyCalendar = require("../models/fantasyCalendar");
+const FantasyPlayer = require("../models/fantasyPlayer");
 
 
 
@@ -24,7 +25,10 @@ function addLineup(req,res){
 
 function addPlayerLineup(req,res){
     let lineupData = req.body.fantasyPlayer.fantasyLineup;
-    let fantasyUser = req.body.fantasyUser
+    const {
+        fantasyUser, seasonId, leagueId, available
+    } = req.body;
+
     const params = req.params;
 
     FantasyLineup.findById({ _id: params.id })
@@ -47,25 +51,37 @@ function addPlayerLineup(req,res){
                                 if(!fantasyLineup) {
                                     res.status(404).send({ code: 404, message: "No se ha encontrado la alineación fantasy."});
                                 } else {
-                                    const registro = new Registro();
-                                    registro.tabla = "fantasyLineup";
-                                    registro.tipo = "add"; 
-                                    registro.fecha = Date.now();
-                                    registro.usuario = fantasyUser 
-                                    registro.mensaje = lineupData.player_name;
 
-                                    registro.save((err, registroCreated) => {
-                                        if(err){
-                                            res.status(500).send({ message: "Error del servidor."});
-                                        } else {
-                                            if(!registroCreated) {
-                                                res.status(404).send({ message: "Error al crear el registro."});
+                                    FantasyPlayer.updateOne({ player_id: lineupData.player_id, season_id: seasonId, league_id: leagueId}, 
+                                        { available }, (err, fantasyStored) => {
+                                            if(err) {
+                                                res.status(500).send({ message: "Error del servidor."});
                                             } else {
-                                                utiles.sleepFor(2000);
-                                                res.status(200).send({ code: 200, message: "Jugador añadido correctamente." });
-                                            }
-                                        }
-                                    });
+                                                if(!fantasyStored) {
+                                                    res.status(404).send({ message: "Jugador Fantasy no encontrado."});
+                                                } else {
+                                                    const registro = new Registro();
+                                                    registro.tabla = "fantasyLineup";
+                                                    registro.tipo = "add"; 
+                                                    registro.fecha = Date.now();
+                                                    registro.usuario = fantasyUser 
+                                                    registro.mensaje = lineupData.player_name;                       
+                                                    registro.save((err, registroCreated) => {
+                                                        if(err){
+                                                            res.status(500).send({ code: 500, message: "Error del servidor."});
+                                                        } else {
+                                                            if(!registroCreated) {
+                                                                res.status(404).send({ code: 404, message: "Error al crear el registro."});
+                                                            } else {
+                                                                //utiles.sleepFor(2000);
+                                                                res.status(200).send({ code: 200, message: "Jugador añadido correctamente." });
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            }        
+                                        } );
+                                            
                                 }
                             }
                         });
@@ -73,7 +89,6 @@ function addPlayerLineup(req,res){
                 }
             }
         });
-   
 }
 
 function getFantasyLineup(req,res){
@@ -182,7 +197,7 @@ function deletePlayerFantasyLineup(req, res) {
     const { id } = req.params;
 
     const {
-        fantasyPlayerId, fantasyPlayerName, fantasyUser
+        fantasyPlayerId, fantasyPlayerName, fantasyPlayer_id, fantasyUser, season_id, league_id, available
     } = req.body;
 
     FantasyLineup.updateOne( {_id: id}, { $pull: { fantasyLineup: { _id : [ fantasyPlayerId ] } } } )
@@ -194,25 +209,36 @@ function deletePlayerFantasyLineup(req, res) {
                     if(!fantasyLineup) {
                         res.status(404).send({ message: "No se ha encontrado la alineación fantasy."});
                     } else {
-                        const registro = new Registro();
-                        registro.tabla = "fantasyLineup";
-                        registro.tipo = "drop"; 
-                        registro.fecha = Date.now();
-                        registro.usuario = fantasyUser; 
-                        registro.mensaje = fantasyPlayerName;                        
 
-                        registro.save((err, registroCreated) => {
-                            if(err){
+                        FantasyPlayer.updateOne({ player_id: fantasyPlayer_id, season_id: season_id, league_id: league_id}, 
+                            { available }, (err, fantasyStored) => {
+                            if(err) {
                                 res.status(500).send({ message: "Error del servidor."});
                             } else {
-                                if(!registroCreated) {
-                                    res.status(404).send({ message: "Error al crear el registro."});
+                                if(!fantasyStored) {
+                                    res.status(404).send({ message: "Jugador Fantasy no encontrado."});
                                 } else {
-                                    utiles.sleepFor(2000);
-                                    res.status(200).send({ message: "Alineación actualizada correctamente." });
+                                    const registro = new Registro();
+                                    registro.tabla = "fantasyLineup";
+                                    registro.tipo = "drop"; 
+                                    registro.fecha = Date.now();
+                                    registro.usuario = fantasyUser; 
+                                    registro.mensaje = fantasyPlayerName;                        
+                                    registro.save((err, registroCreated) => {
+                                        if(err){
+                                            res.status(500).send({ code: 500, message: "Error del servidor."});
+                                        } else {
+                                            if(!registroCreated) {
+                                                res.status(404).send({ code: 404, message: "Error al crear el registro."});
+                                            } else {
+                                                //utiles.sleepFor(2000);
+                                                res.status(200).send({ code: 200, message: "Alineación actualizada correctamente." });
+                                           }
+                                        }
+                                     });
                                 }
                             }
-                        });
+                        } );
                     }
                 }
             }
