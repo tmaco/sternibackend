@@ -51,7 +51,25 @@ function getPlayer(req,res){
                 if(playerStored.length <= 0) {
                     res.status(404).send({ message: "No se ha encontrado ningun jugador llamado " + playerName + "."});
                 } else {
-                    //console.log(playersStored.length);
+                    res.status(200).send({ code: 200, player: playerStored });
+                }
+            }
+        });
+
+}
+
+function getPlayerId(req,res){
+
+    const playerId = parseInt(req.params.playerId);
+
+    Player.findOne({ season_id: "20_21", player_id : playerId})
+        .exec((err, playerStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(playerStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado ningun jugador con id " + playerId + "."});
+                } else {
                     res.status(200).send({ code: 200, player: playerStored });
                 }
             }
@@ -188,6 +206,7 @@ module.exports = {
     getPlayers,
     getPlayersByTeam,
     getPlayer,
+    getPlayerId,
     getPlayersData,
     updateDisplayName
 };

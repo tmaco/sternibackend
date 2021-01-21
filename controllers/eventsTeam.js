@@ -110,7 +110,6 @@ function getEventsTeamRegularData(req,res){
       });	
 }
 
-
 function getEventsTeamRegularSeason1920Data(req,res){
     console.log(req.params.team);
     var TeamName = req.params.team;
@@ -325,12 +324,11 @@ function getEventsTeamPlayoffsSeason1920Data(req,res){
       });	
 }
 
-
 function getEventsDate(req,res){
     const dateFrom = req.query.from;
     const dateTo = req.query.to;
 
-    EventsTeam.find({ event_status: "COMPLETED", event_start_date_time: {
+    EventsTeam.find({ event_start_date_time: {
         $gte: dateFrom,
         $lt: dateTo}})
         .sort({event_id: "asc"})
@@ -399,6 +397,7 @@ function updateEventsDate(req,res){
 
                 var homeTeam= utiles.checkAbv(event.schedule.homeTeam.abbreviation);
                 var awayTeam= utiles.checkAbv(event.schedule.awayTeam.abbreviation);
+                var playedStatus = event.schedule.playedStatus;
 
                 var team_points_scored = event.score.homeScoreTotal;
                 var opponent_points_scored = event.score.awayScoreTotal;
@@ -412,7 +411,7 @@ function updateEventsDate(req,res){
 
                 EventsTeam.updateOne({event_id: event.schedule.id, team_id: homeTeam, event_status: 'UNPLAYED'},
                 { $set: { team_event_result: team_event_result, team_points_scored: team_points_scored, 
-                    opponent_points_scored: opponent_points_scored, event_status: 'COMPLETED' }})
+                    opponent_points_scored: opponent_points_scored, event_status: playedStatus }})
                 .exec((err, eventStored) => {
                     if(err){
                         res.status(500).send({ message: "Error del servidor."});
@@ -433,7 +432,7 @@ function updateEventsDate(req,res){
 
                 EventsTeam.updateOne({event_id: event.schedule.id, team_id: awayTeam, event_status: 'UNPLAYED'},
                 { $set: { team_event_result: team_event_result, team_points_scored: team_points_scored_away, 
-                    opponent_points_scored: opponent_points_scored_away, event_status: 'COMPLETED' }})
+                    opponent_points_scored: opponent_points_scored_away, event_status: playedStatus}})
                 .exec((err, eventStored) => {
                     if(err){
                         res.status(500).send({ code: 500, message: "Error del servidor."});
@@ -453,11 +452,30 @@ function updateEventsDate(req,res){
 
 }
 
+function getEvent(req,res){
+    const eventId = parseInt(req.params.eventId);
+    const team = req.query.team;
+    
+    EventsTeam.findOne({ season_id: "20_21", event_id : eventId, team_id: team})
+        .exec((err, eventStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(!eventStored) {
+                    res.status(404).send({ message: "No se ha encontrado ningun jugador con id " + eventId + "."});
+                } else {
+                    res.status(200).send({ code: 200, event: eventStored });
+                }
+            }
+        });
+}
+
 module.exports = {
     getEventsTeamRegularData,
     getEventsTeamRegularSeason1920Data,
     getEventsTeamPlayoffsSeason1920Data,
     getEventsDate,
     updateEventsDate,
-    getEventsDateById
+    getEventsDateById,
+    getEvent
 };

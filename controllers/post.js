@@ -13,14 +13,14 @@ function addPost(req,res){
             if (!postStored) {
                 res.status(400).send({ code: 400, message: "No se ha podido crear el post."});
             } else {
-                res.status(200).send({ code: 400, message: "Post creado correctamente"});
+                res.status(200).send({ code: 200, message: "Post creado correctamente"});
 
             }
         }
     });
 }
 
-function getPost(req,res){
+function getPosts(req,res){
     const { page = 1, limit = 10 } = req.query;
 
     const options = {
@@ -40,6 +40,24 @@ function getPost(req,res){
 
             }
         }
+    });
+}
+
+function getPost(req,res){
+    const { url } = req.params;
+
+    Post.findOne({ url }, (err, postStored) =>{
+        if(err){
+            res.status(500).send({ message: "Error del servidor."});
+        } else {
+            if (!postStored) {
+                res.status(404).send({ code: 404, message: "No se ha encontrado ningun post."});
+            } else {
+                res.status(200).send({ code: 200, post: postStored });
+
+            }
+        }
+
     });
 }
 
@@ -63,9 +81,28 @@ function updatePost(req,res){
 
 }
 
+function deletePost(req,res){
+    const { id } = req.params;
+
+    Post.findByIdAndRemove(id, (err, postDeleted) => {
+        if(err){
+            res.status(500).send({ message: "Error del servidor."});
+
+        }else{
+            if (!postDeleted) {
+                res.status(404).send({ code: 404, message: "No se ha encontrado ningun post."});
+            } else {
+                res.status(200).send({ code: 200, message: "Post eliminado correctamente."});
+            }
+        }
+    })
+}
+
 
 module.exports = {
     addPost,
-    getPost,
-    updatePost
+    getPosts,
+    updatePost,
+    deletePost,
+    getPost
 };

@@ -569,7 +569,7 @@ function addStatsEventData(req,res){
                 
                                         //console.log(playerStatHome);
                                         console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" game: "+ playerStatHome.team_event_number_in_season +" event: "+ playerStatHome.event_id);
-                                        utiles.sleepFor(1000);
+                                        //utiles.sleepFor(1000);
                                         PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
                                             if (err){ 
                                                 console.warn("Duplicado");
@@ -724,7 +724,7 @@ function addStatsEventData(req,res){
                 
                                         //console.log(playerStatHome);
                                         console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" game: "+ playerStatHome.team_event_number_in_season +" event: "+ playerStatHome.event_id);
-                                        utiles.sleepFor(1000);
+                                        //utiles.sleepFor(1000);
                                         PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
                                             if (err){ 
                                                 console.warn("Duplicado");
@@ -751,9 +751,13 @@ function addStatsEventData(req,res){
     });    	
 }
 
-function UpdateReboundsLocal(req,res){
+function updateReboundsLocal(req,res){
+
+    const eventID = req.params.event;
+    console.log(eventID);
 
     PlayerStat.find({
+        event_id: eventID,
         season_id:"20_21", 
         event_season_type:"regular",
         team_event_location_type:"h"
@@ -798,6 +802,6 @@ module.exports = {
     getStatsBySeason,
     addStatsEventData,
     getStatsEventData,
-    UpdateReboundsLocal
+    updateReboundsLocal
     
 };

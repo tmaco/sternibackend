@@ -3,7 +3,6 @@ const PlayerStatController = require("../controllers/playerStat");
 
 const md_auth = require("../middleware/authenticate");
 
-
 const api = express.Router();
 
 api.get("/get-total-stats/:playerName", PlayerStatController.getTotalStatsByPlayer);
@@ -15,6 +14,6 @@ api.put("/update-stats-name", [md_auth.ensureAdmin], PlayerStatController.update
 api.get("/add-stats/:team", [md_auth.ensureAdmin], PlayerStatController.getStatsData);
 api.get("/add-stats-event/:event",[md_auth.ensureAdmin],PlayerStatController.addStatsEventData);
 api.get("/get-stats-event/:event",[md_auth.ensureAdmin],PlayerStatController.getStatsEventData);
-
+api.put("/update-stats-rebounds/:event",[md_auth.ensureAdmin], PlayerStatController.updateReboundsLocal);
 
 module.exports = api;
