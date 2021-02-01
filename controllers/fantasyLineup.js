@@ -65,7 +65,8 @@ function addPlayerLineup(req,res){
                                                     registro.tipo = "add"; 
                                                     registro.fecha = Date.now();
                                                     registro.usuario = fantasyUser 
-                                                    registro.mensaje = lineupData.player_name;                       
+                                                    registro.mensaje = lineupData.player_name;  
+                                                    registro.league = leagueId;                     
                                                     registro.save((err, registroCreated) => {
                                                         if(err){
                                                             res.status(500).send({ code: 500, message: "Error del servidor."});
@@ -123,6 +124,26 @@ function getFantasyLineupId(req,res){
                     res.status(404).send({ code: 404, message: "No se ha encontrado la fantasy lineup."});
                 } else {
                     res.status(200).send({ code: 200, fantasyLineup: fantasyLineup });
+                }
+            }
+        });
+
+}
+
+function getFantasyLeagueId(req,res){
+
+    const userId = req.query.user;
+    const seasonId = req.query.season;
+
+    FantasyLineup.findOne({ user_id: userId, season_id: seasonId ,number_match: 0})
+        .exec((err, fantasyLeague) => {
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+                if(!fantasyLeague || fantasyLeague.length === 0) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado la fantasy league."});
+                } else {
+                    res.status(200).send({ code: 200, fantasyLeague: fantasyLeague.league_id });
                 }
             }
         });
@@ -218,12 +239,14 @@ function deletePlayerFantasyLineup(req, res) {
                                 if(!fantasyStored) {
                                     res.status(404).send({ message: "Jugador Fantasy no encontrado."});
                                 } else {
+                                    console.log(league_id);
                                     const registro = new Registro();
                                     registro.tabla = "fantasyLineup";
                                     registro.tipo = "drop"; 
                                     registro.fecha = Date.now();
                                     registro.usuario = fantasyUser; 
-                                    registro.mensaje = fantasyPlayerName;                        
+                                    registro.mensaje = fantasyPlayerName;     
+                                    registro.league = league_id;                   
                                     registro.save((err, registroCreated) => {
                                         if(err){
                                             res.status(500).send({ code: 500, message: "Error del servidor."});
@@ -436,5 +459,6 @@ module.exports = {
     updateTotalScoringLineupUser,
     getTotalScoringByJornada,
     getTotalScoringByLeague,
-    getTotalScoringGroupByJornada
+    getTotalScoringGroupByJornada,
+    getFantasyLeagueId
 };

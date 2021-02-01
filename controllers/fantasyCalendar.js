@@ -36,9 +36,15 @@ function getFantasyCalendarEvents(req,res){
             if(err){
                 res.status(500).send({ code: 500, message: "Error del servidor."});
             } else {
+                if(!eventosData || eventosData.length === 0){   
+                    res.status(404).send({ code: 404, message: "Calendario no encontrado."});
 
+                } else {
                     res.status(200).send({ code: 200, eventos: eventosData[0].eventos });
+
                 }
+
+            }
         });
 }
 

@@ -62,7 +62,7 @@ function addFantasyPlayers(req,res){
                         player_id: fp.player_id,
                         player_name: utiles.removeDiacritics(fp.display_name),
                         season_id: "20_21",
-                        league_id: "fa-league",
+                        league_id: "4-mandos",
                         salary: 1,
                         cost: 1,
                         available: true,

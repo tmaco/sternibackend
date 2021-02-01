@@ -9,6 +9,7 @@ api.post("/add-lineup", [md_auth.ensureAuth], FantasyLineupController.addLineup)
 api.post("/add-player-lineup/:id", [md_auth.ensureAuth], FantasyLineupController.addPlayerLineup);
 api.get("/get-lineup", FantasyLineupController.getFantasyLineup);
 api.get("/get-fantasy-lineup-id", FantasyLineupController.getFantasyLineupId);
+api.get("/get-fantasy-league", FantasyLineupController.getFantasyLeagueId);
 api.get("/get-fantasy-lineup-limit/:id", FantasyLineupController.getFantasyLineupLimit);
 api.get("/get-fantasy-lineup", FantasyLineupController.getUserFantasyLineup);
 api.get("/get-users-lineup", FantasyLineupController.getUsersFantasyLineups);
