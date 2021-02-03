@@ -98,6 +98,37 @@ function getStatsByPlayerAndMatch(req,res){
 
 }
 
+function getStatsByPlayerAndDate(req,res){
+    const seasonId = req.query.season;
+    const eventId = req.query.event;
+    const matchId = req.query.match;
+    const playerName = req.params.playerName;
+
+    PlayerStat.findOne({ season_id : seasonId, display_name: playerName, event_season_type: eventId, 
+        event_start_date_time: matchId})
+        .exec((err, statsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if (!statsStored) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado estadisticas de " + 
+                                            playerName + " del partido " + matchId + " del evento de tipo " 
+                                            + eventId + " para la temporada " + seasonId+ "."});
+                } else {
+                    if(statsStored.length <= 0) {
+                        res.status(404).send({ code: 404, message: "No se ha encontrado estadisticas de " + 
+                                            playerName + " del partido " + matchId + " del evento de tipo " 
+                                            + eventId + " para la temporada " + seasonId+ "."});
+                    } else {
+                        res.status(200).send({ code: 200, stats: statsStored });
+                    }
+                }
+                
+            }
+        });
+
+}
+
 function getStatsBySeason(req,res){
 
     const seasonId = req.params.season;
@@ -797,6 +828,7 @@ module.exports = {
     getTotalStatsBySeasonPlayerApi,
     getStatsByPlayer,
     getStatsByPlayerAndMatch,
+    getStatsByPlayerAndDate,
     updateStatDisplayName,
     getStatsData,
     getStatsBySeason,

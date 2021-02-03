@@ -125,6 +125,38 @@ function getFantasyStatsByPlayerAndMatch(req,res){
 
 }
 
+function getFantasyStatsByPlayerAndDate(req,res){
+    const leagueId = req.query.fantasy;
+    const seasonId = req.query.season;
+    const eventId = req.query.event;
+    const matchId = req.query.match;
+    const playerName = req.params.playerName;
+
+    FantasyStat.findOne({ league_id : leagueId, season_id : seasonId, player_name: playerName, type_match: eventId, 
+        date_match: matchId})
+        .exec((err, statsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if (!statsStored) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado estadisticas de " + 
+                                            playerName + " del partido " + matchId + " del evento de tipo " 
+                                            + eventId + " para la temporada " + seasonId+ "."});
+                } else {
+                    if(statsStored.length <= 0) {
+                        res.status(404).send({ code: 404, message: "No se ha encontrado estadisticas de " + 
+                                            playerName + " del partido " + matchId + " del evento de tipo " 
+                                            + eventId + " para la temporada " + seasonId+ "."});
+                    } else {
+                        res.status(200).send({ code: 200, fantasy: statsStored });
+                    }
+                }
+                
+            }
+        });
+
+}
+
 function updateFantasyDisplayName(req,res) {
     FantasyStat.find({season_id: "19_20"})
         .exec((err, playersStored) => {
@@ -597,7 +629,8 @@ module.exports = {
     getTotalFantasyStatsBySeasonPlayerApi,
     getFantasyStatsByPlayer,
     getFantasyStatsByLeague,
-	getFantasyStatsByPlayerAndMatch,
+    getFantasyStatsByPlayerAndMatch,
+    getFantasyStatsByPlayerAndDate,
 	getFantasyStatsBySeason,
     updateFantasyDisplayName,
     getFantasyStatsData,

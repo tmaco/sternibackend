@@ -11,6 +11,7 @@ api.get("/get-season-fantasy/:playerName", FantasyStatController.getTotalFantasy
 api.get("/get-fantasy/:playerName", FantasyStatController.getFantasyStatsByPlayer);
 api.get("/get-fantasy-league/:playerName", FantasyStatController.getFantasyStatsByLeague);
 api.get("/get-fantasy-match/:playerName", FantasyStatController.getFantasyStatsByPlayerAndMatch);
+api.get("/get-fantasy-date/:playerName", FantasyStatController.getFantasyStatsByPlayerAndDate);
 api.get("/get-fantasy-season/:league", FantasyStatController.getFantasyStatsBySeason);
 api.get("/get-fantasy-scoring/:player", FantasyStatController.getFantasyScoringByPlayer);
 api.get("/get-fantasy-event/:event", FantasyStatController.getFantasyScoringByEvent);
