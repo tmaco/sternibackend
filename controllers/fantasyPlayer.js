@@ -24,6 +24,28 @@ function getFantasyPlayers(req,res){
 
 }
 
+function getFantasyPlayer(req,res){
+
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+    const PlayerId = req.params.player;
+
+    FantasyPlayer.findOne({ league_id: leagueId , season_id: seasonId , player_id: PlayerId })
+        .sort({ last_name: "asc" })
+        .exec((err, fantasyPlayer) => {
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+                if(!fantasyPlayer || fantasyPlayer.length === 0) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado el jugador fantasy."});
+                } else {
+                    res.status(200).send({ code: 200, fantasyPlayer: fantasyPlayer });
+                }
+            }
+        });
+
+}
+
 function activateFantasyPlayer(req, res){
     const { player_name, season_id, league_id, available } = req.body;
 
@@ -138,5 +160,6 @@ module.exports = {
     getFantasyPlayers,
     activateFantasyPlayer,
     addFantasyPlayers,
-    updateAvatarFantasyPlayer
+    updateAvatarFantasyPlayer,
+    getFantasyPlayer
 };

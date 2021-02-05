@@ -276,7 +276,7 @@ function getUsersFantasyLineups(req,res){
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId ,number_match: 0}},
         { $unwind: "$fantasyLineup" },
         { $sort: { "fantasyLineup.order": 1 } },
-        { $group: { _id: "$_id", playersList: { $push: { player_id: "$fantasyLineup.player_id", name_team : "$name_team" } } }}])
+        { $group: { _id: "$_id", playersList: { $push: { player_id: "$fantasyLineup.player_id", name_team : "$name_team", avatar: "$fantasyLineup.avatar" } } }}])
         .exec((err, fantasyLineup) => {
             if(err){
                 res.status(500).send({ code: 500, message: "Error del servidor."});
