@@ -345,6 +345,29 @@ function getEventsDate(req,res){
         });
 }
 
+function getEventsDateTeam(req,res){
+    const nameTeam = req.params.team;
+    const dateFrom = req.query.from;
+    const dateTo = req.query.to;
+    const eventStatus = req.query.status; 
+
+    EventsTeam.find({ team_id: nameTeam, event_status: eventStatus, event_start_date_time: {
+        $gte: dateFrom,
+        $lt: dateTo}})
+        .sort({event_start_date_time: "asc"})
+        .exec((err, eventsStored) => {
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+                if(eventsStored.length <= 0) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado eventos."});
+                } else {
+                    res.status(200).send({ code: 200, events: eventsStored });
+                }
+            }
+        });
+}
+
 function getEventsDateById(req,res){
     const dateFrom = req.query.from;
     const dateTo = req.query.to;
@@ -370,6 +393,7 @@ function getEventsDateById(req,res){
             }
         });
 }
+
 
 function updateEventsDate(req,res){
     const dateFrom = req.query.from;
@@ -475,6 +499,7 @@ module.exports = {
     getEventsTeamRegularSeason1920Data,
     getEventsTeamPlayoffsSeason1920Data,
     getEventsDate,
+    getEventsDateTeam,
     updateEventsDate,
     getEventsDateById,
     getEvent

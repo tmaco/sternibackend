@@ -20,7 +20,7 @@ api.post("/add-fantasy/:league", FantasyStatController.getFantasyStatsData);
 api.post("/add-fantasy-event/:league", [md_auth.ensureAdmin], FantasyStatController.addFantasyStatsDataEvent);
 api.get("/get-fstats-player/:playerId", FantasyStatController.getFantasyStatsByPlayerAndEventId);
 api.get("/get-fstats/:playerId", FantasyStatController.getFantasyStatsPlayerByLeague);
-
+api.get("/get-fstats-date/:playerId", FantasyStatController.getFantasyStatsPlayerByLeagueByDate);
 
 
 module.exports = api;
