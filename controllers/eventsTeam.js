@@ -433,9 +433,12 @@ function updateEventsDate(req,res){
                     team_event_result = "loss";
                 }
 
-                EventsTeam.updateOne({event_id: event.schedule.id, team_id: homeTeam, event_status: 'UNPLAYED'},
-                { $set: { team_event_result: team_event_result, team_points_scored: team_points_scored, 
-                    opponent_points_scored: opponent_points_scored, event_status: playedStatus }})
+                EventsTeam.updateOne({event_id: event.schedule.id, team_id: homeTeam},
+                { season_id: "20_21", event_season_type: "regular", team_event_location_type: 'h', 
+                    event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
+                    team_id: homeTeam, opponent_id: awayTeam, team_event_result: team_event_result, team_points_scored: team_points_scored, 
+                    opponent_points_scored: opponent_points_scored, event_status: playedStatus },
+                    {upsert:true})
                 .exec((err, eventStored) => {
                     if(err){
                         res.status(500).send({ message: "Error del servidor."});
@@ -443,7 +446,7 @@ function updateEventsDate(req,res){
                         console.log(eventStored);
                         //res.status(200).send({ code: 200, fantasyCalendar: calendarStored });
                     }
-                });      
+                }); 
 
                 var team_points_scored_away = event.score.awayScoreTotal;
                 var opponent_points_scored_away = event.score.homeScoreTotal;
@@ -454,9 +457,12 @@ function updateEventsDate(req,res){
                     team_event_result = "loss";
                 }
 
-                EventsTeam.updateOne({event_id: event.schedule.id, team_id: awayTeam, event_status: 'UNPLAYED'},
-                { $set: { team_event_result: team_event_result, team_points_scored: team_points_scored_away, 
-                    opponent_points_scored: opponent_points_scored_away, event_status: playedStatus}})
+                EventsTeam.updateOne({event_id: event.schedule.id, team_id: awayTeam},
+                { season_id: "20_21", event_season_type: "regular", team_event_location_type: 'a', 
+                    event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
+                    team_id: awayTeam, opponent_id: homeTeam, team_event_result: team_event_result, team_points_scored: team_points_scored_away, 
+                    opponent_points_scored: opponent_points_scored_away, event_status: playedStatus},
+                    {upsert:true})
                 .exec((err, eventStored) => {
                     if(err){
                         res.status(500).send({ code: 500, message: "Error del servidor."});
