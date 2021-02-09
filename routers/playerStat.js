@@ -14,7 +14,7 @@ api.get("/get-stats-season/:season", PlayerStatController.getStatsBySeason);
 api.put("/update-stats-name", [md_auth.ensureAdmin], PlayerStatController.updateStatDisplayName);
 api.get("/add-stats/:team", [md_auth.ensureAdmin], PlayerStatController.getStatsData);
 api.get("/add-stats-event/:event",[md_auth.ensureAdmin],PlayerStatController.addStatsEventData);
-api.get("/get-stats-event/:event",[md_auth.ensureAdmin],PlayerStatController.getStatsEventData);
+api.get("/get-stats-event/:event",[md_auth.ensureAuth],PlayerStatController.getStatsEventData);
 api.put("/update-stats-rebounds/:event",[md_auth.ensureAdmin], PlayerStatController.updateReboundsLocal);
 
 module.exports = api;
