@@ -331,7 +331,28 @@ function getEventsDate(req,res){
     EventsTeam.find({ event_start_date_time: {
         $gte: dateFrom,
         $lt: dateTo}})
-        .sort({event_id: "asc"})
+        .sort({event_start_date_time: "asc"})
+        .exec((err, eventsStored) => {
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+                if(eventsStored.length <= 0) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado eventos."});
+                } else {
+                    res.status(200).send({ code: 200, events: eventsStored });
+                }
+            }
+        });
+}
+
+function getHomeEventsDate(req,res){
+    const dateFrom = req.query.from;
+    const dateTo = req.query.to;
+
+    EventsTeam.find({ team_event_location_type : "h", event_start_date_time: {
+        $gte: dateFrom,
+        $lt: dateTo}})
+        .sort({event_start_date_time: "asc"})
         .exec((err, eventsStored) => {
             if(err){
                 res.status(500).send({ code: 500, message: "Error del servidor."});
@@ -505,6 +526,7 @@ module.exports = {
     getEventsTeamRegularSeason1920Data,
     getEventsTeamPlayoffsSeason1920Data,
     getEventsDate,
+    getHomeEventsDate,
     getEventsDateTeam,
     updateEventsDate,
     getEventsDateById,

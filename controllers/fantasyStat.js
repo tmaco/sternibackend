@@ -125,6 +125,31 @@ function getFantasyStatsByPlayerAndMatch(req,res){
 
 }
 
+function getFantasyStatsByEvent(req,res){
+    const eventId = req.params.event;
+    const leagueId = req.query.league;
+    const seasonId = req.query.season;
+
+    FantasyStat.find({ league_id : leagueId, season_id : seasonId, event_id: eventId})
+        .exec((err, statsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if (!statsStored) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado estadisticas del partido."});
+                } else {
+                    if(statsStored.length <= 0) {
+                        res.status(404).send({ code: 404, message: "No se ha encontrado estadisticas del partido."});
+                    } else {
+                        res.status(200).send({ code: 200, fantasy: statsStored });
+                    }
+                }
+                
+            }
+        });
+
+}
+
 function getFantasyStatsByPlayerAndDate(req,res){
     const leagueId = req.query.fantasy;
     const seasonId = req.query.season;
@@ -697,5 +722,6 @@ module.exports = {
     getFantasyStatsByPlayerAndEventId,
     getFantasyStatsPlayerByLeague,
     getFantasyStatsPlayerByLeagueByDate,
-    getFantasyScoringLastGamesByPlayer
+    getFantasyScoringLastGamesByPlayer,
+    getFantasyStatsByEvent
 }
