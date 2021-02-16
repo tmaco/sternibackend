@@ -424,12 +424,12 @@ function updateEventsDate(req,res){
 
     var msf = new MySportsFeeds("2.1", true);
     msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
-    msf.getData('nba', '2020-2021-regular', 'seasonal_games', 'json', {status: 'final',  date: 'from-yesterday-to-tomorrow', force: 'true', sort: 'game.starttime'})
-    .then(async response => {
+    msf.getData('nba', '2020-2021-regular', 'seasonal_games', 'json', {date: 'from-yesterday-to-1-weeks-from-now', force: 'true', sort: 'game.starttime'})
+    .then(async response => { //status: 'final',  
         const fs = require('fs');
         var path = require('path');
                 
-        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2020-2021-regular-from-yesterday-to-tomorrow.json');
+        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2020-2021-regular-from-yesterday-to-1-weeks-from-now.json');
                 
         await fs.readFile(jsonPath, (err, data) => {
             if (err) throw err;

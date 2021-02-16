@@ -8,7 +8,7 @@ function getTotalStatsByPlayer(req,res){
 
 
     PlayerStat.find({ display_name: playerName,})
-        .sort({ team_event_number_in_season: "asc"})
+        .sort({ event_start_date_time: "asc"})
         .exec((err, statsStored) => {
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
@@ -29,7 +29,7 @@ function getTotalStatsBySeasonPlayerApi(req,res){
 
 
     PlayerStat.find({ season_id : seasonId, display_name: playerName,})
-        .sort({ team_event_number_in_season: "asc"})
+        .sort({ event_start_date_time: "asc"})
         .exec((err, statsStored) => {
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
@@ -51,7 +51,7 @@ function getStatsByPlayer(req,res){
 
 
     PlayerStat.find({ season_id : seasonId, display_name: playerName, event_season_type: eventId})
-        .sort({ team_event_number_in_season: "asc"})
+        .sort({ event_start_date_time: "asc"})
         .exec((err, statsStored) => {
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
@@ -213,8 +213,8 @@ function getStatsData(req,res){
 
     let team_id = TeamName;
 
-    EventsTeam.findOne({"team_id":team_id, "team_event_number_in_season": numMatch, 
-    "season_id": seasonId, "event_season_type": eventType, "event_status": "COMPLETED"})
+    EventsTeam.findOne({team_id:team_id, team_event_number_in_season: numMatch, 
+    season_id: seasonId, event_season_type: eventType, event_status: "COMPLETED"})
     .exec((err, eventsStored) => {
         if(err){
             res.status(500).send({ message: "Error del servidor."});
@@ -405,7 +405,7 @@ function getStatsEventData(req,res){
     const eventID = req.params.event;
     const eventLocation= req.query.location;
         
-    EventsTeam.findOne({ "event_id": parseInt(eventID), "team_event_location_type": eventLocation, "event_status": "COMPLETED"})
+    EventsTeam.findOne({ event_id: parseInt(eventID), team_event_location_type: eventLocation, event_status: "COMPLETED"})
     .exec((err, eventsStored) => {
         if(err){
             res.status(500).send({ message: "Error del servidor."});
@@ -440,7 +440,7 @@ function addStatsEventData(req,res){
     const eventID = req.params.event;
     const eventLocation= req.query.location;
         
-    EventsTeam.findOne({ "event_id": parseInt(eventID), "team_event_location_type": eventLocation, "event_status": "COMPLETED"})
+    EventsTeam.findOne({ event_id: parseInt(eventID), team_event_location_type: eventLocation, event_status: "COMPLETED"})
     .exec((err, eventsStored) => {
         if(err){
             res.status(500).send({ message: "Error del servidor."});
@@ -467,149 +467,157 @@ function addStatsEventData(req,res){
                         fs.readFile(jsonPath, (err, data) => {
             
                                 if (err) throw err;
+
                                 let statsDats = JSON.parse(data);
-                                                
-                                var statAway = statsDats.stats.away;
-                                var statHome = statsDats.stats.home;
-                                var resultAway='';
-                                var resultHome='';
-                                if (statsDats.scoring.homeScoreTotal < statsDats.scoring.awayScoreTotal){
-                                    resultAway='win';
-                                    resultHome='lose'
-                                }else if (statsDats.scoring.homeScoreTotal > statsDats.scoring.awayScoreTotal){
-                                    resultAway='lose';
-                                    resultHome='win'
-                                }
-                                    
-                                if(event.team_event_location_type === 'a'){
-                                    console.log(utiles.count(statAway.players));
-                                    for(var i=0; i<utiles.count(statAway.players); i++){
-                                        let playerStats = statAway.players[i].playerStats;
-                                        let fieldGoals = playerStats[0].fieldGoals;
-                                        let freeThrows= playerStats[0].freeThrows;
-                                        let rebounds = playerStats[0].rebounds;
-                                        let offense = playerStats[0].offense;
-                                        let defense = playerStats[0].defense;
-                                        let miscellaneous = playerStats[0].miscellaneous;
-            
-                                        var playerStatAway = new PlayerStat({
-                                            player_id: statAway.players[i].player.id,
-                                            season_id: event.season_id, 
-                                            team_id: event.team_id,
-                                            last_name: utiles.removeDiacritics(statAway.players[i].player.lastName),
-                                            first_name: utiles.removeDiacritics(statAway.players[i].player.firstName),
-                                            display_name: utiles.removeDiacritics(statAway.players[i].player.firstName) + " " + utiles.removeDiacritics(statAway.players[i].player.lastName),
-                                            team_abbreviation: utiles.checkTeam(event.team_id),
-                                            opponent_id: event.opponent_id,
-                                            position: statAway.players[i].player.position,
-                                            seconds: miscellaneous.minSeconds,
-                                            minutes: (miscellaneous.minSeconds === 0 ? 0 : (miscellaneous.minSeconds/60).toFixed(2)),
-                                            points: offense.pts,
-                                            assists: offense.ast,
-                                            turnovers: defense.tov,
-                                            steals: defense.stl,
-                                            blocks: defense.blk,
-                                            rebounds: rebounds.reb,
-                                            field_goals_attempted: fieldGoals.fgAtt,
-                                            field_goals_made: fieldGoals.fgMade,
-                                            three_point_field_goals_attempted: fieldGoals.fg3PtAtt,
-                                            three_point_field_goals_made: fieldGoals.fg3PtMade,
-                                            free_throws_attempted: freeThrows.ftAtt,
-                                            free_throws_made: freeThrows.ftMade,
-                                            defensive_rebounds: rebounds.defReb,
-                                            offensive_rebounds: rebounds.offReb,
-                                            personal_fouls: miscellaneous.fouls,
-                                            is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
-                                            field_goal_percentage: fieldGoals.fgPct,
-                                            three_point_percentage: fieldGoals.fg3PtPct,
-                                            free_throw_percentage: freeThrows.ftPct,
-                                            field_goal_percentage_string: fieldGoals.fgPct,
-                                            three_point_field_goal_percentage_string: fieldGoals.fg3PtPct,
-                                            free_throw_percentage_string: freeThrows.ftPct,
-                                            event_id: event.event_id,
-                                            event_start_date_time: event.event_start_date_time,
-                                            event_season_type: event.event_season_type,
-                                            team_event_location_type: 'a',
-                                            team_event_result: resultAway,
-                                            team_event_number_in_season: event.team_event_number_in_season                                
-                                        });
-            
-                                        //console.log(playerStatAway);
-                                        console.log("Player Stats AWAY to Collection: "+playerStatAway.team_id +" player: "+playerStatAway.display_name  +" game: "+ playerStatAway.team_event_number_in_season +" event: "+ playerStatAway.event_id);
-                                        //utiles.sleepFor(1000);
-                                        PlayerStat.collection.updateOne({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
-                                            if (err){ 
-                                                console.warn("Duplicado");
-                                            } else {
-                                                //console.log(docs);
-                                            }
-                                        });
+
+                                if(statsDats.game.playedStatus === "COMPLETED"){
+
+                                    var statAway = statsDats.stats.away;
+                                    var statHome = statsDats.stats.home;
+                                    var resultAway='';
+                                    var resultHome='';
+                                    if (statsDats.scoring.homeScoreTotal < statsDats.scoring.awayScoreTotal){
+                                        resultAway='win';
+                                        resultHome='lose'
+                                    }else if (statsDats.scoring.homeScoreTotal > statsDats.scoring.awayScoreTotal){
+                                        resultAway='lose';
+                                        resultHome='win'
                                     }
-                                } else if(event.team_event_location_type === 'h'){
-                                    console.log(utiles.count(statHome.players));
-                                    for(var j=0; j<utiles.count(statHome.players); j++){
-                                        let playerStats = statHome.players[j].playerStats;
-                                        let fieldGoals = playerStats[0].fieldGoals;
-                                        let freeThrows= playerStats[0].freeThrows;
-                                        let rebounds = playerStats[0].rebounds;
-                                        let offense = playerStats[0].offense;
-                                        let defense = playerStats[0].defense;
-                                        let miscellaneous = playerStats[0].miscellaneous;
+                                        
+                                    if(event.team_event_location_type === 'a'){
+                                        console.log(utiles.count(statAway.players));
+                                        for(var i=0; i<utiles.count(statAway.players); i++){
+                                            let playerStats = statAway.players[i].playerStats;
+                                            let fieldGoals = playerStats[0].fieldGoals;
+                                            let freeThrows= playerStats[0].freeThrows;
+                                            let rebounds = playerStats[0].rebounds;
+                                            let offense = playerStats[0].offense;
+                                            let defense = playerStats[0].defense;
+                                            let miscellaneous = playerStats[0].miscellaneous;
                 
-                                        var playerStatHome = new PlayerStat({
-                                            player_id: statHome.players[j].player.id,
-                                            season_id: event.season_id, 
-                                            team_id: event.team_id,
-                                            last_name: utiles.removeDiacritics(statHome.players[j].player.lastName),
-                                            first_name: utiles.removeDiacritics(statHome.players[j].player.firstName),
-                                            display_name: utiles.removeDiacritics(statHome.players[j].player.firstName) + " " + utiles.removeDiacritics(statHome.players[j].player.lastName),
-                                            team_abbreviation: utiles.checkTeam(event.team_id),
-                                            opponent_id: event.opponent_id,
-                                            position: statHome.players[j].player.position,
-                                            seconds: miscellaneous.minSeconds,
-                                            minutes: (miscellaneous.minSeconds === 0 ? 0 : (miscellaneous.minSeconds/60).toFixed(2)),
-                                            points: offense.pts,
-                                            assists: offense.ast,
-                                            turnovers: defense.tov,
-                                            steals: defense.stl,
-                                            blocks: defense.blk,
-                                            rebounds: rebounds.reb,
-                                            field_goals_attempted: fieldGoals.fgAtt,
-                                            field_goals_made: fieldGoals.fgMade,
-                                            three_point_field_goals_attempted: fieldGoals.fg3PtAtt,
-                                            three_point_field_goals_made: fieldGoals.fg3PtMade,
-                                            free_throws_attempted: freeThrows.ftAtt,
-                                            free_throws_made: freeThrows.ftMade,
-                                            defensive_rebounds: rebounds.defReb,
-                                            offensive_rebounds: rebounds.offReb,
-                                            personal_fouls: miscellaneous.fouls,
-                                            is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
-                                            field_goal_percentage: fieldGoals.fgPct,
-                                            three_point_percentage: fieldGoals.fg3PtPct,
-                                            free_throw_percentage: freeThrows.ftPct,
-                                            field_goal_percentage_string: fieldGoals.fgPct,
-                                            three_point_field_goal_percentage_string: fieldGoals.fg3PtPct,
-                                            free_throw_percentage_string: freeThrows.ftPct,
-                                            event_id: event.event_id,
-                                            event_start_date_time: event.event_start_date_time,
-                                            event_season_type: event.event_season_type,
-                                            team_event_location_type: 'h',
-                                            team_event_result: resultHome,
-                                            team_event_number_in_season: event.team_event_number_in_season                                
-                                        });
+                                            var playerStatAway = new PlayerStat({
+                                                player_id: statAway.players[i].player.id,
+                                                season_id: event.season_id, 
+                                                team_id: event.team_id,
+                                                last_name: utiles.removeDiacritics(statAway.players[i].player.lastName),
+                                                first_name: utiles.removeDiacritics(statAway.players[i].player.firstName),
+                                                display_name: utiles.removeDiacritics(statAway.players[i].player.firstName) + " " + utiles.removeDiacritics(statAway.players[i].player.lastName),
+                                                team_abbreviation: utiles.checkTeam(event.team_id),
+                                                opponent_id: event.opponent_id,
+                                                position: statAway.players[i].player.position,
+                                                seconds: miscellaneous.minSeconds,
+                                                minutes: (miscellaneous.minSeconds === 0 ? 0 : (miscellaneous.minSeconds/60).toFixed(2)),
+                                                points: offense.pts,
+                                                assists: offense.ast,
+                                                turnovers: defense.tov,
+                                                steals: defense.stl,
+                                                blocks: defense.blk,
+                                                rebounds: rebounds.reb,
+                                                field_goals_attempted: fieldGoals.fgAtt,
+                                                field_goals_made: fieldGoals.fgMade,
+                                                three_point_field_goals_attempted: fieldGoals.fg3PtAtt,
+                                                three_point_field_goals_made: fieldGoals.fg3PtMade,
+                                                free_throws_attempted: freeThrows.ftAtt,
+                                                free_throws_made: freeThrows.ftMade,
+                                                defensive_rebounds: rebounds.defReb,
+                                                offensive_rebounds: rebounds.offReb,
+                                                personal_fouls: miscellaneous.fouls,
+                                                is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
+                                                field_goal_percentage: fieldGoals.fgPct,
+                                                three_point_percentage: fieldGoals.fg3PtPct,
+                                                free_throw_percentage: freeThrows.ftPct,
+                                                field_goal_percentage_string: fieldGoals.fgPct,
+                                                three_point_field_goal_percentage_string: fieldGoals.fg3PtPct,
+                                                free_throw_percentage_string: freeThrows.ftPct,
+                                                event_id: event.event_id,
+                                                event_start_date_time: event.event_start_date_time,
+                                                event_season_type: event.event_season_type,
+                                                team_event_location_type: 'a',
+                                                team_event_result: resultAway,
+                                                team_event_number_in_season: event.team_event_number_in_season                                
+                                            });
                 
-                                        //console.log(playerStatHome);
-                                        console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" game: "+ playerStatHome.team_event_number_in_season +" event: "+ playerStatHome.event_id);
-                                        //utiles.sleepFor(1000);
-                                        PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
-                                            if (err){ 
-                                                console.warn("Duplicado");
-                                            } else {
-                                                //console.log(docs);
-                                            }
-                                        });
+                                            //console.log(playerStatAway);
+                                            console.log("Player Stats AWAY to Collection: "+playerStatAway.team_id +" player: "+playerStatAway.display_name  +" game: "+ playerStatAway.team_event_number_in_season +" event: "+ playerStatAway.event_id);
+                                            //utiles.sleepFor(1000);
+                                            PlayerStat.collection.updateOne({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
+                                                if (err){ 
+                                                    console.warn("Duplicado");
+                                                } else {
+                                                    //console.log(docs);
+                                                }
+                                            });
+                                        }
+                                    } else if(event.team_event_location_type === 'h'){
+                                        console.log(utiles.count(statHome.players));
+                                        for(var j=0; j<utiles.count(statHome.players); j++){
+                                            let playerStats = statHome.players[j].playerStats;
+                                            let fieldGoals = playerStats[0].fieldGoals;
+                                            let freeThrows= playerStats[0].freeThrows;
+                                            let rebounds = playerStats[0].rebounds;
+                                            let offense = playerStats[0].offense;
+                                            let defense = playerStats[0].defense;
+                                            let miscellaneous = playerStats[0].miscellaneous;
+                    
+                                            var playerStatHome = new PlayerStat({
+                                                player_id: statHome.players[j].player.id,
+                                                season_id: event.season_id, 
+                                                team_id: event.team_id,
+                                                last_name: utiles.removeDiacritics(statHome.players[j].player.lastName),
+                                                first_name: utiles.removeDiacritics(statHome.players[j].player.firstName),
+                                                display_name: utiles.removeDiacritics(statHome.players[j].player.firstName) + " " + utiles.removeDiacritics(statHome.players[j].player.lastName),
+                                                team_abbreviation: utiles.checkTeam(event.team_id),
+                                                opponent_id: event.opponent_id,
+                                                position: statHome.players[j].player.position,
+                                                seconds: miscellaneous.minSeconds,
+                                                minutes: (miscellaneous.minSeconds === 0 ? 0 : (miscellaneous.minSeconds/60).toFixed(2)),
+                                                points: offense.pts,
+                                                assists: offense.ast,
+                                                turnovers: defense.tov,
+                                                steals: defense.stl,
+                                                blocks: defense.blk,
+                                                rebounds: rebounds.reb,
+                                                field_goals_attempted: fieldGoals.fgAtt,
+                                                field_goals_made: fieldGoals.fgMade,
+                                                three_point_field_goals_attempted: fieldGoals.fg3PtAtt,
+                                                three_point_field_goals_made: fieldGoals.fg3PtMade,
+                                                free_throws_attempted: freeThrows.ftAtt,
+                                                free_throws_made: freeThrows.ftMade,
+                                                defensive_rebounds: rebounds.defReb,
+                                                offensive_rebounds: rebounds.offReb,
+                                                personal_fouls: miscellaneous.fouls,
+                                                is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
+                                                field_goal_percentage: fieldGoals.fgPct,
+                                                three_point_percentage: fieldGoals.fg3PtPct,
+                                                free_throw_percentage: freeThrows.ftPct,
+                                                field_goal_percentage_string: fieldGoals.fgPct,
+                                                three_point_field_goal_percentage_string: fieldGoals.fg3PtPct,
+                                                free_throw_percentage_string: freeThrows.ftPct,
+                                                event_id: event.event_id,
+                                                event_start_date_time: event.event_start_date_time,
+                                                event_season_type: event.event_season_type,
+                                                team_event_location_type: 'h',
+                                                team_event_result: resultHome,
+                                                team_event_number_in_season: event.team_event_number_in_season                                
+                                            });
+                    
+                                            //console.log(playerStatHome);
+                                            console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" game: "+ playerStatHome.team_event_number_in_season +" event: "+ playerStatHome.event_id);
+                                            //utiles.sleepFor(1000);
+                                            PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
+                                                if (err){ 
+                                                    console.warn("Duplicado");
+                                                } else {
+                                                    //console.log(docs);
+                                                }
+                                            });
+                                        }
+                
                                     }
-            
+
+                                } else {
+                                    console.log(statsDats.game.playedStatus);
+
                                 }
                         });
                         //});
@@ -623,148 +631,154 @@ function addStatsEventData(req,res){
             
                                 if (err) throw err;
                                 let statsDats = JSON.parse(data);
-                                                
-                                var statAway = statsDats.stats.away;
-                                var statHome = statsDats.stats.home;
-                                var resultAway='';
-                                var resultHome='';
-                                if (statsDats.scoring.homeScoreTotal < statsDats.scoring.awayScoreTotal){
-                                    resultAway='win';
-                                    resultHome='lose'
-                                }else if (statsDats.scoring.homeScoreTotal > statsDats.scoring.awayScoreTotal){
-                                    resultAway='lose';
-                                    resultHome='win'
-                                }
-                                    
-                                if(event.team_event_location_type === 'a'){
-                                    console.log(utiles.count(statAway.players));
-                                    for(var i=0; i<utiles.count(statAway.players); i++){
-                                        let playerStats = statAway.players[i].playerStats;
-                                        let fieldGoals = playerStats[0].fieldGoals;
-                                        let freeThrows= playerStats[0].freeThrows;
-                                        let rebounds = playerStats[0].rebounds;
-                                        let offense = playerStats[0].offense;
-                                        let defense = playerStats[0].defense;
-                                        let miscellaneous = playerStats[0].miscellaneous;
-            
-                                        var playerStatAway = new PlayerStat({
-                                            player_id: statAway.players[i].player.id,
-                                            season_id: event.season_id, 
-                                            team_id: event.team_id,
-                                            last_name: utiles.removeDiacritics(statAway.players[i].player.lastName),
-                                            first_name: utiles.removeDiacritics(statAway.players[i].player.firstName),
-                                            display_name: utiles.removeDiacritics(statAway.players[i].player.firstName) + " " + utiles.removeDiacritics(statAway.players[i].player.lastName),
-                                            team_abbreviation: utiles.checkTeam(event.team_id),
-                                            opponent_id: event.opponent_id,
-                                            position: statAway.players[i].player.position,
-                                            seconds: miscellaneous.minSeconds,
-                                            minutes: (miscellaneous.minSeconds === 0 ? 0 : (miscellaneous.minSeconds/60).toFixed(2)),
-                                            points: offense.pts,
-                                            assists: offense.ast,
-                                            turnovers: defense.tov,
-                                            steals: defense.stl,
-                                            blocks: defense.blk,
-                                            rebounds: rebounds.reb,
-                                            field_goals_attempted: fieldGoals.fgAtt,
-                                            field_goals_made: fieldGoals.fgMade,
-                                            three_point_field_goals_attempted: fieldGoals.fg3PtAtt,
-                                            three_point_field_goals_made: fieldGoals.fg3PtMade,
-                                            free_throws_attempted: freeThrows.ftAtt,
-                                            free_throws_made: freeThrows.ftMade,
-                                            defensive_rebounds: rebounds.defReb,
-                                            offensive_rebounds: rebounds.offReb,
-                                            personal_fouls: miscellaneous.fouls,
-                                            is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
-                                            field_goal_percentage: fieldGoals.fgPct,
-                                            three_point_percentage: fieldGoals.fg3PtPct,
-                                            free_throw_percentage: freeThrows.ftPct,
-                                            field_goal_percentage_string: fieldGoals.fgPct,
-                                            three_point_field_goal_percentage_string: fieldGoals.fg3PtPct,
-                                            free_throw_percentage_string: freeThrows.ftPct,
-                                            event_id: event.event_id,
-                                            event_start_date_time: event.event_start_date_time,
-                                            event_season_type: event.event_season_type,
-                                            team_event_location_type: 'a',
-                                            team_event_result: resultAway,
-                                            team_event_number_in_season: event.team_event_number_in_season                                
-                                        });
-            
-                                        //console.log(playerStatAway);
-                                        console.log("Player Stats AWAY to Collection: "+playerStatAway.team_id +" player: "+playerStatAway.display_name  +" game: "+ playerStatAway.team_event_number_in_season +" event: "+ playerStatAway.event_id);
-                                        //utiles.sleepFor(1000);
-                                        PlayerStat.collection.updateOne({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
-                                            if (err){ 
-                                                console.warn("Duplicado");
-                                            } else {
-                                                //console.log(docs);
-                                            }
-                                        });
+
+                                if(statsDats.game.playedStatus === "COMPLETED"){
+                                    var statAway = statsDats.stats.away;
+                                    var statHome = statsDats.stats.home;
+                                    var resultAway='';
+                                    var resultHome='';
+                                    if (statsDats.scoring.homeScoreTotal < statsDats.scoring.awayScoreTotal){
+                                        resultAway='win';
+                                        resultHome='lose'
+                                    }else if (statsDats.scoring.homeScoreTotal > statsDats.scoring.awayScoreTotal){
+                                        resultAway='lose';
+                                        resultHome='win'
                                     }
-                                } else if(event.team_event_location_type === 'h'){
-                                    console.log(utiles.count(statHome.players));
-                                    for(var j=0; j<utiles.count(statHome.players); j++){
-                                        let playerStats = statHome.players[j].playerStats;
-                                        let fieldGoals = playerStats[0].fieldGoals;
-                                        let freeThrows= playerStats[0].freeThrows;
-                                        let rebounds = playerStats[0].rebounds;
-                                        let offense = playerStats[0].offense;
-                                        let defense = playerStats[0].defense;
-                                        let miscellaneous = playerStats[0].miscellaneous;
+                                        
+                                    if(event.team_event_location_type === 'a'){
+                                        console.log(utiles.count(statAway.players));
+                                        for(var i=0; i<utiles.count(statAway.players); i++){
+                                            let playerStats = statAway.players[i].playerStats;
+                                            let fieldGoals = playerStats[0].fieldGoals;
+                                            let freeThrows= playerStats[0].freeThrows;
+                                            let rebounds = playerStats[0].rebounds;
+                                            let offense = playerStats[0].offense;
+                                            let defense = playerStats[0].defense;
+                                            let miscellaneous = playerStats[0].miscellaneous;
                 
-                                        var playerStatHome = new PlayerStat({
-                                            player_id: statHome.players[j].player.id,
-                                            season_id: event.season_id, 
-                                            team_id: event.team_id,
-                                            last_name: utiles.removeDiacritics(statHome.players[j].player.lastName),
-                                            first_name: utiles.removeDiacritics(statHome.players[j].player.firstName),
-                                            display_name: utiles.removeDiacritics(statHome.players[j].player.firstName) + " " + utiles.removeDiacritics(statHome.players[j].player.lastName),
-                                            team_abbreviation: utiles.checkTeam(event.team_id),
-                                            opponent_id: event.opponent_id,
-                                            position: statHome.players[j].player.position,
-                                            seconds: miscellaneous.minSeconds,
-                                            minutes: (miscellaneous.minSeconds === 0 ? 0 : (miscellaneous.minSeconds/60).toFixed(2)),
-                                            points: offense.pts,
-                                            assists: offense.ast,
-                                            turnovers: defense.tov,
-                                            steals: defense.stl,
-                                            blocks: defense.blk,
-                                            rebounds: rebounds.reb,
-                                            field_goals_attempted: fieldGoals.fgAtt,
-                                            field_goals_made: fieldGoals.fgMade,
-                                            three_point_field_goals_attempted: fieldGoals.fg3PtAtt,
-                                            three_point_field_goals_made: fieldGoals.fg3PtMade,
-                                            free_throws_attempted: freeThrows.ftAtt,
-                                            free_throws_made: freeThrows.ftMade,
-                                            defensive_rebounds: rebounds.defReb,
-                                            offensive_rebounds: rebounds.offReb,
-                                            personal_fouls: miscellaneous.fouls,
-                                            is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
-                                            field_goal_percentage: fieldGoals.fgPct,
-                                            three_point_percentage: fieldGoals.fg3PtPct,
-                                            free_throw_percentage: freeThrows.ftPct,
-                                            field_goal_percentage_string: fieldGoals.fgPct,
-                                            three_point_field_goal_percentage_string: fieldGoals.fg3PtPct,
-                                            free_throw_percentage_string: freeThrows.ftPct,
-                                            event_id: event.event_id,
-                                            event_start_date_time: event.event_start_date_time,
-                                            event_season_type: event.event_season_type,
-                                            team_event_location_type: 'h',
-                                            team_event_result: resultHome,
-                                            team_event_number_in_season: event.team_event_number_in_season                                
-                                        });
+                                            var playerStatAway = new PlayerStat({
+                                                player_id: statAway.players[i].player.id,
+                                                season_id: event.season_id, 
+                                                team_id: event.team_id,
+                                                last_name: utiles.removeDiacritics(statAway.players[i].player.lastName),
+                                                first_name: utiles.removeDiacritics(statAway.players[i].player.firstName),
+                                                display_name: utiles.removeDiacritics(statAway.players[i].player.firstName) + " " + utiles.removeDiacritics(statAway.players[i].player.lastName),
+                                                team_abbreviation: utiles.checkTeam(event.team_id),
+                                                opponent_id: event.opponent_id,
+                                                position: statAway.players[i].player.position,
+                                                seconds: miscellaneous.minSeconds,
+                                                minutes: (miscellaneous.minSeconds === 0 ? 0 : (miscellaneous.minSeconds/60).toFixed(2)),
+                                                points: offense.pts,
+                                                assists: offense.ast,
+                                                turnovers: defense.tov,
+                                                steals: defense.stl,
+                                                blocks: defense.blk,
+                                                rebounds: rebounds.reb,
+                                                field_goals_attempted: fieldGoals.fgAtt,
+                                                field_goals_made: fieldGoals.fgMade,
+                                                three_point_field_goals_attempted: fieldGoals.fg3PtAtt,
+                                                three_point_field_goals_made: fieldGoals.fg3PtMade,
+                                                free_throws_attempted: freeThrows.ftAtt,
+                                                free_throws_made: freeThrows.ftMade,
+                                                defensive_rebounds: rebounds.defReb,
+                                                offensive_rebounds: rebounds.offReb,
+                                                personal_fouls: miscellaneous.fouls,
+                                                is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
+                                                field_goal_percentage: fieldGoals.fgPct,
+                                                three_point_percentage: fieldGoals.fg3PtPct,
+                                                free_throw_percentage: freeThrows.ftPct,
+                                                field_goal_percentage_string: fieldGoals.fgPct,
+                                                three_point_field_goal_percentage_string: fieldGoals.fg3PtPct,
+                                                free_throw_percentage_string: freeThrows.ftPct,
+                                                event_id: event.event_id,
+                                                event_start_date_time: event.event_start_date_time,
+                                                event_season_type: event.event_season_type,
+                                                team_event_location_type: 'a',
+                                                team_event_result: resultAway,
+                                                team_event_number_in_season: event.team_event_number_in_season                                
+                                            });
                 
-                                        //console.log(playerStatHome);
-                                        console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" game: "+ playerStatHome.team_event_number_in_season +" event: "+ playerStatHome.event_id);
-                                        //utiles.sleepFor(1000);
-                                        PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
-                                            if (err){ 
-                                                console.warn("Duplicado");
-                                            } else {
-                                                //console.log(docs);
-                                            }
-                                        });
+                                            //console.log(playerStatAway);
+                                            console.log("Player Stats AWAY to Collection: "+playerStatAway.team_id +" player: "+playerStatAway.display_name  +" game: "+ playerStatAway.team_event_number_in_season +" event: "+ playerStatAway.event_id);
+                                            //utiles.sleepFor(1000);
+                                            PlayerStat.collection.updateOne({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
+                                                if (err){ 
+                                                    console.warn("Duplicado");
+                                                } else {
+                                                    //console.log(docs);
+                                                }
+                                            });
+                                        }
+                                    } else if(event.team_event_location_type === 'h'){
+                                        console.log(utiles.count(statHome.players));
+                                        for(var j=0; j<utiles.count(statHome.players); j++){
+                                            let playerStats = statHome.players[j].playerStats;
+                                            let fieldGoals = playerStats[0].fieldGoals;
+                                            let freeThrows= playerStats[0].freeThrows;
+                                            let rebounds = playerStats[0].rebounds;
+                                            let offense = playerStats[0].offense;
+                                            let defense = playerStats[0].defense;
+                                            let miscellaneous = playerStats[0].miscellaneous;
+                    
+                                            var playerStatHome = new PlayerStat({
+                                                player_id: statHome.players[j].player.id,
+                                                season_id: event.season_id, 
+                                                team_id: event.team_id,
+                                                last_name: utiles.removeDiacritics(statHome.players[j].player.lastName),
+                                                first_name: utiles.removeDiacritics(statHome.players[j].player.firstName),
+                                                display_name: utiles.removeDiacritics(statHome.players[j].player.firstName) + " " + utiles.removeDiacritics(statHome.players[j].player.lastName),
+                                                team_abbreviation: utiles.checkTeam(event.team_id),
+                                                opponent_id: event.opponent_id,
+                                                position: statHome.players[j].player.position,
+                                                seconds: miscellaneous.minSeconds,
+                                                minutes: (miscellaneous.minSeconds === 0 ? 0 : (miscellaneous.minSeconds/60).toFixed(2)),
+                                                points: offense.pts,
+                                                assists: offense.ast,
+                                                turnovers: defense.tov,
+                                                steals: defense.stl,
+                                                blocks: defense.blk,
+                                                rebounds: rebounds.reb,
+                                                field_goals_attempted: fieldGoals.fgAtt,
+                                                field_goals_made: fieldGoals.fgMade,
+                                                three_point_field_goals_attempted: fieldGoals.fg3PtAtt,
+                                                three_point_field_goals_made: fieldGoals.fg3PtMade,
+                                                free_throws_attempted: freeThrows.ftAtt,
+                                                free_throws_made: freeThrows.ftMade,
+                                                defensive_rebounds: rebounds.defReb,
+                                                offensive_rebounds: rebounds.offReb,
+                                                personal_fouls: miscellaneous.fouls,
+                                                is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
+                                                field_goal_percentage: fieldGoals.fgPct,
+                                                three_point_percentage: fieldGoals.fg3PtPct,
+                                                free_throw_percentage: freeThrows.ftPct,
+                                                field_goal_percentage_string: fieldGoals.fgPct,
+                                                three_point_field_goal_percentage_string: fieldGoals.fg3PtPct,
+                                                free_throw_percentage_string: freeThrows.ftPct,
+                                                event_id: event.event_id,
+                                                event_start_date_time: event.event_start_date_time,
+                                                event_season_type: event.event_season_type,
+                                                team_event_location_type: 'h',
+                                                team_event_result: resultHome,
+                                                team_event_number_in_season: event.team_event_number_in_season                                
+                                            });
+                    
+                                            //console.log(playerStatHome);
+                                            console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" game: "+ playerStatHome.team_event_number_in_season +" event: "+ playerStatHome.event_id);
+                                            //utiles.sleepFor(1000);
+                                            PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
+                                                if (err){ 
+                                                    console.warn("Duplicado");
+                                                } else {
+                                                    //console.log(docs);
+                                                }
+                                            });
+                                        }
+                
                                     }
-            
+
+                                } else {
+                                    console.log(statsDats.game.playedStatus);
+
                                 }
                             });
                         });
