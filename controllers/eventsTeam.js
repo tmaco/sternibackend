@@ -513,7 +513,7 @@ function getEvent(req,res){
                 res.status(500).send({ message: "Error del servidor."});
             } else {
                 if(!eventStored) {
-                    res.status(404).send({ message: "No se ha encontrado ningun jugador con id " + eventId + "."});
+                    res.status(404).send({ message: "No se ha encontrado ningun evento con id " + eventId + "."});
                 } else {
                     res.status(200).send({ code: 200, event: eventStored });
                 }
