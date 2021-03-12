@@ -10,16 +10,17 @@ function getEventsTeamRegularData(req,res){
 
     var MySportsFeeds = require("mysportsfeeds-node");
 
-    var msf = new MySportsFeeds("2.1", true);
+    /*var msf = new MySportsFeeds("2.1", true);
     msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
-    msf.getData('nba', '2020-2021-regular', 'seasonal_games', 'json', {team: TeamName,  force: 'true', sort: 'game.starttime'})
-    .then(async response => {
+    msf.getData('nba', '2020-2021-regular', 'seasonal_games', 'json', {team: TeamName,  force: 'false', sort: 'game.starttime'})
+    .then(async response => {*/
         const fs = require('fs');
         var path = require('path');
 
         var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2020-2021-regular.json');
 
-        await fs.readFile(jsonPath, (err, data) => {
+        //await fs.readFile(jsonPath, (err, data) => {
+            fs.readFile(jsonPath, (err, data) => {
             if (err) throw err;
             let eventsData = JSON.parse(data);
 
@@ -92,18 +93,19 @@ function getEventsTeamRegularData(req,res){
 
                 //console.log(eventTeam);
 
+                //EventsTeam.collection.updateOne({ event_id: eventTeam.event_id }, eventTeam, {upsert:true}, function (err, docs) {
+
                 EventsTeam.collection.insert(eventTeam, function (err, docs) {
                     if (err){ 
-                        return console.error(err);
+                        console.warn("Duplicado");
                     } else {
-                        //console.log("Event inserted to Collection");
-
+                        //console.log(docs);
                     }
                 });
             }
         });
-    });
-
+    //});
+    
     res.status(200).jsonp({
         "status": 200,
         "message": `Events team ${team_id} inserted into Database`

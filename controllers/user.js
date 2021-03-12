@@ -114,6 +114,18 @@ function getUsers(req, res) {
     });
 }
 
+function getUser(req, res) {
+    const { id } = req.params;
+
+    User.findById(id).then(user => {
+        if(!user) {
+            res.status(404).send({ code: 404, message: "No se ha encontrado ningun usuario."});
+        } else {
+            res.status(200).send({ code: 200, user: user });
+        }
+    });
+}
+
 function getUsersActive(req, res) {
     const query = req.query;
 
@@ -146,7 +158,7 @@ function uploadAvatar(req, res) {
                     let extSplit = fileName.split(".");
                     let fileExt = extSplit[1];
 
-                    if(fileExt !== "png" && fileExt !== "jpeg") {
+                    if(fileExt !== "png" && fileExt !== "jpeg" && fileExt !== "jpg") {
                         res.status(400)
                         .send({ 
                             message: "La extension de la imagen no es valida. Extensiones permitidas .png y .jpeg"
@@ -327,6 +339,7 @@ module.exports = {
     signUp,
     signIn,
     getUsers,
+    getUser,
     getUsersActive,
     uploadAvatar,
     getAvatar,
