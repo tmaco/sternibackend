@@ -3,9 +3,10 @@ const path = require("path");
 const bcrypt = require("bcrypt-nodejs");
 const jwt = require("../services/jwt");
 const User = require("../models/user");
-const { UPLOADPATH } = require("../config");
+const { UPLOADPATH, S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION } = require("../config");
 const Registro = require("../models/registro");
-
+const AWS = require('aws-sdk');
+AWS.config.update({ accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY , region: AWS_REGION });
 
 function signUp(req, res) {
     const user = new User;
@@ -139,9 +140,77 @@ function getUsersActive(req, res) {
 }
 
 function uploadAvatar(req, res) {
+
+    //Almacenamiento S3
+
     const params = req.params;
 
     User.findById({_id: params.id}, (err,userData) => {
+        if(err) {
+            err.status(500).send({ message: "Error del servidor."});
+        } else {
+            if(!userData) {
+                err.status(404).send({ message: "Usuario no encontrado."});
+            } else {
+                let user = userData;
+                
+                if(req.files) {
+                    let filePath = req.files.avatar.path;
+                    let fileSplit = filePath.split("/");
+                    let fileName = fileSplit[2];
+
+                    let extSplit = fileName.split(".");
+                    let fileExt = extSplit[1];
+
+                    if(fileExt !== "png" && fileExt !== "jpeg" && fileExt !== "jpg") {
+                        res.status(400)
+                        .send({ 
+                            message: "La extension de la imagen no es valida. Extensiones permitidas .png, jpg y .jpeg"
+                        });
+                    } else {
+                        user.avatar = fileName;
+                        User.findByIdAndUpdate({
+                            _id: params.id
+                        }, user, (err, userResult) => {
+                            if(err) {
+                                err.status(500).send({ message: "Error del servidor."})
+
+                            } else {
+                                if(!userResult) {
+                                    err.status(404).send({ message: "Usuario no encontrado."});
+                                } else {
+                                    const s3 = new AWS.S3();
+                                    const fileContent = fs.readFileSync(req.files.avatar.path);
+                                    const s3Params = {
+                                        Bucket: S3_BUCKET,
+                                        Key: `${fileName}`,
+                                        Body: fileContent,
+                                        ACL: 'public-read',
+                                    }
+
+                                    s3.upload(s3Params, (err, data) => {
+                                        if (err) { return console.log(err) }
+                                                                                
+                                            // Continue if no error
+                                            // Save data.Location in your database
+                                            console.log(`Image successfully uploaded. ${data.Location}`);
+
+                                            res.status(200).send({ avatarName: fileName});
+                                     });
+                                }
+                            }
+                        });
+                    }
+
+                }
+
+            }
+        }
+    })    
+
+    //Almacenamiento local
+    
+    /*User.findById({_id: params.id}, (err,userData) => {
         if(err) {
             err.status(500).send({ message: "Error del servidor."});
         } else {
@@ -185,21 +254,29 @@ function uploadAvatar(req, res) {
 
             }
         }
-    })
+    })*/
 }
 
 function getAvatar(req,res) {
     const AvatarName = req.params.avatarName;
     const filePath = UPLOADPATH + AvatarName;
-
-    fs.exists(filePath, exists => {
+    
+    //Almacenamiento local
+    /*fs.exists(filePath, exists => {
         if(!exists) {
             res.status(404).send({ message: "El avatar que buscas no existe"});
         } else {
             res.sendFile(path.resolve(filePath));
         }
-    });
-    
+    });*/
+
+    //ALmacenamiento S3
+
+    const returnData = {
+        url: filePath
+      };
+      res.write(JSON.stringify(returnData));
+      res.end();    
 }
 
 async function updateUser(req, res) {
