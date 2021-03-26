@@ -351,11 +351,11 @@ function updateScoringLineupUser(req,res) {
 function updateTotalScoringLineupUser(req,res) {
     const FantasyLineupId = req.params.id;
     const {
-        fantasy_scoring, total_minutes
+        fantasy_scoring, total_minutes, fantasy_scoring_prev
     } = req.body;
         
     FantasyLineup.updateOne({"_id": FantasyLineupId},
-    { $set: {"fantasy_scoring": fantasy_scoring, "total_minutes": total_minutes }})
+    { $set: {"fantasy_scoring": fantasy_scoring, "total_minutes": total_minutes, "fantasy_scoring_prev": fantasy_scoring_prev }})
     .exec(
             (err, fantasyLineup) => {
                 if(err){
@@ -378,7 +378,7 @@ function getTotalScoringByJornada(req,res) {
     const numJornada = req.query.match;
 
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId ,number_match: parseInt(numJornada)}},
-        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes"}}},
+        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes", fantasy_scoring_prev:"$fantasy_scoring_prev"}}},
         { $sort: { "_id.fantasy_scoring": -1 } }
     ])
         .exec((err, fantasyScoring) => {
@@ -393,6 +393,29 @@ function getTotalScoringByJornada(req,res) {
             }
         });
 }
+
+function getTotalScoringLineupByJornada(req,res) {
+
+    const userId = req.params.user;
+
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+    const numMatch = req.query.match;
+
+    FantasyLineup.findOne({ user_id: userId, league_id: leagueId , season_id: seasonId ,number_match: parseInt(numMatch)})
+        .exec((err, fantasyLineup) => {
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+                if(!fantasyLineup || fantasyLineup.length === 0) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado la fantasy lineup."});
+                } else {
+                    res.status(200).send({ code: 200, fantasyScoring: fantasyLineup.fantasy_scoring });
+                }
+            }
+        });
+}
+
 
 function getTotalScoringByLeague(req,res) {
 
@@ -427,7 +450,7 @@ function getTotalScoringGroupByJornada(req,res) {
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, number_match : {
         $gte: 2
     } }},
-        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", number_match: "$number_match", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes"}}},
+        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", number_match: "$number_match", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes", fantasy_scoring_prev:"$fantasy_scoring_prev"}}},
         { $sort: { "_id.number_match": 1, "_id.fantasy_scoring": -1,  } }
     ])
         .exec((err, fantasyScoring) => {
@@ -458,6 +481,7 @@ module.exports = {
     updateScoringLineupUser,
     updateTotalScoringLineupUser,
     getTotalScoringByJornada,
+    getTotalScoringLineupByJornada,
     getTotalScoringByLeague,
     getTotalScoringGroupByJornada,
     getFantasyLeagueId
