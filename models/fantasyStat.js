@@ -5,7 +5,9 @@ const fantasyStatSchema = new Schema(
     {
         league_id: { type: String, required: true } ,
         season_id: { type: String, required: true },
-        player_name: { type: String, required: true } ,
+        team_id: { type: String, required: true },
+        opponent_id: { type: String, required: true },
+        player_name: { type: String, required: true },
         player_id: { type: Number, required: true },
         event_id: { type: String, required: true },
         position: { type: String, required: true } ,

@@ -324,51 +324,51 @@ function getFantasyStatsData(req,res){
                         var ppm = 0;
                         
                         if(stat.minutes!==0)
-                            ppm = scoring/stat.minutes;
-
-						var fantasyStat = new FantasyStat({
-                          season_id: seasonId,
-                          league_id: req.params.league,
-                          player_id: stat.player_id,
-                          event_id: stat.event_id,
-					      player_name: stat.display_name,
-					      position: stat.position,
-					      fantasy_scoring: ( scoring === 0 ? scoring : scoring.toFixed(2)),
-					      minutes: stat.minutes,
-					      points_per_minute: ( ppm === 0 ? ppm : ppm.toFixed(2)),
-					      points: stat.points,
-					      offensive_rebounds: stat.offensive_rebounds,
-					      defensive_rebounds: stat.defensive_rebounds,
-					      rebounds: stat.rebounds,
-					      assists: stat.assists,
-					      steals: stat.steals,
-					      blocks: stat.blocks,
-					      turnovers: stat.turnovers,
-					      field_goals_attempted: stat.field_goals_attempted,
-					      field_goals_made: stat.field_goals_made,
-					      field_goals_missed: stat.field_goals_attempted - stat.field_goals_made, 
-					      two_point_field_goals_attempted: stat.field_goals_attempted - stat.three_point_field_goals_attempted,
-					      two_point_field_goals_made: stat.field_goals_made - stat.three_point_field_goals_made,
-					      two_point_field_goals_missed: (stat.field_goals_attempted - stat.three_point_field_goals_attempted)  - (stat.field_goals_made - stat.three_point_field_goals_made),
-					      three_point_field_goals_attempted: stat.three_point_field_goals_attempted,
-					      three_point_field_goals_made: stat.three_point_field_goals_made,
-					      three_point_field_goals_missed: stat.three_point_field_goals_attempted - stat.three_point_field_goals_made,
-					      free_throws_attempted: stat.free_throws_attempted,
-					      free_throws_made: stat.free_throws_made,
-					      free_throws_missed: stat.free_throws_attempted - stat.free_throws_made,
-					      personal_fouls: stat.personal_fouls,
-					      is_starter: stat.is_starter,
-					      is_double_double: isDobleDoble,
-					      is_triple_double: isTripleDoble,
-					      date_match: stat.event_start_date_time,
-					      number_match: stat.team_event_number_in_season,
-					      type_match: stat.event_season_type,
-					      location_match: stat.team_event_location_type,
-					      result_match: stat.team_event_result
-                        });
+                          ppm = scoring/stat.minutes;
+                          
+                          var fantasyStat = new FantasyStat({
+                            season_id: "20_21_1",
+                            league_id: req.params.league,
+                            team_id: stat.team_id,
+                            opponent_id: stat.opponent_id,
+                            player_id: stat.player_id,
+                            event_id: stat.event_id,
+                            player_name: stat.display_name,
+                            position: stat.position,
+                            fantasy_scoring: ( scoring === 0 ? scoring : scoring.toFixed(2)),
+                            minutes: stat.minutes,
+                            points_per_minute: ( ppm === 0 ? ppm : ppm.toFixed(2)),
+                            points: stat.points,
+                            offensive_rebounds: stat.offensive_rebounds,
+                            defensive_rebounds: stat.defensive_rebounds,
+                            rebounds: stat.rebounds,
+                            assists: stat.assists,
+                            steals: stat.steals,
+                            blocks: stat.blocks,
+                            turnovers: stat.turnovers,
+                            field_goals_attempted: stat.field_goals_attempted,
+                            field_goals_made: stat.field_goals_made,
+                            field_goals_missed: stat.field_goals_attempted - stat.field_goals_made, 
+                            two_point_field_goals_attempted: stat.field_goals_attempted - stat.three_point_field_goals_attempted,
+                            two_point_field_goals_made: stat.field_goals_made - stat.three_point_field_goals_made,
+                            two_point_field_goals_missed: (stat.field_goals_attempted - stat.three_point_field_goals_attempted)  - (stat.field_goals_made - stat.three_point_field_goals_made),
+                            three_point_field_goals_attempted: stat.three_point_field_goals_attempted,
+                            three_point_field_goals_made: stat.three_point_field_goals_made,
+                            three_point_field_goals_missed: stat.three_point_field_goals_attempted - stat.three_point_field_goals_made,
+                            free_throws_attempted: stat.free_throws_attempted,
+                            free_throws_made: stat.free_throws_made,
+                            free_throws_missed: stat.free_throws_attempted - stat.free_throws_made,
+                            personal_fouls: stat.personal_fouls,
+                            is_starter: stat.is_starter,
+                            is_double_double: isDobleDoble,
+                            is_triple_double: isTripleDoble,
+                            date_match: stat.event_start_date_time,
+                            number_match: stat.team_event_number_in_season,
+                            type_match: stat.event_season_type,
+                            location_match: stat.team_event_location_type,
+                            result_match: stat.team_event_result
+                          });
                         
-                    
-
 						console.log("Fantasy Stats to League: "+fantasyStat.league_id +" player: "+fantasyStat.player_name +" Fantasy points: "+ fantasyStat.fantasy_scoring +" points per minute: "+ fantasyStat.points_per_minute +" Num match: "+ fantasyStat.number_match);
 						//console.log(scoring);
 						utiles.sleepFor(100);
@@ -376,8 +376,8 @@ function getFantasyStatsData(req,res){
 						FantasyStat.collection.updateOne({ player_id: fantasyStat.player_id, event_id: fantasyStat.event_id, season_id: fantasyStat.season_id, league_id: fantasyStat.league_id}, fantasyStat, {upsert:true}, function (err, docs) {
 						//FantasyStat.collection.insert(fantasyStat, function (err, docs) {
 							if (err){ 
-								//return console.error(err);
-								console.warn("Duplicado");
+								return console.error(err);
+								//console.warn("Duplicado");
 							} else {
 							    //console.log("Fantasy Stat inserted to Collection");
 							    //console.log(docs);
@@ -435,6 +435,8 @@ function addFantasyStatsDataEvent(req,res){
 						var fantasyStat = new FantasyStat({
                           season_id: seasonId,
                           league_id: req.params.league,
+                          team_id: stat.team_id,
+                          opponent_id: stat.opponent_id,
                           player_id: stat.player_id,
                           event_id: stat.event_id,
 					      player_name: stat.display_name,
@@ -509,7 +511,7 @@ function getFantasyStatsBySeason(req,res){
     FantasyStat.aggregate([{$match: { league_id: leagueId, season_id: seasonId, type_match: eventID, 
         minutes: { $gt: 0}
             }},
-            { $group: { "_id": { player_id: "$player_id" , player_name: "$player_name" }, 
+            { $group: { "_id": { player_id: "$player_id" , player_name: "$player_name", team_id: "$team_id" }, 
                 "totalMatches" : { "$sum": 1},
                 "totalMinutes" : { "$sum": "$minutes"},
                 "totalFantasyScoring" : { "$sum": "$fantasy_scoring"},                           

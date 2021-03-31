@@ -18,7 +18,7 @@ api.get("/get-fantasy-scoring-last/:player", FantasyStatController.getFantasySco
 api.get("/get-fantasy-event/:event", FantasyStatController.getFantasyScoringByEvent);
 api.get("/get-fantasy-stats/:event", FantasyStatController.getFantasyStatsByEvent);
 api.put("/update-fantasy-name", [md_auth.ensureAdmin], FantasyStatController.updateFantasyDisplayName);
-api.post("/add-fantasy/:league", FantasyStatController.getFantasyStatsData);
+api.post("/add-fantasy/:league", [md_auth.ensureAdmin], FantasyStatController.getFantasyStatsData);
 api.post("/add-fantasy-event/:league", [md_auth.ensureAdmin], FantasyStatController.addFantasyStatsDataEvent);
 api.get("/get-fstats-player/:playerId", FantasyStatController.getFantasyStatsByPlayerAndEventId);
 api.get("/get-fstats/:playerId", FantasyStatController.getFantasyStatsPlayerByLeague);
