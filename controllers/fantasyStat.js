@@ -327,7 +327,7 @@ function getFantasyStatsData(req,res){
                           ppm = scoring/stat.minutes;
                           
                           var fantasyStat = new FantasyStat({
-                            season_id: "20_21_1",
+                            season_id: seasonId,
                             league_id: req.params.league,
                             team_id: stat.team_id,
                             opponent_id: stat.opponent_id,
