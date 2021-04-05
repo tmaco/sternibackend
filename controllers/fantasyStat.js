@@ -708,6 +708,31 @@ function getFantasyScoringLastGamesByPlayer(req,res){
         });
 }
 
+function getFantasyStatsByLeagueByDate(req,res){
+    const leagueId = req.query.league;
+    const seasonId = req.query.season;
+    const dateFrom = req.query.from;
+    const dateTo = req.query.to;
+    
+    FantasyStat.find({ league_id : leagueId, season_id : seasonId, date_match: {
+        $gte: dateFrom,
+        $lt: dateTo}})
+        .sort({ points_per_minute: "desc"})
+        .exec((err, statsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(statsStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado estadisticas dentro de la liga fantasy " + leagueId+ " para " + PlayerId 
+                    + " en la temporada " + seasonId+ "."});
+                } else {
+                    res.status(200).send({ code: 200, fantasy: statsStored });
+                }
+            }
+        });
+
+}
+
 module.exports = {
     getTotalFantasyStatsByPlayer,
     getTotalFantasyStatsBySeasonPlayerApi,
@@ -725,5 +750,6 @@ module.exports = {
     getFantasyStatsPlayerByLeague,
     getFantasyStatsPlayerByLeagueByDate,
     getFantasyScoringLastGamesByPlayer,
-    getFantasyStatsByEvent
+    getFantasyStatsByEvent,
+    getFantasyStatsByLeagueByDate
 }
