@@ -723,8 +723,7 @@ function getFantasyStatsByLeagueByDate(req,res){
                 res.status(500).send({ message: "Error del servidor."});
             } else {
                 if(statsStored.length <= 0) {
-                    res.status(404).send({ message: "No se ha encontrado estadisticas dentro de la liga fantasy " + leagueId+ " para " + PlayerId 
-                    + " en la temporada " + seasonId+ "."});
+                    res.status(404).send({ message: "No se ha encontrado estadisticas dentro de la liga fantasy " + leagueId+ " en la temporada " + seasonId+ "."});
                 } else {
                     res.status(200).send({ code: 200, fantasy: statsStored });
                 }
