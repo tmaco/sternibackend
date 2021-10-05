@@ -68,7 +68,7 @@ function activateFantasyPlayer(req, res){
 }
 
 function addFantasyPlayers(req,res){
-    Player.find({season_id: "20_21"})
+    Player.find({season_id: "21_22"})
     .sort({ team_id: "asc", last_name: "asc"})
     .exec((err, playersStored) => {
         if(err){
@@ -83,17 +83,19 @@ function addFantasyPlayers(req,res){
                     var fplayer = new FantasyPlayer({
                         player_id: fp.player_id,
                         player_name: utiles.removeDiacritics(fp.display_name),
-                        season_id: "20_21",
-                        league_id: "4-mandos",
+                        season_id: "21_22",
+                        league_id: "fa-league-22",
                         salary: 1,
                         cost: 1,
                         available: true,
                         position: fp.position,
                         avatar: fp.avatar
                     });
-                    //console.log(fplayer);
+                    console.log(fplayer);
 
-                    FantasyPlayer.collection.updateOne({player_id: fplayer.player_id, season_id: fplayer.season_id, league_id: fplayer.league_id}, fplayer, {upsert:true}, function (err, docs) {
+                    //FantasyPlayer.collection.updateOne({player_id: fplayer.player_id, season_id: fplayer.season_id, league_id: fplayer.league_id}, fplayer, {upsert:true}, function (err, docs) {
+                    FantasyPlayer.collection.insertOne(fplayer, function (err, docs) {
+
                         if (err){ 
                             //return console.error(err);
                             console.warn("Duplicado");
@@ -113,7 +115,7 @@ function addFantasyPlayers(req,res){
 }
 
 function updateAvatarFantasyPlayer(req,res){
-    Player.find({season_id: "20_21"})
+    Player.find({season_id: "21_22"})
     .sort({ team_id: "asc", last_name: "asc"})
     .exec((err, playersStored) => {
         if(err){
@@ -128,8 +130,8 @@ function updateAvatarFantasyPlayer(req,res){
                     var fplayer = new FantasyPlayer({
                         player_id: fp.player_id,
                         player_name: utiles.removeDiacritics(fp.display_name),
-                        season_id: "20_21",
-                        league_id: "fa-league",
+                        season_id: "21_22",
+                        league_id: "fa-league-22",
                         salary: 1,
                         cost: 1,
                         available: true,

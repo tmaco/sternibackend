@@ -3,7 +3,7 @@ const utiles = require("../utils/normalizationNames");
 const Player = require("../models/player");
 
 function getPlayers(req,res) {
-    Player.find({season_id: "20_21", roster_status: "active"})
+    Player.find({season_id: "21_22", roster_status: "active"})
         .sort({ team_id: "asc", last_name: "asc"})
         .exec((err, playersStored) => {
             if(err){
@@ -23,7 +23,7 @@ function getPlayersByTeam(req,res) {
 
     const TeamName = req.params.teamName;
 
-    Player.find({ season_id: "20_21", team_id : TeamName, roster_status: "active"})
+    Player.find({ season_id: "21_22", team_id : TeamName, roster_status: "active"})
         .sort({ last_name: "asc"})
         .exec((err, playersStored) => {
             if(err){
@@ -43,7 +43,7 @@ function getPlayer(req,res){
 
     const playerName = req.params.playerName;
 
-    Player.findOne({ season_id: "20_21", display_name : playerName})
+    Player.findOne({ season_id: "21_22", display_name : playerName})
         .exec((err, playerStored) => {
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
@@ -62,7 +62,7 @@ function getPlayerId(req,res){
 
     const playerId = parseInt(req.params.playerId);
 
-    Player.findOne({ season_id: "20_21", player_id : playerId})
+    Player.findOne({ season_id: "21_22", player_id : playerId})
         .exec((err, playerStored) => {
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
@@ -86,12 +86,12 @@ function getPlayersData(req,res){
 
     var msf = new MySportsFeeds("2.1", true);
     msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
-    msf.getData('nba', '2020-2021-regular', 'players', 'json', {team: TeamName,  force: 'false' })
+    msf.getData('nba', '2021-2022-regular', 'players', 'json', {team: TeamName,  force: 'false' })
     .then(async response => {
         const fs = require('fs');
         var path = require('path');
 
-        var jsonPath = path.join(__dirname, '..', '.', 'results', 'players-nba-2020-2021-regular.json');
+        var jsonPath = path.join(__dirname, '..', '.', 'results', 'players-nba-2021-2022-regular.json');
         await fs.readFile(jsonPath, (err, data) => {
         if (err) throw err;
         let playersData = JSON.parse(data);
@@ -105,7 +105,7 @@ function getPlayersData(req,res){
                 //console.log(ply.lastName);
                 var player = new Player({
                     player_id: ply.id,
-                    season_id: "20_21",
+                    season_id: "21_22",
                     team_id: team_id,
                     last_name: utiles.removeDiacritics(ply.lastName), 
                     first_name: utiles.removeDiacritics(ply.firstName), 
@@ -123,6 +123,7 @@ function getPlayersData(req,res){
                 });
 
                 //console.log(player);
+                //Player.collection.insertOne(player, function (err, docs) {
                 Player.collection.updateOne({ player_id: player.player_id, season_id: player.season_id}, player, {upsert:true}, function (err, docs) {
                     if (err){ 
                         //return console.error(err);

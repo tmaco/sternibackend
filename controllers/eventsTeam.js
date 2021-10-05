@@ -459,7 +459,7 @@ function updateEventsDate(req,res){
                 EventsTeam.updateOne({event_id: event.schedule.id, team_id: homeTeam},
                 { season_id: "20_21", event_season_type: "regular", team_event_location_type: 'h', 
                     event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
-                    team_id: homeTeam, opponent_id: awayTeam, team_event_result: team_event_result, team_points_scored: team_points_scored, 
+                    team_id: homeTeam, opponent_id: awayTeam, team_event_result: team_points_scored > opponent_points_scored ? "win" : "loss", team_points_scored: team_points_scored, 
                     opponent_points_scored: opponent_points_scored, event_status: playedStatus },
                     {upsert:true})
                 .exec((err, eventStored) => {
@@ -483,7 +483,7 @@ function updateEventsDate(req,res){
                 EventsTeam.updateOne({event_id: event.schedule.id, team_id: awayTeam},
                 { season_id: "20_21", event_season_type: "regular", team_event_location_type: 'a', 
                     event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
-                    team_id: awayTeam, opponent_id: homeTeam, team_event_result: team_event_result, team_points_scored: team_points_scored_away, 
+                    team_id: awayTeam, opponent_id: homeTeam, team_event_result: team_points_scored_away > opponent_points_scored_away ? "win" : "loss", team_points_scored: team_points_scored_away, 
                     opponent_points_scored: opponent_points_scored_away, event_status: playedStatus},
                     {upsert:true})
                 .exec((err, eventStored) => {
@@ -501,6 +501,93 @@ function updateEventsDate(req,res){
     });
 
     res.status(200).send({ code: 200, message: "Events actualizados en la BD"});
+
+
+}
+
+function updateEventsDatePlayoff(req,res){
+    const dateFrom = req.query.from;
+    const dateTo = req.query.to;
+
+    var MySportsFeeds = require("mysportsfeeds-node");
+
+    var msf = new MySportsFeeds("2.1", true);
+    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+    msf.getData('nba', '2021-playoff', 'seasonal_games', 'json', {date: 'from-20210518-to-20210721', force: 'false', sort: 'game.starttime'})
+    .then(async response => { //status: 'final',  
+        const fs = require('fs');
+        var path = require('path');
+                
+        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2021-playoff-from-20210518-to-20210721.json');
+                
+        await fs.readFile(jsonPath, (err, data) => {
+            if (err) throw err;
+            let eventsData = JSON.parse(data);
+
+            console.log(utiles.count(eventsData.games));
+            for(var i=0; i<utiles.count(eventsData.games); i++){
+
+                var event = eventsData.games[i];
+
+                var homeTeam= utiles.checkAbv(event.schedule.homeTeam.abbreviation);
+                var awayTeam= utiles.checkAbv(event.schedule.awayTeam.abbreviation);
+                var playedStatus = event.schedule.playedStatus;
+
+                var team_points_scored = event.score.homeScoreTotal;
+                var opponent_points_scored = event.score.awayScoreTotal;
+                    
+                var team_event_result=null;
+                if( team_points_scored > opponent_points_scored ){
+                    team_event_result = "win";
+                } else if (team_points_scored < opponent_points_scored){
+                    team_event_result = "loss";
+                }
+
+                EventsTeam.updateOne({event_id: event.schedule.id, team_id: homeTeam},
+                { season_id: "20_21", event_season_type: "post", team_event_location_type: 'h', 
+                    event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
+                    team_id: homeTeam, opponent_id: awayTeam, team_event_result: team_points_scored > opponent_points_scored ? "win" : "loss", team_points_scored: team_points_scored, 
+                    opponent_points_scored: opponent_points_scored, event_status: playedStatus },
+                    {upsert:true})
+                .exec((err, eventStored) => {
+                    if(err){
+                        res.status(500).send({ message: "Error del servidor."});
+                    } else {
+                        console.log(eventStored);
+                        //res.status(200).send({ code: 200, fantasyCalendar: calendarStored });
+                    }
+                }); 
+
+                var team_points_scored_away = event.score.awayScoreTotal;
+                var opponent_points_scored_away = event.score.homeScoreTotal;
+
+                if( team_points_scored_away > opponent_points_scored_away ){
+                    team_event_result = "win";
+                } else if (opponent_points_scored_away < team_points_scored_away){
+                    team_event_result = "loss";
+                }
+
+                EventsTeam.updateOne({event_id: event.schedule.id, team_id: awayTeam},
+                { season_id: "20_21", event_season_type: "post", team_event_location_type: 'a', 
+                    event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
+                    team_id: awayTeam, opponent_id: homeTeam, team_event_result: team_points_scored_away > opponent_points_scored_away ? "win" : "loss", team_points_scored: team_points_scored_away, 
+                    opponent_points_scored: opponent_points_scored_away, event_status: playedStatus},
+                    {upsert:true})
+                .exec((err, eventStored) => {
+                    if(err){
+                        res.status(500).send({ code: 500, message: "Error del servidor."});
+                    } else {
+                        console.log(eventStored);
+                        //res.status(200).send({ code: 200, fantasyCalendar: calendarStored });
+                    }
+                }); 
+
+
+            }
+        });
+    });
+
+    res.status(200).send({ code: 200, message: "Events Playoffs actualizados en la BD"});
 
 
 }
@@ -532,5 +619,6 @@ module.exports = {
     getEventsDateTeam,
     updateEventsDate,
     getEventsDateById,
-    getEvent
+    getEvent,
+    updateEventsDatePlayoff
 };

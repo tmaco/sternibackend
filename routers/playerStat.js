@@ -16,5 +16,7 @@ api.get("/add-stats/:team", [md_auth.ensureAdmin], PlayerStatController.getStats
 api.get("/add-stats-event/:event",[md_auth.ensureAdmin],PlayerStatController.addStatsEventData);
 api.get("/get-stats-event/:event", PlayerStatController.getStatsEventData);
 api.put("/update-stats-rebounds/:event",[md_auth.ensureAdmin], PlayerStatController.updateReboundsLocal);
+api.get("/add-stats-event-playoff/:event", PlayerStatController.addStatsEventDataPlayoff);
+api.get("/get-stats-event-playoff/:event", PlayerStatController.getStatsEventDataPlayoff);
 
 module.exports = api;

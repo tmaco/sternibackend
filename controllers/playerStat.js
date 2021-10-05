@@ -796,6 +796,401 @@ function addStatsEventData(req,res){
     });    	
 }
 
+function getStatsEventDataPlayoff(req,res){
+    const eventID = req.params.event;
+    const eventLocation= req.query.location;
+        
+    EventsTeam.findOne({ event_id: parseInt(eventID), team_event_location_type: eventLocation, event_status: "COMPLETED"})
+    .exec((err, eventsStored) => {
+        if(err){
+            res.status(500).send({ message: "Error del servidor."});
+        } else {
+            if (!eventsStored) {
+                res.status(404).send({ code: 404, message: "No se ha encontrado eventos completados: "+ eventID});
+            } else {
+                if(eventsStored.length <= 0) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado eventos completados: "+eventID});
+                } else {
+                    var MySportsFeeds = require("mysportsfeeds-node");
+    
+                    var msf = new MySportsFeeds("2.1", true);
+                    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+
+                    var event = eventsStored;
+                    const fs = require('fs');
+                    var path = require('path');
+    
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2021-playoff-${event.event_id}.json`);
+                    msf.getData('nba', '2021-playoff', 'game_boxscore', 'json', {game: event.event_id,  force: 'false' });
+                    res.status(200).send({ code: 200, message: "Fichero de estadísticas generado - "+ eventID});
+
+                }
+            }
+        }
+            
+    });    	
+}
+
+function addStatsEventDataPlayoff(req,res){
+    const eventID = req.params.event;
+    const eventLocation= req.query.location;
+        
+    EventsTeam.findOne({ event_id: parseInt(eventID), team_event_location_type: eventLocation, event_status: "COMPLETED"})
+    .exec((err, eventsStored) => {
+        if(err){
+            res.status(500).send({ message: "Error del servidor."});
+        } else {
+            if (!eventsStored) {
+                res.status(404).send({ code: 404, message: "No se ha encontrado eventos completados: "+ eventID});
+            } else {
+                if(eventsStored.length <= 0) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado eventos completados: "+eventID});
+                } else {
+                    //res.status(200).send({ code: 200, events: eventsStored });
+                    var MySportsFeeds = require("mysportsfeeds-node");
+    
+                    var msf = new MySportsFeeds("2.1", true);
+                    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+
+                    var event = eventsStored;
+                    const fs = require('fs');
+                    var path = require('path');
+    
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2021-playoff-${event.event_id}.json`);
+                    if (fs.existsSync(jsonPath)) {
+                        console.log("FILE existsSync!!!");
+                        fs.readFile(jsonPath, (err, data) => {
+            
+                                if (err) throw err;
+
+                                let statsDats = JSON.parse(data);
+
+                                if(statsDats.game.playedStatus === "COMPLETED"){
+
+                                    var statAway = statsDats.stats.away;
+                                    var statHome = statsDats.stats.home;
+                                    var resultAway='';
+                                    var resultHome='';
+                                    if (statsDats.scoring.homeScoreTotal < statsDats.scoring.awayScoreTotal){
+                                        resultAway='win';
+                                        resultHome='lose'
+                                    }else if (statsDats.scoring.homeScoreTotal > statsDats.scoring.awayScoreTotal){
+                                        resultAway='lose';
+                                        resultHome='win'
+                                    }
+                                        
+                                    if(event.team_event_location_type === 'a'){
+                                        console.log(utiles.count(statAway.players));
+                                        for(var i=0; i<utiles.count(statAway.players); i++){
+                                            let playerStats = statAway.players[i].playerStats;
+                                            let fieldGoals = playerStats[0].fieldGoals;
+                                            let freeThrows= playerStats[0].freeThrows;
+                                            let rebounds = playerStats[0].rebounds;
+                                            let offense = playerStats[0].offense;
+                                            let defense = playerStats[0].defense;
+                                            let miscellaneous = playerStats[0].miscellaneous;
+                
+                                            var playerStatAway = new PlayerStat({
+                                                player_id: statAway.players[i].player.id,
+                                                season_id: event.season_id, 
+                                                team_id: event.team_id,
+                                                last_name: utiles.removeDiacritics(statAway.players[i].player.lastName),
+                                                first_name: utiles.removeDiacritics(statAway.players[i].player.firstName),
+                                                display_name: utiles.removeDiacritics(statAway.players[i].player.firstName) + " " + utiles.removeDiacritics(statAway.players[i].player.lastName),
+                                                team_abbreviation: utiles.checkTeam(event.team_id),
+                                                opponent_id: event.opponent_id,
+                                                position: statAway.players[i].player.position,
+                                                seconds: miscellaneous.minSeconds,
+                                                minutes: (miscellaneous.minSeconds === 0 ? 0 : (miscellaneous.minSeconds/60).toFixed(2)),
+                                                points: offense.pts,
+                                                assists: offense.ast,
+                                                turnovers: defense.tov,
+                                                steals: defense.stl,
+                                                blocks: defense.blk,
+                                                rebounds: rebounds.reb,
+                                                field_goals_attempted: fieldGoals.fgAtt,
+                                                field_goals_made: fieldGoals.fgMade,
+                                                three_point_field_goals_attempted: fieldGoals.fg3PtAtt,
+                                                three_point_field_goals_made: fieldGoals.fg3PtMade,
+                                                free_throws_attempted: freeThrows.ftAtt,
+                                                free_throws_made: freeThrows.ftMade,
+                                                defensive_rebounds: rebounds.defReb,
+                                                offensive_rebounds: rebounds.offReb,
+                                                personal_fouls: miscellaneous.fouls,
+                                                is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
+                                                field_goal_percentage: fieldGoals.fgPct,
+                                                three_point_percentage: fieldGoals.fg3PtPct,
+                                                free_throw_percentage: freeThrows.ftPct,
+                                                field_goal_percentage_string: fieldGoals.fgPct,
+                                                three_point_field_goal_percentage_string: fieldGoals.fg3PtPct,
+                                                free_throw_percentage_string: freeThrows.ftPct,
+                                                event_id: event.event_id,
+                                                event_start_date_time: event.event_start_date_time,
+                                                event_season_type: event.event_season_type,
+                                                team_event_location_type: 'a',
+                                                team_event_result: resultAway,
+                                                //team_event_number_in_season: event.team_event_number_in_season                                
+                                            });
+                
+                                            //console.log(playerStatAway);
+                                            console.log("Player Stats AWAY to Collection: "+playerStatAway.team_id +" player: "+playerStatAway.display_name  +" event: "+ playerStatAway.event_id);
+                                            //utiles.sleepFor(1000);
+                                            PlayerStat.collection.updateOne({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
+                                                if (err){ 
+                                                    console.warn("Duplicado");
+                                                } else {
+                                                    //console.log(docs);
+                                                }
+                                            });
+                                        }
+                                    } else if(event.team_event_location_type === 'h'){
+                                        console.log(utiles.count(statHome.players));
+                                        for(var j=0; j<utiles.count(statHome.players); j++){
+                                            let playerStats = statHome.players[j].playerStats;
+                                            let fieldGoals = playerStats[0].fieldGoals;
+                                            let freeThrows= playerStats[0].freeThrows;
+                                            let rebounds = playerStats[0].rebounds;
+                                            let offense = playerStats[0].offense;
+                                            let defense = playerStats[0].defense;
+                                            let miscellaneous = playerStats[0].miscellaneous;
+                    
+                                            var playerStatHome = new PlayerStat({
+                                                player_id: statHome.players[j].player.id,
+                                                season_id: event.season_id, 
+                                                team_id: event.team_id,
+                                                last_name: utiles.removeDiacritics(statHome.players[j].player.lastName),
+                                                first_name: utiles.removeDiacritics(statHome.players[j].player.firstName),
+                                                display_name: utiles.removeDiacritics(statHome.players[j].player.firstName) + " " + utiles.removeDiacritics(statHome.players[j].player.lastName),
+                                                team_abbreviation: utiles.checkTeam(event.team_id),
+                                                opponent_id: event.opponent_id,
+                                                position: statHome.players[j].player.position,
+                                                seconds: miscellaneous.minSeconds,
+                                                minutes: (miscellaneous.minSeconds === 0 ? 0 : (miscellaneous.minSeconds/60).toFixed(2)),
+                                                points: offense.pts,
+                                                assists: offense.ast,
+                                                turnovers: defense.tov,
+                                                steals: defense.stl,
+                                                blocks: defense.blk,
+                                                rebounds: rebounds.reb,
+                                                field_goals_attempted: fieldGoals.fgAtt,
+                                                field_goals_made: fieldGoals.fgMade,
+                                                three_point_field_goals_attempted: fieldGoals.fg3PtAtt,
+                                                three_point_field_goals_made: fieldGoals.fg3PtMade,
+                                                free_throws_attempted: freeThrows.ftAtt,
+                                                free_throws_made: freeThrows.ftMade,
+                                                defensive_rebounds: rebounds.defReb,
+                                                offensive_rebounds: rebounds.offReb,
+                                                personal_fouls: miscellaneous.fouls,
+                                                is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
+                                                field_goal_percentage: fieldGoals.fgPct,
+                                                three_point_percentage: fieldGoals.fg3PtPct,
+                                                free_throw_percentage: freeThrows.ftPct,
+                                                field_goal_percentage_string: fieldGoals.fgPct,
+                                                three_point_field_goal_percentage_string: fieldGoals.fg3PtPct,
+                                                free_throw_percentage_string: freeThrows.ftPct,
+                                                event_id: event.event_id,
+                                                event_start_date_time: event.event_start_date_time,
+                                                event_season_type: event.event_season_type,
+                                                team_event_location_type: 'h',
+                                                team_event_result: resultHome,
+                                                //team_event_number_in_season: event.team_event_number_in_season                                
+                                            });
+                    
+                                            //console.log(playerStatHome);
+                                            console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" event: "+ playerStatHome.event_id);
+                                            //utiles.sleepFor(1000);
+                                            PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
+                                                if (err){ 
+                                                    console.warn("Duplicado");
+                                                } else {
+                                                    //console.log(docs);
+                                                }
+                                            });
+                                        }
+                
+                                    }
+
+                                } else {
+                                    console.log(statsDats.game.playedStatus);
+
+                                }
+                        });
+                        //});
+                        
+                    } else{
+                        console.log("FILE NOT!!! existsSync");
+                        msf.getData('nba', '2021-playoff', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
+                        .then( async response => {
+                            await fs.readFile(jsonPath, (err, data) => {
+                            //fs.readFile(jsonPath, (err, data) => {
+            
+                                if (err) throw err;
+                                let statsDats = JSON.parse(data);
+
+                                if(statsDats.game.playedStatus === "COMPLETED"){
+                                    var statAway = statsDats.stats.away;
+                                    var statHome = statsDats.stats.home;
+                                    var resultAway='';
+                                    var resultHome='';
+                                    if (statsDats.scoring.homeScoreTotal < statsDats.scoring.awayScoreTotal){
+                                        resultAway='win';
+                                        resultHome='lose'
+                                    }else if (statsDats.scoring.homeScoreTotal > statsDats.scoring.awayScoreTotal){
+                                        resultAway='lose';
+                                        resultHome='win'
+                                    }
+                                        
+                                    if(event.team_event_location_type === 'a'){
+                                        console.log(utiles.count(statAway.players));
+                                        for(var i=0; i<utiles.count(statAway.players); i++){
+                                            let playerStats = statAway.players[i].playerStats;
+                                            let fieldGoals = playerStats[0].fieldGoals;
+                                            let freeThrows= playerStats[0].freeThrows;
+                                            let rebounds = playerStats[0].rebounds;
+                                            let offense = playerStats[0].offense;
+                                            let defense = playerStats[0].defense;
+                                            let miscellaneous = playerStats[0].miscellaneous;
+                
+                                            var playerStatAway = new PlayerStat({
+                                                player_id: statAway.players[i].player.id,
+                                                season_id: event.season_id, 
+                                                team_id: event.team_id,
+                                                last_name: utiles.removeDiacritics(statAway.players[i].player.lastName),
+                                                first_name: utiles.removeDiacritics(statAway.players[i].player.firstName),
+                                                display_name: utiles.removeDiacritics(statAway.players[i].player.firstName) + " " + utiles.removeDiacritics(statAway.players[i].player.lastName),
+                                                team_abbreviation: utiles.checkTeam(event.team_id),
+                                                opponent_id: event.opponent_id,
+                                                position: statAway.players[i].player.position,
+                                                seconds: miscellaneous.minSeconds,
+                                                minutes: (miscellaneous.minSeconds === 0 ? 0 : (miscellaneous.minSeconds/60).toFixed(2)),
+                                                points: offense.pts,
+                                                assists: offense.ast,
+                                                turnovers: defense.tov,
+                                                steals: defense.stl,
+                                                blocks: defense.blk,
+                                                rebounds: rebounds.reb,
+                                                field_goals_attempted: fieldGoals.fgAtt,
+                                                field_goals_made: fieldGoals.fgMade,
+                                                three_point_field_goals_attempted: fieldGoals.fg3PtAtt,
+                                                three_point_field_goals_made: fieldGoals.fg3PtMade,
+                                                free_throws_attempted: freeThrows.ftAtt,
+                                                free_throws_made: freeThrows.ftMade,
+                                                defensive_rebounds: rebounds.defReb,
+                                                offensive_rebounds: rebounds.offReb,
+                                                personal_fouls: miscellaneous.fouls,
+                                                is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
+                                                field_goal_percentage: fieldGoals.fgPct,
+                                                three_point_percentage: fieldGoals.fg3PtPct,
+                                                free_throw_percentage: freeThrows.ftPct,
+                                                field_goal_percentage_string: fieldGoals.fgPct,
+                                                three_point_field_goal_percentage_string: fieldGoals.fg3PtPct,
+                                                free_throw_percentage_string: freeThrows.ftPct,
+                                                event_id: event.event_id,
+                                                event_start_date_time: event.event_start_date_time,
+                                                event_season_type: event.event_season_type,
+                                                team_event_location_type: 'a',
+                                                team_event_result: resultAway,
+                                                team_event_number_in_season: event.team_event_number_in_season                                
+                                            });
+                
+                                            //console.log(playerStatAway);
+                                            console.log("Player Stats AWAY to Collection: "+playerStatAway.team_id +" player: "+playerStatAway.display_name  +" game: "+ playerStatAway.team_event_number_in_season +" event: "+ playerStatAway.event_id);
+                                            //utiles.sleepFor(1000);
+                                            PlayerStat.collection.updateOne({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
+                                                if (err){ 
+                                                    console.warn("Duplicado");
+                                                } else {
+                                                    //console.log(docs);
+                                                }
+                                            });
+                                        }
+                                    } else if(event.team_event_location_type === 'h'){
+                                        console.log(utiles.count(statHome.players));
+                                        for(var j=0; j<utiles.count(statHome.players); j++){
+                                            let playerStats = statHome.players[j].playerStats;
+                                            let fieldGoals = playerStats[0].fieldGoals;
+                                            let freeThrows= playerStats[0].freeThrows;
+                                            let rebounds = playerStats[0].rebounds;
+                                            let offense = playerStats[0].offense;
+                                            let defense = playerStats[0].defense;
+                                            let miscellaneous = playerStats[0].miscellaneous;
+                    
+                                            var playerStatHome = new PlayerStat({
+                                                player_id: statHome.players[j].player.id,
+                                                season_id: event.season_id, 
+                                                team_id: event.team_id,
+                                                last_name: utiles.removeDiacritics(statHome.players[j].player.lastName),
+                                                first_name: utiles.removeDiacritics(statHome.players[j].player.firstName),
+                                                display_name: utiles.removeDiacritics(statHome.players[j].player.firstName) + " " + utiles.removeDiacritics(statHome.players[j].player.lastName),
+                                                team_abbreviation: utiles.checkTeam(event.team_id),
+                                                opponent_id: event.opponent_id,
+                                                position: statHome.players[j].player.position,
+                                                seconds: miscellaneous.minSeconds,
+                                                minutes: (miscellaneous.minSeconds === 0 ? 0 : (miscellaneous.minSeconds/60).toFixed(2)),
+                                                points: offense.pts,
+                                                assists: offense.ast,
+                                                turnovers: defense.tov,
+                                                steals: defense.stl,
+                                                blocks: defense.blk,
+                                                rebounds: rebounds.reb,
+                                                field_goals_attempted: fieldGoals.fgAtt,
+                                                field_goals_made: fieldGoals.fgMade,
+                                                three_point_field_goals_attempted: fieldGoals.fg3PtAtt,
+                                                three_point_field_goals_made: fieldGoals.fg3PtMade,
+                                                free_throws_attempted: freeThrows.ftAtt,
+                                                free_throws_made: freeThrows.ftMade,
+                                                defensive_rebounds: rebounds.defReb,
+                                                offensive_rebounds: rebounds.offReb,
+                                                personal_fouls: miscellaneous.fouls,
+                                                is_starter: ( miscellaneous.gamesStarted === 1 ? true: false),
+                                                field_goal_percentage: fieldGoals.fgPct,
+                                                three_point_percentage: fieldGoals.fg3PtPct,
+                                                free_throw_percentage: freeThrows.ftPct,
+                                                field_goal_percentage_string: fieldGoals.fgPct,
+                                                three_point_field_goal_percentage_string: fieldGoals.fg3PtPct,
+                                                free_throw_percentage_string: freeThrows.ftPct,
+                                                event_id: event.event_id,
+                                                event_start_date_time: event.event_start_date_time,
+                                                event_season_type: event.event_season_type,
+                                                team_event_location_type: 'h',
+                                                team_event_result: resultHome,
+                                                team_event_number_in_season: event.team_event_number_in_season                                
+                                            });
+                    
+                                            //console.log(playerStatHome);
+                                            console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" game: "+ playerStatHome.team_event_number_in_season +" event: "+ playerStatHome.event_id);
+                                            //utiles.sleepFor(1000);
+                                            PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
+                                                if (err){ 
+                                                    console.warn("Duplicado");
+                                                } else {
+                                                    //console.log(docs);
+                                                }
+                                            });
+                                        }
+                
+                                    }
+
+                                } else {
+                                    console.log(statsDats.game.playedStatus);
+
+                                }
+                            });
+                        });
+
+                    }
+                    
+                }
+                utiles.sleepFor(5000);	
+                res.status(200).send({ code: 200, message: "Player Stats actualizadas en la BD - "+ eventID + "-"+eventLocation});
+
+                        
+            }
+        }
+            
+    });    	
+}
+
 function updateReboundsLocal(req,res){
 
     const eventID = req.params.event;
@@ -848,6 +1243,8 @@ module.exports = {
     getStatsBySeason,
     addStatsEventData,
     getStatsEventData,
-    updateReboundsLocal
+    updateReboundsLocal,
+    getStatsEventDataPlayoff,
+    addStatsEventDataPlayoff
     
 };

@@ -130,7 +130,7 @@ function getFantasyStatsByEvent(req,res){
     const leagueId = req.query.league;
     const seasonId = req.query.season;
 
-    FantasyStat.find({ league_id : leagueId, season_id : seasonId, event_id: eventId})
+    FantasyStat.find({ league_id : leagueId, event_id: eventId})
         .exec((err, statsStored) => {
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
@@ -374,7 +374,7 @@ function getFantasyStatsData(req,res){
 						utiles.sleepFor(100);
 
 						FantasyStat.collection.updateOne({ player_id: fantasyStat.player_id, event_id: fantasyStat.event_id, season_id: fantasyStat.season_id, league_id: fantasyStat.league_id}, fantasyStat, {upsert:true}, function (err, docs) {
-						//FantasyStat.collection.insert(fantasyStat, function (err, docs) {
+						//FantasyStat.collection.insertOne(fantasyStat, function (err, docs) {
 							if (err){ 
 								return console.error(err);
 								//console.warn("Duplicado");
