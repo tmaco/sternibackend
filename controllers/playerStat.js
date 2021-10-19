@@ -425,8 +425,8 @@ function getStatsEventData(req,res){
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2020-2021-regular-${event.event_id}.json`);
-                    msf.getData('nba', '2020-2021-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' });
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2021-2022-regular-${event.event_id}.json`);
+                    msf.getData('nba', '2021-2022-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' });
                     res.status(200).send({ code: 200, message: "Fichero de estadísticas generado - "+ eventID});
 
                 }
@@ -461,7 +461,7 @@ function addStatsEventData(req,res){
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2020-2021-regular-${event.event_id}.json`);
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2021-2022-regular-${event.event_id}.json`);
                     if (fs.existsSync(jsonPath)) {
                         console.log("FILE existsSync!!!");
                         fs.readFile(jsonPath, (err, data) => {
@@ -624,7 +624,7 @@ function addStatsEventData(req,res){
                         
                     } else{
                         console.log("FILE NOT!!! existsSync");
-                        msf.getData('nba', '2020-2021-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
+                        msf.getData('nba', '2021-2022-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
                         .then( async response => {
                             await fs.readFile(jsonPath, (err, data) => {
                             //fs.readFile(jsonPath, (err, data) => {
