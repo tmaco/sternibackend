@@ -129,7 +129,7 @@ function updateAvatarFantasyPlayer(req,res){
                     var fp = playersStored[i];
                     var fplayer = new FantasyPlayer({
                         player_id: fp.player_id,
-                        player_name: utiles.removeDiacritics(fp.display_name),
+                        //player_name: utiles.removeDiacritics(fp.display_name),
                         season_id: "21_22",
                         league_id: "fa-league-22",
                         salary: 1,

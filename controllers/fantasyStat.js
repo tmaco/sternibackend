@@ -713,8 +713,10 @@ function getFantasyStatsByLeagueByDate(req,res){
     const seasonId = req.query.season;
     const dateFrom = req.query.from;
     const dateTo = req.query.to;
+
+    //season_id : seasonId
     
-    FantasyStat.find({ league_id : leagueId, season_id : seasonId, date_match: {
+    FantasyStat.find({ league_id : leagueId, date_match: {
         $gte: dateFrom,
         $lt: dateTo}})
         .sort({ points_per_minute: "desc"})

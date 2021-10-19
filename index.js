@@ -23,7 +23,7 @@ mongoose.connect(`mongodb+srv://${USER_DB}:${PASS_DB}@${HOST_DB}/${DB}?retryWrit
       console.log("###############################");
       console.log("######### API REST  ###########");
       console.log("###############################");
-      //console.log(`http://${IP_SERVER}:${PORT_SERVER}/api/${API_VERSION}/`);
+      //console.log(`TESTBED - http://${IP_SERVER}:${PORT_SERVER}/api/${API_VERSION}/`);
       console.log(`mongodb+srv://${HOST_DB}/api/${API_VERSION}/`);
     });
   }

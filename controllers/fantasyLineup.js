@@ -65,7 +65,7 @@ function addPlayerLineup(req,res){
                                                     registro.tipo = "add"; 
                                                     registro.fecha = Date.now();
                                                     registro.usuario = fantasyUser 
-                                                    registro.mensaje = lineupData.player_name;  
+                                                    registro.mensaje = lineupData.position + " " + lineupData.player_name;
                                                     registro.league = leagueId;                     
                                                     registro.save((err, registroCreated) => {
                                                         if(err){
@@ -218,8 +218,9 @@ function deletePlayerFantasyLineup(req, res) {
     const { id } = req.params;
 
     const {
-        fantasyPlayerId, fantasyPlayerName, fantasyPlayer_id, fantasyUser, season_id, league_id, available
+        fantasyPlayerId, fantasyPlayerName, fantasyPlayer_id, fantasyUser, season_id, league_id, available, position
     } = req.body;
+
 
     FantasyLineup.updateOne( {_id: id}, { $pull: { fantasyLineup: { _id : [ fantasyPlayerId ] } } } )
     .exec(
@@ -239,13 +240,12 @@ function deletePlayerFantasyLineup(req, res) {
                                 if(!fantasyStored) {
                                     res.status(404).send({ message: "Jugador Fantasy no encontrado."});
                                 } else {
-                                    console.log(league_id);
                                     const registro = new Registro();
                                     registro.tabla = "fantasyLineup";
                                     registro.tipo = "drop"; 
                                     registro.fecha = Date.now();
                                     registro.usuario = fantasyUser; 
-                                    registro.mensaje = fantasyPlayerName;     
+                                    registro.mensaje = position + " " + fantasyPlayerName;
                                     registro.league = league_id;                   
                                     registro.save((err, registroCreated) => {
                                         if(err){
@@ -302,7 +302,7 @@ function getScoringLineupUser(req,res){
         { $unwind: "$fantasyLineup" },
         { $sort: { "fantasyLineup.order": 1 } },
         { $group: { _id: "$_id", playersList: { $push: { player_id: "$fantasyLineup.player_id", player_name: "$fantasyLineup.player_name", name_team : "$name_team", 
-        numMatches: "$fantasyLineup.numMatches",  fScoring: "$fantasyLineup.fScoring", minutes: "$fantasyLineup.minutes", order: "$fantasyLineup.order", avatar: "$fantasyLineup.avatar" } } }}])
+        numMatches: "$fantasyLineup.numMatches",  fScoring: "$fantasyLineup.fScoring", minutes: "$fantasyLineup.minutes", position: "$fantasyLineup.position", order: "$fantasyLineup.order", avatar: "$fantasyLineup.avatar" } } }}])
         .exec((err, fantasyLineup) => {
             if(err){
                 res.status(500).send({ code: 500, message: "Error del servidor."});
@@ -351,11 +351,15 @@ function updateScoringLineupUser(req,res) {
 function updateTotalScoringLineupUser(req,res) {
     const FantasyLineupId = req.params.id;
     const {
-        fantasy_scoring, total_minutes, fantasy_scoring_prev
+        fantasy_scoring, total_minutes, fantasy_scoring_prev, fantasy_scoringPG, fantasy_scoringSG, 
+        fantasy_scoringSF, fantasy_scoringPF, fantasy_scoringC
     } = req.body;
+
         
     FantasyLineup.updateOne({"_id": FantasyLineupId},
-    { $set: {"fantasy_scoring": fantasy_scoring, "total_minutes": total_minutes, "fantasy_scoring_prev": fantasy_scoring_prev }})
+    { $set: {"fantasy_scoring": fantasy_scoring, "total_minutes": total_minutes, "fantasy_scoring_prev": fantasy_scoring_prev,
+    "fantasy_scoringPG": fantasy_scoringPG,  "fantasy_scoringSG": fantasy_scoringSG, "fantasy_scoringSF": fantasy_scoringSF, 
+    "fantasy_scoringPF": fantasy_scoringPF, "fantasy_scoringC": fantasy_scoringC}})
     .exec(
             (err, fantasyLineup) => {
                 if(err){
