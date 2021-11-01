@@ -430,8 +430,9 @@ function getTotalScoringByLeague(req,res) {
         $gte: 1, $lt: 19 
     }}},
         { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id"},
-        "totalFScoring" : { "$sum": "$puntos_fantasy"}}},
-        { $sort: { "totalFScoring": -1 } }
+        "totalFScoring" : { "$sum": "$puntos_fantasy"},
+        "totalScoring" : { "$sum": "$fantasy_scoring"}}},
+        { $sort: { "totalFScoring": -1, "totalScoring": -1 } }
     ])
         .exec((err, fantasyScoring) => {
             if(err){
@@ -455,8 +456,11 @@ function getTotalFantasyScoringByLeague(req,res) {
         $gte: 1, $lt: 19 
     }}},
         { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id"},
-        "totalFScoring" : { "$sum": "$fantasy_scoring"}}},
-        { $sort: { "totalFScoring": -1 } }
+        "totalFScoring" : { "$sum": "$fantasy_scoring"},
+        "totalScoring" : { "$sum": "$puntos_fantasy"},
+
+    }},
+        { $sort: { "totalFScoring": -1, "totalScoring": -1  } }
     ])
         .exec((err, fantasyScoring) => {
             if(err){
@@ -480,7 +484,7 @@ function getTotalScoringGroupByJornada(req,res) {
         $gte: 1
     } }},
         { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", number_match: "$number_match", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes", fantasy_scoring_prev:"$fantasy_scoring_prev", puntos_fantasy:"$puntos_fantasy"}}},
-        { $sort: { "_id.number_match": 1, "_id.puntos_fantasy": -1,  } }
+        { $sort: { "_id.number_match": 1, "_id.fantasy_scoring": -1,  } }
     ])
         .exec((err, fantasyScoring) => {
             if(err){
