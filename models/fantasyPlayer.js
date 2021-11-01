@@ -9,6 +9,7 @@ const fantasyPlayerSchema = new Schema(
         league_id: { type: String, required: true } ,
         season_id: { type: String, required: true },
         available: { type: Boolean, default: true },
+        isIL: { type: Boolean, default: false },
         salary: { type: Number, default: 1},
         cost: { type: Number, default: 1}, 
         position: { type: String, required: true },

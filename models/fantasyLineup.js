@@ -10,6 +10,7 @@ const fantasyLineupSchema = new Schema(
         number_match: { type: Number, required: true },
         fantasy_scoring :  { type: Number, default: 0 },
         fantasy_scoring_prev :  { type: Number, default: 0 },
+        puntos_fantasy :  { type: Number, default: 0 },
         total_minutes :  { type: Number, default: 0 },
         fantasy_scoringPG :  { type: Number, default: 0 },
         fantasy_scoringSG :  { type: Number, default: 0 },

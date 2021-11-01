@@ -22,5 +22,8 @@ api.get("/get-total-scoring-jornada",FantasyLineupController.getTotalScoringByJo
 api.get("/get-total-scoring-lineup/:user",FantasyLineupController.getTotalScoringLineupByJornada);
 api.get("/get-total-scoring",FantasyLineupController.getTotalScoringByLeague);
 api.get("/get-total-jornada",FantasyLineupController.getTotalScoringGroupByJornada);
+api.get("/get-total-fantasy-scoring",FantasyLineupController.getTotalFantasyScoringByLeague);
+
+
 
 module.exports = api;
