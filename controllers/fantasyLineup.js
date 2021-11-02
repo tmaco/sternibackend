@@ -382,7 +382,8 @@ function getTotalScoringByJornada(req,res) {
     const numJornada = req.query.match;
 
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId ,number_match: parseInt(numJornada)}},
-        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes", fantasy_scoring_prev:"$fantasy_scoring_prev", puntos_fantasy:"$puntos_fantasy"}}},
+        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes", fantasy_scoring_prev:"$fantasy_scoring_prev", puntos_fantasy:"$puntos_fantasy",
+        fantasy_scoringPG: "$fantasy_scoringPG",  fantasy_scoringSG: "$fantasy_scoringSG",fantasy_scoringSF: "$fantasy_scoringSF", fantasy_scoringPF:"$fantasy_scoringPF", fantasy_scoringC:"$fantasy_scoringC"}}},
         { $sort: { "_id.puntos_fantasy": -1 } }
     ])
         .exec((err, fantasyScoring) => {
@@ -483,7 +484,8 @@ function getTotalScoringGroupByJornada(req,res) {
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, number_match : {
         $gte: 1
     } }},
-        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", number_match: "$number_match", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes", fantasy_scoring_prev:"$fantasy_scoring_prev", puntos_fantasy:"$puntos_fantasy"}}},
+        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", number_match: "$number_match", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes", fantasy_scoring_prev:"$fantasy_scoring_prev", puntos_fantasy:"$puntos_fantasy",
+        fantasy_scoringPG: "$fantasy_scoringPG",  fantasy_scoringSG: "$fantasy_scoringSG",fantasy_scoringSF: "$fantasy_scoringSF", fantasy_scoringPF:"$fantasy_scoringPF", fantasy_scoringC:"$fantasy_scoringC"}}},
         { $sort: { "_id.number_match": 1, "_id.fantasy_scoring": -1,  } }
     ])
         .exec((err, fantasyScoring) => {
