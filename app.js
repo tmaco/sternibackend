@@ -20,6 +20,8 @@ const fantasyCalendarRoutes = require("./routers/fantasyCalendar");
 const fantasyLeagueRoutes = require("./routers/fantasyLeague");
 const registroRoutes = require("./routers/registro");
 const postRoutes = require("./routers/post");
+const statusPlayerRoutes = require("./routers/statusPlayer");
+
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -52,6 +54,6 @@ app.use(`/api/${API_VERSION}`, fantasyCalendarRoutes);
 app.use(`/api/${API_VERSION}`, fantasyLeagueRoutes);
 app.use(`/api/${API_VERSION}`, registroRoutes);
 app.use(`/api/${API_VERSION}`, postRoutes);
-
+app.use(`/api/${API_VERSION}`, statusPlayerRoutes);
 
 module.exports = app;
