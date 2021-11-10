@@ -3,7 +3,6 @@ const utiles = require("../utils/normalizationNames");
 
 function getStatusData(req,res){
 
-
     //borramos el estado anterior de los jugadores
     StatusPlayer.collection.deleteMany({});
     
@@ -11,7 +10,7 @@ function getStatusData(req,res){
 
     var msf = new MySportsFeeds("2.1", true);
     msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
-    msf.getData('nba', '2021-2022-regular', 'player_injuries', 'json', {force: 'false' })
+    msf.getData('nba', '2021-2022-regular', 'player_injuries', 'json', {force: 'true' })
     .then(async response => {
         const fs = require('fs');
         var path = require('path');
