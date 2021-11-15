@@ -157,11 +157,55 @@ function updateAvatarFantasyPlayer(req,res){
 
 }
 
+function isILFPlayer(req, res){
+    const { id } = req.params;
+    const { isIL } = req.body;
+
+    FantasyPlayer.findByIdAndUpdate(id, { isIL}, (err, playerStored) => {
+        if(err) {
+            res.status(500).send({ message: "Error del servidor."});
+        } else {
+            if(!playerStored) {
+                res.status(404).send({ message: "Jugador no encontrado."});
+            } else {
+                if(isIL === true) {
+                    res.status(200).send({ message: "Jugador activado de la IL correctamente."});
+                } else {
+                    res.status(200).send({ message: "Jugador desactivado de la IL correctamente."});
+                }
+            }
+        }
+    } )
+}
+
+function getAllFantasyPlayers(req,res){
+
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+
+    FantasyPlayer.find({ league_id: leagueId , season_id: seasonId })
+        .sort({ last_name: "asc" })
+        .exec((err, fantasyPlayer) => {
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+                if(!fantasyPlayer || fantasyPlayer.length === 0) {
+                    res.status(404).send({ code: 404, message: "No se han encontrado jugadores fantasy disponibles."});
+                } else {
+                    res.status(200).send({ code: 200, fantasyPlayer: fantasyPlayer });
+                }
+            }
+        });
+
+}
+
 
 module.exports = {
     getFantasyPlayers,
     activateFantasyPlayer,
     addFantasyPlayers,
     updateAvatarFantasyPlayer,
-    getFantasyPlayer
+    getFantasyPlayer,
+    isILFPlayer,
+    getAllFantasyPlayers
 };
