@@ -5,7 +5,7 @@ const md_auth = require("../middleware/authenticate");
 
 const api = express.Router();
 
-api.get("/get-status-data", [md_auth.ensureAdmin], StatusPlayerController.getStatusData);
+api.get("/get-status-data", StatusPlayerController.getStatusData);
 api.get("/get-status-player", StatusPlayerController.getStatusPlayers);
 
 

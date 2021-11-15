@@ -8,7 +8,9 @@ const statusPlayerSchema = new Schema(
         first_name : { type: String, required: true } ,
         player_name : { type: String, required: true } ,
         currentInjury: { type: String, required: true } ,
-        currentStatus: { type: String, required: true } 
+        currentStatus: { type: String, required: true } ,
+        lastUpdatedOn: { type: Date, required: true },
+
     }
 );
 

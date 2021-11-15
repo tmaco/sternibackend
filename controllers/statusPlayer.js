@@ -30,7 +30,8 @@ function getStatusData(req,res){
                     first_name: utiles.removeDiacritics(status.firstName), 
                     player_name: utiles.removeDiacritics(status.firstName) + " " +utiles.removeDiacritics(status.lastName), 
                     currentInjury: status.currentInjury.description,
-                    currentStatus: status.currentInjury.playingProbability                    
+                    currentStatus: status.currentInjury.playingProbability,
+                    lastUpdatedOn: statusData.lastUpdatedOn                    
                 });
 
                 //console.log(statusPlayer);
