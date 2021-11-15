@@ -530,6 +530,48 @@ function updateScoringPointsByJornada(req,res) {
         );
 }
 
+function saveFantasyLineups(req,res){
+
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+    const match = req.query.match;
+
+
+    FantasyLineup.find({season_id: seasonId, league_id: leagueId, number_match: 0})
+        .exec((err, fantasyLineup) => {
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+                if(!fantasyLineup || fantasyLineup.length === 0) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado las fantasy lineups."});
+                } else {
+                    fantasyLineup.map((item) =>{
+                        const lineup = new FantasyLineup();
+                        lineup.name_team = item.name_team;
+                        lineup.user_id = item.user_id;; 
+                        lineup.league_id = item.league_id; 
+                        lineup.season_id = item.season_id;
+                        lineup.number_match = match;         
+                        lineup.fantasyLineup=item.fantasyLineup;  
+                        lineup.save((err, lineupCreated) => {
+                            if(err){
+                                res.status(500).send({ code: 500, message: "Error del servidor."});
+                            } else {
+                                if(!lineupCreated) {
+                                    res.status(404).send({ code: 404, message: "Error al crear la alineación."});
+                                } 
+                            }
+                        });
+                    });   
+                    
+                    res.status(200).send({ code: 200, message: "Alineaciones añadidas correctamente." });
+
+                }
+            }
+        });
+
+}
+
 
 module.exports = {
     addLineup,
@@ -550,5 +592,6 @@ module.exports = {
     getTotalScoringGroupByJornada,
     getFantasyLeagueId,
     getTotalFantasyScoringByLeague,
-    updateScoringPointsByJornada
+    updateScoringPointsByJornada,
+    saveFantasyLineups
 };
