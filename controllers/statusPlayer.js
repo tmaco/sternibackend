@@ -10,87 +10,63 @@ function getStatusData(req,res){
 
     var msf = new MySportsFeeds("2.1", true);
     msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
-<<<<<<< HEAD
     msf.getData('nba', '2021-2022-regular', 'player_injuries', 'json', {force: 'true' })
     .then(async response => {
 
         if(response.lastUpdatedOn){
-=======
-    //msf.getData('nba', '2021-2022-regular', 'player_injuries', 'json', {force: 'false' })
-    //.then(async response => {
-        const fs = require('fs');
-        var path = require('path');
+                const fs = require('fs');
+                var path = require('path');
 
-        var jsonPath = path.join(__dirname, '..', '.', 'results', 'player_injuries-nba-2021-2022-regular.json');
-        //await fs.readFile(jsonPath, (err, data) => {
-            fs.readFile(jsonPath, (err, data) => {
-        if (err) throw err;
-        let statusData = JSON.parse(data);
->>>>>>> master
+                var jsonPath = path.join(__dirname, '..', '.', 'results', 'player_injuries-nba-2021-2022-regular.json');
+                await fs.readFile(jsonPath, (err, data) => {
+                    if (err) throw err;
 
-            const fs = require('fs');
-            var path = require('path');
+                    let statusData = JSON.parse(data);
 
-            var jsonPath = path.join(__dirname, '..', '.', 'results', 'player_injuries-nba-2021-2022-regular.json');
-            await fs.readFile(jsonPath, (err, data) => {
-                if (err) throw err;
+                    //borramos el estado anterior de los jugadores
+                    StatusPlayer.collection.deleteMany({});
 
-                let statusData = JSON.parse(data);
+                    console.log(utiles.count(statusData.players));
+                    for(var i=0; i<utiles.count(statusData.players); i++){
+                        var status = statusData.players[i];
+                        //console.log(status);
+                        var statusPlayer = new StatusPlayer({
+                            player_id: status.id,
+                            last_name: utiles.removeDiacritics(status.lastName), 
+                            first_name: utiles.removeDiacritics(status.firstName), 
+                            player_name: utiles.removeDiacritics(status.firstName) + " " +utiles.removeDiacritics(status.lastName), 
+                            currentInjury: status.currentInjury.description,
+                            currentStatus: status.currentInjury.playingProbability,
+                            lastUpdatedOn: statusData.lastUpdatedOn                    
+                        });
 
-                //borramos el estado anterior de los jugadores
-                StatusPlayer.collection.deleteMany({});
+                        //console.log(statusPlayer);
+                        StatusPlayer.collection.insertOne(statusPlayer, function (err, docs) {
+                            if (err){ 
+                                //return console.error(err);
+                                console.warn("Duplicado");
+                            } else {
+                                //console.log("Player inserted to Collection");
+                            }
+                        });
+                    }
 
-                console.log(utiles.count(statusData.players));
-                for(var i=0; i<utiles.count(statusData.players); i++){
-                    var status = statusData.players[i];
-                    //console.log(status);
-                    var statusPlayer = new StatusPlayer({
-                        player_id: status.id,
-                        last_name: utiles.removeDiacritics(status.lastName), 
-                        first_name: utiles.removeDiacritics(status.firstName), 
-                        player_name: utiles.removeDiacritics(status.firstName) + " " +utiles.removeDiacritics(status.lastName), 
-                        currentInjury: status.currentInjury.description,
-                        currentStatus: status.currentInjury.playingProbability,
-                        lastUpdatedOn: statusData.lastUpdatedOn                    
+                    res.status(200).jsonp({
+                        "status": 200,
+                        "message": `Player Status inserted into Database`
                     });
-
-                    //console.log(statusPlayer);
-                    StatusPlayer.collection.insertOne(statusPlayer, function (err, docs) {
-                        if (err){ 
-                            //return console.error(err);
-                            console.warn("Duplicado");
-                        } else {
-                            //console.log("Player inserted to Collection");
-                        }
-                    });
-                }
-
-                res.status(200).jsonp({
-                    "status": 200,
-                    "message": `Player Status inserted into Database`
-                  });
-            
-            });
+                
+                });
 
         } else {
             res.status(404).jsonp({
                 "status": 404,
                 "message": `Player Status not found`
-              });
+            });
         }
         
-<<<<<<< HEAD
     });
-	
-=======
-        });
-    //});
 
-    res.status(200).jsonp({
-        "status": 200,
-        "message": `Player Status inserted into Database`
-      });	
->>>>>>> master
 }
 
 function getStatusPlayers(req,res) {
