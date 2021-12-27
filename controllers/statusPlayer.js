@@ -10,13 +10,14 @@ function getStatusData(req,res){
 
     var msf = new MySportsFeeds("2.1", true);
     msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
-    msf.getData('nba', '2021-2022-regular', 'player_injuries', 'json', {force: 'true' })
-    .then(async response => {
+    //msf.getData('nba', '2021-2022-regular', 'player_injuries', 'json', {force: 'false' })
+    //.then(async response => {
         const fs = require('fs');
         var path = require('path');
 
         var jsonPath = path.join(__dirname, '..', '.', 'results', 'player_injuries-nba-2021-2022-regular.json');
-        await fs.readFile(jsonPath, (err, data) => {
+        //await fs.readFile(jsonPath, (err, data) => {
+            fs.readFile(jsonPath, (err, data) => {
         if (err) throw err;
         let statusData = JSON.parse(data);
 
@@ -46,7 +47,7 @@ function getStatusData(req,res){
             }
         
         });
-    });
+    //});
 
     res.status(200).jsonp({
         "status": 200,
