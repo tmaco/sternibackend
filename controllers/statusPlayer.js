@@ -4,12 +4,18 @@ const utiles = require("../utils/normalizationNames");
 function getStatusData(req,res){
 
     //borramos el estado anterior de los jugadores
-    StatusPlayer.collection.deleteMany({});
+    //StatusPlayer.collection.deleteMany({});
     
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
     msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+<<<<<<< HEAD
+    msf.getData('nba', '2021-2022-regular', 'player_injuries', 'json', {force: 'true' })
+    .then(async response => {
+
+        if(response.lastUpdatedOn){
+=======
     //msf.getData('nba', '2021-2022-regular', 'player_injuries', 'json', {force: 'false' })
     //.then(async response => {
         const fs = require('fs');
@@ -20,32 +26,63 @@ function getStatusData(req,res){
             fs.readFile(jsonPath, (err, data) => {
         if (err) throw err;
         let statusData = JSON.parse(data);
+>>>>>>> master
 
-            console.log(utiles.count(statusData.players));
-            for(var i=0; i<utiles.count(statusData.players); i++){
-                var status = statusData.players[i];
-                //console.log(status);
-                var statusPlayer = new StatusPlayer({
-                    player_id: status.id,
-                    last_name: utiles.removeDiacritics(status.lastName), 
-                    first_name: utiles.removeDiacritics(status.firstName), 
-                    player_name: utiles.removeDiacritics(status.firstName) + " " +utiles.removeDiacritics(status.lastName), 
-                    currentInjury: status.currentInjury.description,
-                    currentStatus: status.currentInjury.playingProbability,
-                    lastUpdatedOn: statusData.lastUpdatedOn                    
-                });
+            const fs = require('fs');
+            var path = require('path');
 
-                //console.log(statusPlayer);
-                StatusPlayer.collection.insertOne(statusPlayer, function (err, docs) {
-                    if (err){ 
-                        //return console.error(err);
-                        console.warn("Duplicado");
-                    } else {
-                        //console.log("Player inserted to Collection");
-                    }
-                });
-            }
+            var jsonPath = path.join(__dirname, '..', '.', 'results', 'player_injuries-nba-2021-2022-regular.json');
+            await fs.readFile(jsonPath, (err, data) => {
+                if (err) throw err;
+
+                let statusData = JSON.parse(data);
+
+                //borramos el estado anterior de los jugadores
+                StatusPlayer.collection.deleteMany({});
+
+                console.log(utiles.count(statusData.players));
+                for(var i=0; i<utiles.count(statusData.players); i++){
+                    var status = statusData.players[i];
+                    //console.log(status);
+                    var statusPlayer = new StatusPlayer({
+                        player_id: status.id,
+                        last_name: utiles.removeDiacritics(status.lastName), 
+                        first_name: utiles.removeDiacritics(status.firstName), 
+                        player_name: utiles.removeDiacritics(status.firstName) + " " +utiles.removeDiacritics(status.lastName), 
+                        currentInjury: status.currentInjury.description,
+                        currentStatus: status.currentInjury.playingProbability,
+                        lastUpdatedOn: statusData.lastUpdatedOn                    
+                    });
+
+                    //console.log(statusPlayer);
+                    StatusPlayer.collection.insertOne(statusPlayer, function (err, docs) {
+                        if (err){ 
+                            //return console.error(err);
+                            console.warn("Duplicado");
+                        } else {
+                            //console.log("Player inserted to Collection");
+                        }
+                    });
+                }
+
+                res.status(200).jsonp({
+                    "status": 200,
+                    "message": `Player Status inserted into Database`
+                  });
+            
+            });
+
+        } else {
+            res.status(404).jsonp({
+                "status": 404,
+                "message": `Player Status not found`
+              });
+        }
         
+<<<<<<< HEAD
+    });
+	
+=======
         });
     //});
 
@@ -53,6 +90,7 @@ function getStatusData(req,res){
         "status": 200,
         "message": `Player Status inserted into Database`
       });	
+>>>>>>> master
 }
 
 function getStatusPlayers(req,res) {
