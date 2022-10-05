@@ -425,8 +425,8 @@ function getStatsEventData(req,res){
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2021-2022-regular-${event.event_id}.json`);
-                    msf.getData('nba', '2021-2022-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' });
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2022-2023-regular-${event.event_id}.json`);
+                    msf.getData('nba', '2022-2023-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' });
                     res.status(200).send({ code: 200, message: "Fichero de estadísticas generado - "+ eventID});
 
                 }
@@ -461,7 +461,7 @@ function addStatsEventData(req,res){
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2021-2022-regular-${event.event_id}.json`);
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2022-2023-regular-${event.event_id}.json`);
                     if (fs.existsSync(jsonPath)) {
                         console.log("FILE existsSync!!!");
                         fs.readFile(jsonPath, (err, data) => {
@@ -537,10 +537,12 @@ function addStatsEventData(req,res){
                                                 team_event_number_in_season: event.team_event_number_in_season                                
                                             });
                 
-                                            //console.log(playerStatAway);
+                                            console.log(playerStatAway);
                                             console.log("Player Stats AWAY to Collection: "+playerStatAway.team_id +" player: "+playerStatAway.display_name  +" game: "+ playerStatAway.team_event_number_in_season +" event: "+ playerStatAway.event_id);
                                             //utiles.sleepFor(1000);
                                             PlayerStat.collection.updateOne({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
+                                            //PlayerStat.collection.insertOne(playerStatAway, function (err, docs) {
+
                                                 if (err){ 
                                                     console.warn("Duplicado");
                                                 } else {
@@ -601,10 +603,12 @@ function addStatsEventData(req,res){
                                                 team_event_number_in_season: event.team_event_number_in_season                                
                                             });
                     
-                                            //console.log(playerStatHome);
+                                            console.log(playerStatHome);
                                             console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" game: "+ playerStatHome.team_event_number_in_season +" event: "+ playerStatHome.event_id);
                                             //utiles.sleepFor(1000);
                                             PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
+                                            //PlayerStat.collection.insertOne(playerStatHome, function (err, docs) {
+
                                                 if (err){ 
                                                     console.warn("Duplicado");
                                                 } else {
@@ -624,7 +628,7 @@ function addStatsEventData(req,res){
                         
                     } else{
                         console.log("FILE NOT!!! existsSync");
-                        msf.getData('nba', '2021-2022-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
+                        msf.getData('nba', '2022-2023-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
                         .then( async response => {
                             await fs.readFile(jsonPath, (err, data) => {
                             //fs.readFile(jsonPath, (err, data) => {
@@ -820,8 +824,8 @@ function getStatsEventDataPlayoff(req,res){
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2021-playoff-${event.event_id}.json`);
-                    msf.getData('nba', '2021-playoff', 'game_boxscore', 'json', {game: event.event_id,  force: 'false' });
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2022-playoff-${event.event_id}.json`);
+                    msf.getData('nba', '2022-playoff', 'game_boxscore', 'json', {game: event.event_id,  force: 'false' });
                     res.status(200).send({ code: 200, message: "Fichero de estadísticas generado - "+ eventID});
 
                 }
@@ -856,7 +860,7 @@ function addStatsEventDataPlayoff(req,res){
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2021-playoff-${event.event_id}.json`);
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2022-playoff-${event.event_id}.json`);
                     if (fs.existsSync(jsonPath)) {
                         console.log("FILE existsSync!!!");
                         fs.readFile(jsonPath, (err, data) => {
@@ -936,6 +940,8 @@ function addStatsEventDataPlayoff(req,res){
                                             console.log("Player Stats AWAY to Collection: "+playerStatAway.team_id +" player: "+playerStatAway.display_name  +" event: "+ playerStatAway.event_id);
                                             //utiles.sleepFor(1000);
                                             PlayerStat.collection.updateOne({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
+                                            //PlayerStat.collection.insertOne(playerStatAway, function (err, docs) {
+
                                                 if (err){ 
                                                     console.warn("Duplicado");
                                                 } else {
@@ -1000,6 +1006,8 @@ function addStatsEventDataPlayoff(req,res){
                                             console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" event: "+ playerStatHome.event_id);
                                             //utiles.sleepFor(1000);
                                             PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
+                                            //PlayerStat.collection.insertOne(playerStatHome, function (err, docs) {
+
                                                 if (err){ 
                                                     console.warn("Duplicado");
                                                 } else {
@@ -1019,7 +1027,7 @@ function addStatsEventDataPlayoff(req,res){
                         
                     } else{
                         console.log("FILE NOT!!! existsSync");
-                        msf.getData('nba', '2021-playoff', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
+                        msf.getData('nba', '2022-playoff', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
                         .then( async response => {
                             await fs.readFile(jsonPath, (err, data) => {
                             //fs.readFile(jsonPath, (err, data) => {

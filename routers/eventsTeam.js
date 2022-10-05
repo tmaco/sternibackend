@@ -9,6 +9,7 @@ const api = express.Router();
 api.get("/get-events-data/:team", [md_auth.ensureAdmin], EventsTeamController.getEventsTeamRegularData);
 api.get("/get-events-data-2019/:team", [md_auth.ensureAdmin], EventsTeamController.getEventsTeamRegularSeason1920Data);
 api.get("/get-events-playoffs-data-2019/:team", [md_auth.ensureAdmin], EventsTeamController.getEventsTeamPlayoffsSeason1920Data);
+api.get("/get-events-playoffs-data-2022/:team", EventsTeamController.getEventsTeamPlayoffsSeason2122Data);
 api.get("/get-events-date", EventsTeamController.getEventsDate);
 api.get("/get-home-events-date", EventsTeamController.getHomeEventsDate);
 api.get("/get-events-date-team/:team", EventsTeamController.getEventsDateTeam);
