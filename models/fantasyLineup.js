@@ -12,10 +12,8 @@ const fantasyLineupSchema = new Schema(
         fantasy_scoring_prev :  { type: Number, default: 0 },
         puntos_fantasy :  { type: Number, default: 0 },
         total_minutes :  { type: Number, default: 0 },
-        fantasy_scoringPG :  { type: Number, default: 0 },
-        fantasy_scoringSG :  { type: Number, default: 0 },
-        fantasy_scoringSF :  { type: Number, default: 0 },
-        fantasy_scoringPF :  { type: Number, default: 0 },
+        fantasy_scoringG :  { type: Number, default: 0 },
+        fantasy_scoringF :  { type: Number, default: 0 },
         fantasy_scoringC :  { type: Number, default: 0 },
         fantasyLineup: [ { 
             player_id: { type: Number, required: true },
