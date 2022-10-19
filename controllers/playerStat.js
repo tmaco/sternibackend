@@ -313,7 +313,7 @@ function getStatsData(req,res){
 
                                     //console.log(playerStatAway);
                                     console.log("Player Stats AWAY to Collection: "+playerStatAway.team_id +" player: "+playerStatAway.display_name  +" game: "+ playerStatAway.team_event_number_in_season +" event: "+ playerStatAway.event_id);
-                                    PlayerStat.collection.updateOne({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
+                                    PlayerStat.collection.update({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
                                         if (err){ 
                                             console.warn("Duplicado");
                                         } else {
@@ -376,7 +376,7 @@ function getStatsData(req,res){
     
                                     //console.log(playerStatHome);
                                     console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" game: "+ playerStatHome.team_event_number_in_season +" event: "+ playerStatHome.event_id);
-                                    PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
+                                    PlayerStat.collection.update({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
                                         if (err){ 
                                             console.warn("Duplicado");
                                         } else {
@@ -537,10 +537,10 @@ function addStatsEventData(req,res){
                                                 team_event_number_in_season: event.team_event_number_in_season                                
                                             });
                 
-                                            console.log(playerStatAway);
+                                            //console.log(playerStatAway);
                                             console.log("Player Stats AWAY to Collection: "+playerStatAway.team_id +" player: "+playerStatAway.display_name  +" game: "+ playerStatAway.team_event_number_in_season +" event: "+ playerStatAway.event_id);
                                             //utiles.sleepFor(1000);
-                                            PlayerStat.collection.updateOne({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
+                                            PlayerStat.collection.update({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
                                             //PlayerStat.collection.insertOne(playerStatAway, function (err, docs) {
 
                                                 if (err){ 
@@ -603,16 +603,16 @@ function addStatsEventData(req,res){
                                                 team_event_number_in_season: event.team_event_number_in_season                                
                                             });
                     
-                                            console.log(playerStatHome);
+                                            //console.log(playerStatHome);
                                             console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" game: "+ playerStatHome.team_event_number_in_season +" event: "+ playerStatHome.event_id);
                                             //utiles.sleepFor(1000);
-                                            PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
+                                            PlayerStat.collection.update({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
                                             //PlayerStat.collection.insertOne(playerStatHome, function (err, docs) {
 
                                                 if (err){ 
                                                     console.warn("Duplicado");
                                                 } else {
-                                                    //console.log(docs);
+                                                   // console.log(docs);
                                                 }
                                             });
                                         }
@@ -705,7 +705,7 @@ function addStatsEventData(req,res){
                                             //console.log(playerStatAway);
                                             console.log("Player Stats AWAY to Collection: "+playerStatAway.team_id +" player: "+playerStatAway.display_name  +" game: "+ playerStatAway.team_event_number_in_season +" event: "+ playerStatAway.event_id);
                                             //utiles.sleepFor(1000);
-                                            PlayerStat.collection.updateOne({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
+                                            PlayerStat.collection.update({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
                                                 if (err){ 
                                                     console.warn("Duplicado");
                                                 } else {
@@ -769,7 +769,7 @@ function addStatsEventData(req,res){
                                             //console.log(playerStatHome);
                                             console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" game: "+ playerStatHome.team_event_number_in_season +" event: "+ playerStatHome.event_id);
                                             //utiles.sleepFor(1000);
-                                            PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
+                                            PlayerStat.collection.update({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
                                                 if (err){ 
                                                     console.warn("Duplicado");
                                                 } else {
@@ -939,7 +939,7 @@ function addStatsEventDataPlayoff(req,res){
                                             //console.log(playerStatAway);
                                             console.log("Player Stats AWAY to Collection: "+playerStatAway.team_id +" player: "+playerStatAway.display_name  +" event: "+ playerStatAway.event_id);
                                             //utiles.sleepFor(1000);
-                                            PlayerStat.collection.updateOne({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
+                                            PlayerStat.collection.update({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
                                             //PlayerStat.collection.insertOne(playerStatAway, function (err, docs) {
 
                                                 if (err){ 
@@ -1005,7 +1005,7 @@ function addStatsEventDataPlayoff(req,res){
                                             //console.log(playerStatHome);
                                             console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" event: "+ playerStatHome.event_id);
                                             //utiles.sleepFor(1000);
-                                            PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
+                                            PlayerStat.collection.update({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
                                             //PlayerStat.collection.insertOne(playerStatHome, function (err, docs) {
 
                                                 if (err){ 
@@ -1104,7 +1104,7 @@ function addStatsEventDataPlayoff(req,res){
                                             //console.log(playerStatAway);
                                             console.log("Player Stats AWAY to Collection: "+playerStatAway.team_id +" player: "+playerStatAway.display_name  +" game: "+ playerStatAway.team_event_number_in_season +" event: "+ playerStatAway.event_id);
                                             //utiles.sleepFor(1000);
-                                            PlayerStat.collection.updateOne({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
+                                            PlayerStat.collection.update({ player_id: playerStatAway.player_id, event_id: playerStatAway.event_id}, playerStatAway, {upsert:true}, function (err, docs) {
                                                 if (err){ 
                                                     console.warn("Duplicado");
                                                 } else {
@@ -1168,7 +1168,7 @@ function addStatsEventDataPlayoff(req,res){
                                             //console.log(playerStatHome);
                                             console.log("Player Stats HOME  to Collection: "+playerStatHome.team_id +" player: "+playerStatHome.display_name +" game: "+ playerStatHome.team_event_number_in_season +" event: "+ playerStatHome.event_id);
                                             //utiles.sleepFor(1000);
-                                            PlayerStat.collection.updateOne({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
+                                            PlayerStat.collection.update({ player_id: playerStatHome.player_id, event_id: playerStatHome.event_id}, playerStatHome, {upsert:true}, function (err, docs) {
                                                 if (err){ 
                                                     console.warn("Duplicado");
                                                 } else {

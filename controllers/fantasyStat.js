@@ -373,8 +373,8 @@ function getFantasyStatsData(req,res){
 						//console.log(scoring);
 						utiles.sleepFor(100);
 
-						//FantasyStat.collection.updateOne({ player_id: fantasyStat.player_id, event_id: fantasyStat.event_id, season_id: fantasyStat.season_id, league_id: fantasyStat.league_id}, fantasyStat, {upsert:true}, function (err, docs) {
-						FantasyStat.collection.insertOne(fantasyStat, function (err, docs) {
+						FantasyStat.collection.updateOne({ player_id: fantasyStat.player_id, event_id: fantasyStat.event_id, season_id: fantasyStat.season_id, league_id: fantasyStat.league_id}, fantasyStat, {upsert:true}, function (err, docs) {
+						//FantasyStat.collection.insertOne(fantasyStat, function (err, docs) {
 							if (err){ 
 								return console.error(err);
 								//console.warn("Duplicado");
@@ -481,11 +481,11 @@ function addFantasyStatsDataEvent(req,res){
 						//console.log(scoring);
 						utiles.sleepFor(100);
 
-						FantasyStat.collection.updateOne({ player_id: fantasyStat.player_id, event_id: fantasyStat.event_id, season_id: fantasyStat.season_id, league_id: fantasyStat.league_id}, fantasyStat, {upsert:true}, function (err, docs) {
+						FantasyStat.collection.update({ player_id: fantasyStat.player_id, event_id: fantasyStat.event_id, season_id: fantasyStat.season_id, league_id: fantasyStat.league_id}, fantasyStat, {upsert:true}, function (err, docs) {
 						//FantasyStat.collection.insertOne(fantasyStat, function (err, docs) {
 							if (err){ 
 								//return console.error(err);
-								console.warn("Duplicado");
+								console.warn(err);
 							} else {
 							    console.log("Fantasy Stat inserted to Collection");
 							    //console.log(docs);
