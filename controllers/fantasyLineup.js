@@ -409,6 +409,37 @@ function updateScoringLineupUser(req,res) {
         );
 }
 
+function resetScoringLineupUser(req,res) {
+    const FantasyLineupUser = req.params.user;
+    const seasonID = req.query.season;
+    const leagueID = req.query.league;
+    const numMatch = req.query.match;
+    const {
+        player_id
+    } = req.body;
+
+    FantasyLineup.updateOne({"user_id": FantasyLineupUser, "season_id": seasonID,"league_id": leagueID,
+    "number_match": parseInt(numMatch), "fantasyLineup.player_id": parseInt(player_id)},
+    { $set: { "fantasyLineup.$.fScoring": 0,
+            "fantasyLineup.$.minutes": 0,
+            "fantasyLineup.$.numMatches": 0
+        }
+    })
+    .exec(
+            (err, fantasyLineup) => {
+                if(err){
+                    res.status(500).send({ code: 500, message: "Error del servidor."});
+                } else {
+                    if(!fantasyLineup) {
+                        res.status(404).send({ code: 404, message: "No se ha encontrado la fantasy lineup."});
+                    } else {
+                        res.status(200).send({ code: 200, message: "Puntuacion Lineup reseteada correctamente." });
+                    }
+                }
+            }
+        );
+}
+
 /*function updateTotalScoringLineupUser(req,res) {
     const FantasyLineupId = req.params.id;
     const {
@@ -728,5 +759,6 @@ module.exports = {
     getFantasyLeagueId,
     getTotalFantasyScoringByLeague,
     updateScoringPointsByJornada,
-    saveFantasyLineups
+    saveFantasyLineups,
+    resetScoringLineupUser
 };
