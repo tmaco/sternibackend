@@ -1,6 +1,7 @@
 //const { response } = require("express");
 const utiles = require("../utils/normalizationNames");
 const Player = require("../models/player");
+const { log } = require("console");
 
 function getPlayers(req,res) {
     Player.find({season_id: "22_23", roster_status: "active"})
@@ -12,7 +13,6 @@ function getPlayers(req,res) {
                 if(playersStored.length <= 0) {
                     res.status(404).send({ message: "No se ha encontrado ningun jugador."});
                 } else {
-                    //console.log(playersStored.length);
                     res.status(200).send({ code: 200, players: playersStored });
                 }
             }
@@ -32,7 +32,39 @@ function getPlayersByTeam(req,res) {
                 if(playersStored.length <= 0) {
                     res.status(404).send({ message: "No se ha encontrado ningun jugador de " + TeamName + "."});
                 } else {
-                    //console.log(playersStored.length);
+                    res.status(200).send({ code: 200, players: playersStored });
+                }
+            }
+        });
+}
+
+function getPlayersByPosition(req,res) {
+
+    let position = [];
+
+    switch(req.params.position) {
+        case 'G':
+            position = [ "PG", "SG" ];
+            break;
+        case 'F':
+            position = [ "SF", "PF" ];
+            break;
+        case 'C':
+            position = [ "C" ];
+            break;
+        default:
+            position = [ "C" ];
+    };
+
+    Player.find({ season_id: "22_23", position : { $in: position }, roster_status: "active"})
+        .sort({ last_name: "asc"})
+        .exec((err, playersStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(playersStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado ningun jugador con la posición " + position + "."});
+                } else {
                     res.status(200).send({ code: 200, players: playersStored });
                 }
             }
@@ -52,6 +84,25 @@ function getPlayer(req,res){
                     res.status(404).send({ message: "No se ha encontrado ningun jugador llamado " + playerName + "."});
                 } else {
                     res.status(200).send({ code: 200, player: playerStored });
+                }
+            }
+        });
+
+}
+
+function getListPlayers(req,res){
+
+    let players = req.params.playersName.split(',');
+
+    Player.find({ season_id: "22_23", display_name : { $in: players }})
+        .exec((err, playersStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(playersStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado ningun jugador llamado " + players + "."});
+                } else {
+                    res.status(200).send({ code: 200, players: playersStored });
                 }
             }
         });
@@ -209,5 +260,7 @@ module.exports = {
     getPlayer,
     getPlayerId,
     getPlayersData,
-    updateDisplayName
+    updateDisplayName,
+    getPlayersByPosition,
+    getListPlayers
 };
