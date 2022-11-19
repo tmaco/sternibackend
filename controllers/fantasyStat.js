@@ -601,6 +601,35 @@ function getFantasyScoringByEvent(req,res){
 
 }
 
+function getFantasyScoringByEvents(req,res){
+
+    const leagueID = req.query.league;
+    let eventIDs = req.params.event.split(',');
+    console.log(eventIDs);
+
+
+    FantasyStat.aggregate([{$match: { event_id : { $in: eventIDs }, league_id : leagueID,
+        minutes: { $gt: 0}
+            }},
+            { $group: { "_id": { event_id: "$event_id", player_id: "$player_id" , player_name: "$player_name",league_id: "$league_id",
+            fantasy_scoring: "$fantasy_scoring", minutes: "$minutes", points_per_minute: "$points_per_minute"        },                           
+            } },
+            { $sort: { fantasy_scoring: 1 } },
+        ])
+        .exec((err, fstatsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(fstatsStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado estadisticas fantasy de " + leagueID + " para los eventos " + eventIDs +"."});
+                } else {
+                    res.status(200).send({ code: 200, fstats: fstatsStored });
+                }
+            }
+        });
+
+}
+
 function getFantasyStatsByPlayerAndEventId(req,res){
     const leagueId = req.query.league;
     const seasonId = req.query.season;
@@ -752,5 +781,6 @@ module.exports = {
     getFantasyStatsPlayerByLeagueByDate,
     getFantasyScoringLastGamesByPlayer,
     getFantasyStatsByEvent,
-    getFantasyStatsByLeagueByDate
+    getFantasyStatsByLeagueByDate,
+    getFantasyScoringByEvents
 }
