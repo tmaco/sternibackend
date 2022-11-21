@@ -687,9 +687,9 @@ function updateScoringPointsByJornada(req,res) {
                     res.status(500).send({ message: "Error del servidor."});
                 } else {
                     if(!fantasyLineup) {
-                        res.status(404).send({ message: "No se ha encontrado la fantasy lineup."});
+                        res.status(404).send({ code: 404, message: "No se ha encontrado la fantasy lineup."});
                     } else {
-                        res.status(200).send({ message: "Puntuación actualizada correctamente." });
+                        res.status(200).send({ code: 200, message: "Puntuación actualizada correctamente." });
                     }
                 }
             }
