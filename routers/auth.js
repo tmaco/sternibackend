@@ -4,5 +4,7 @@ const AuthController = require("../controllers/auth");
 const api = express.Router();
 
 api.post("/refresh-access-token", AuthController.refresAccessToken);
+api.get("/health", AuthController.isOK);
+
 
 module.exports = api;

@@ -38,6 +38,22 @@ function refresAccessToken(req, res) {
     }
 }
 
+async function isOK(_req, res) {
+
+    const healthcheck = {
+        uptime: process.uptime(),
+        message: 'OK',
+        timestamp: Date.now(),
+    };
+    try {
+        await res.send(healthcheck);
+    } catch (error) {
+        healthcheck.message = error;
+        await res.status(503).send();
+    }
+} 
+
 module.exports = {
-    refresAccessToken
+    refresAccessToken,
+    isOK
 };
