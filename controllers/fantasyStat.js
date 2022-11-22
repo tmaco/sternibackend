@@ -485,7 +485,7 @@ function addFantasyStatsDataEvent(req,res){
 						//FantasyStat.collection.insertOne(fantasyStat, function (err, docs) {
 							if (err){ 
 								//return console.error(err);
-								console.warn(err);
+                                console.warn("Duplicado");
 							} else {
 							    console.log("Fantasy Stat inserted to Collection");
 							    //console.log(docs);
