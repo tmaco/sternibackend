@@ -3,10 +3,13 @@ const path = require("path");
 const bcrypt = require("bcrypt-nodejs");
 const jwt = require("../services/jwt");
 const User = require("../models/user");
+
 const { UPLOADPATH, S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION } = require("../config");
 const Registro = require("../models/registro");
-const AWS = require('aws-sdk');
-AWS.config.update({ accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY , region: AWS_REGION });
+
+//Almacenamiento S3
+//const AWS = require('aws-sdk');
+//AWS.config.update({ accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY , region: AWS_REGION });
 
 function signUp(req, res) {
     const user = new User;
@@ -141,11 +144,11 @@ function getUsersActive(req, res) {
 
 function uploadAvatar(req, res) {
 
-    //Almacenamiento S3
-
     const params = req.params;
 
-    User.findById({_id: params.id}, (err,userData) => {
+    //Almacenamiento S3
+
+    /*User.findById({_id: params.id}, (err,userData) => {
         if(err) {
             err.status(500).send({ message: "Error del servidor."});
         } else {
@@ -206,11 +209,11 @@ function uploadAvatar(req, res) {
 
             }
         }
-    })    
+    }) */   
 
     //Almacenamiento local
     
-    /*User.findById({_id: params.id}, (err,userData) => {
+    User.findById({_id: params.id}, (err,userData) => {
         if(err) {
             err.status(500).send({ message: "Error del servidor."});
         } else {
@@ -254,7 +257,7 @@ function uploadAvatar(req, res) {
 
             }
         }
-    })*/
+    })
 }
 
 function getAvatar(req,res) {
@@ -262,21 +265,21 @@ function getAvatar(req,res) {
     const filePath = UPLOADPATH + AvatarName;
     
     //Almacenamiento local
-    /*fs.exists(filePath, exists => {
+    fs.exists(filePath, exists => {
         if(!exists) {
             res.status(404).send({ message: "El avatar que buscas no existe"});
         } else {
             res.sendFile(path.resolve(filePath));
         }
-    });*/
+    });
 
     //ALmacenamiento S3
 
-    const returnData = {
+    /*const returnData = {
         url: filePath
       };
       res.write(JSON.stringify(returnData));
-      res.end();    
+      res.end();    */
 }
 
 async function updateUser(req, res) {

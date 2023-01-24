@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require('morgan');
+const cors = require('cors');
 
 const app = express();
 const { API_VERSION } = require('./config');
@@ -23,12 +24,17 @@ const postRoutes = require("./routers/post");
 const statusPlayerRoutes = require("./routers/statusPlayer");
 
 
-app.use(bodyParser.urlencoded({ extended: false }));
+//Configure Body Parser
+
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(morgan('dev'));
 
-// Configure Header HTTP
-app.use((req, res, next) => {
+//Configure static folder
+app.use(express.static("uploads"));
+
+// Configure Header HTTP - CORS
+/*app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header(
       "Access-Control-Allow-Headers",
@@ -37,7 +43,9 @@ app.use((req, res, next) => {
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
     res.header("Allow", "GET, POST, OPTIONS, PUT, DELETE");
     next();
-  });
+  });*/
+
+app.use(cors());
 
 // Router Basic
 app.use(`/api/${API_VERSION}`, authRoutes);

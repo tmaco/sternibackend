@@ -22,6 +22,7 @@ api.get("/get-total-scoring-jornada",FantasyLineupController.getTotalScoringByJo
 api.get("/get-total-scoring-lineup/:user",FantasyLineupController.getTotalScoringLineupByJornada);
 api.get("/get-total-scoring",FantasyLineupController.getTotalScoringByLeague);
 api.get("/get-total-jornada",FantasyLineupController.getTotalScoringGroupByJornada);
+api.get("/get-total-jornada-pos",FantasyLineupController.getTotalScoringGroupByJornadaPos);
 api.get("/get-total-fantasy-scoring",FantasyLineupController.getTotalFantasyScoringByLeague);
 api.put("/update-scoring-points/:user", [md_auth.ensureAdmin], FantasyLineupController.updateScoringPointsByJornada);
 api.post("/save-all-lineups", [md_auth.ensureAdmin], FantasyLineupController.saveFantasyLineups);

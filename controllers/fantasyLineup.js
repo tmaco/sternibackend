@@ -469,27 +469,57 @@ function resetScoringLineupUser(req,res) {
 
 function updateTotalScoringLineupUser(req,res) {
     const FantasyLineupId = req.params.id;
-    const {
-        fantasy_scoring, total_minutes, fantasy_scoring_prev, fantasy_scoringG, fantasy_scoringF, fantasy_scoringC
-    } = req.body;
+    const isPrev = req.query.prev;
 
-        
-    FantasyLineup.updateOne({"_id": FantasyLineupId},
-    { $set: {"fantasy_scoring": fantasy_scoring, "total_minutes": total_minutes, "fantasy_scoring_prev": fantasy_scoring_prev,
-    "fantasy_scoringG": fantasy_scoringG, "fantasy_scoringF": fantasy_scoringF, "fantasy_scoringC": fantasy_scoringC}})
-    .exec(
-            (err, fantasyLineup) => {
-                if(err){
-                    res.status(500).send({ code:500, message: "Error del servidor."});
-                } else {
-                    if(!fantasyLineup) {
-                        res.status(404).send({ code:404, message: "No se ha encontrado la fantasy lineup."});
+    if(typeof(isPrev) !== "undefined" && isPrev === "false"){
+
+        const {
+            fantasy_scoring, total_minutes, fantasy_scoringG, fantasy_scoringF, fantasy_scoringC
+        } = req.body;
+    
+            
+        FantasyLineup.updateOne({"_id": FantasyLineupId},
+        { $set: {"fantasy_scoring": fantasy_scoring, "total_minutes": total_minutes,
+        "fantasy_scoringG": fantasy_scoringG, "fantasy_scoringF": fantasy_scoringF, "fantasy_scoringC": fantasy_scoringC}})
+        .exec(
+                (err, fantasyLineup) => {
+                    if(err){
+                        res.status(500).send({ code:500, message: "Error del servidor."});
                     } else {
-                        res.status(200).send({ code:200, message: "Fantasy Scoring actualizada correctamente." });
+                        if(!fantasyLineup) {
+                            res.status(404).send({ code:404, message: "No se ha encontrado la fantasy lineup."});
+                        } else {
+                            res.status(200).send({ code:200, message: "Fantasy Scoring actualizada correctamente." });
+                        }
                     }
                 }
-            }
-        );
+            );
+
+    }else{
+        const {
+            fantasy_scoring, total_minutes, fantasy_scoring_prev, fantasy_scoringG, fantasy_scoringF, fantasy_scoringC
+        } = req.body;
+    
+            
+        FantasyLineup.updateOne({"_id": FantasyLineupId},
+        { $set: {"fantasy_scoring": fantasy_scoring, "total_minutes": total_minutes, "fantasy_scoring_prev": fantasy_scoring_prev,
+        "fantasy_scoringG": fantasy_scoringG, "fantasy_scoringF": fantasy_scoringF, "fantasy_scoringC": fantasy_scoringC}})
+        .exec(
+                (err, fantasyLineup) => {
+                    if(err){
+                        res.status(500).send({ code:500, message: "Error del servidor."});
+                    } else {
+                        if(!fantasyLineup) {
+                            res.status(404).send({ code:404, message: "No se ha encontrado la fantasy lineup."});
+                        } else {
+                            res.status(200).send({ code:200, message: "Fantasy Scoring actualizada correctamente." });
+                        }
+                    }
+                }
+            );
+    }
+
+    
 }
 
 /*function getTotalScoringByJornada(req,res) {
@@ -617,7 +647,7 @@ function getTotalFantasyScoringByLeague(req,res) {
         });
 }
 
-/*function getTotalScoringGroupByJornada(req,res) {
+function getTotalScoringGroupByJornadaPos(req,res) {
 
     const seasonId = req.query.season;
     const leagueId = req.query.league;
@@ -640,7 +670,7 @@ function getTotalFantasyScoringByLeague(req,res) {
                 }
             }
         });
-}*/
+}
 
 function getTotalScoringGroupByJornada(req,res) {
 
@@ -760,5 +790,6 @@ module.exports = {
     getTotalFantasyScoringByLeague,
     updateScoringPointsByJornada,
     saveFantasyLineups,
-    resetScoringLineupUser
+    resetScoringLineupUser,
+    getTotalScoringGroupByJornadaPos
 };
