@@ -600,9 +600,9 @@ function getTotalScoringByLeague(req,res) {
     var limit = 17;
 
     if(seasonId==="20_21"){
-        limit = 18;
+        limit = 19;
     }else if(seasonId==="21_22"){
-        limit = 18;
+        limit = 19;
     }else if(seasonId==="22_23"){
         limit = 17;
     }
@@ -633,16 +633,25 @@ function getTotalFantasyScoringByLeague(req,res) {
 
     const seasonId = req.query.season;
     const leagueId = req.query.league;
+    var limit = 17;
+
+    if(seasonId==="20_21"){
+        limit = 19;
+    }else if(seasonId==="21_22"){
+        limit = 19;
+    }else if(seasonId==="22_23"){
+        limit = 17;
+    }
 
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, number_match : {
-        $gte: 1, $lt: 17 
+        $gte: 1, $lt: limit 
     }}},
         { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id"},
         "totalFScoring" : { "$sum": "$fantasy_scoring"},
         "totalScoring" : { "$sum": "$puntos_fantasy"},
 
     }},
-        { $sort: { "totalFScoring": -1, "totalScoring": -1  } }
+        { $sort: { "totalScoring": -1, "totalFScoring": -1,  } }
     ])
         .exec((err, fantasyScoring) => {
             if(err){
