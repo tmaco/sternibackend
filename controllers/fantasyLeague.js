@@ -101,7 +101,8 @@ function createFantasyLeague(req,res){
                 res.status(500).send({ message: "Error al encriptar la contraseña." });
             } else {
                 fleague.password_league = hash;
-                FantasyLeague.collection.insert(fleague, function (err, docs) {
+                FantasyLeague.collection.insertOne(fleague, function (err, docs) {
+                    console.log(err);
                     if (err){ 
                         res.status(500).send({ message: "Error al crear la liga fantasy." });
                     } else {

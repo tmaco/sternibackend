@@ -373,8 +373,8 @@ function getFantasyStatsData(req,res){
 						//console.log(scoring);
 						utiles.sleepFor(100);
 
-						FantasyStat.collection.updateOne({ player_id: fantasyStat.player_id, event_id: fantasyStat.event_id, season_id: fantasyStat.season_id, league_id: fantasyStat.league_id}, fantasyStat, {upsert:true}, function (err, docs) {
-						//FantasyStat.collection.insertOne(fantasyStat, function (err, docs) {
+						//FantasyStat.collection.updateOne({ player_id: fantasyStat.player_id, event_id: fantasyStat.event_id, season_id: fantasyStat.season_id, league_id: fantasyStat.league_id}, fantasyStat, {upsert:true}, function (err, docs) {
+						FantasyStat.collection.insertOne(fantasyStat, function (err, docs) {
 							if (err){ 
 								return console.error(err);
 								//console.warn("Duplicado");
@@ -763,6 +763,36 @@ function getFantasyStatsByLeagueByDate(req,res){
 
 }
 
+function getPPmazosFromTo(req,res){
+	const seasonId = req.query.season;
+    const leagueId = req.query.league;
+    const dateFrom = new Date(req.query.from);
+    const dateTo = new Date(req.query.to);
+
+    FantasyStat.aggregate([{$match: { league_id: leagueId, season_id: seasonId, minutes: { $gt: 0}, date_match: {
+        $gte: dateFrom,
+        $lt: dateTo}}},
+            { $group: { "_id": { player_id: "$player_id" , player_name: "$player_name" , team_id: "$team_id", 
+            position: "$position", season: "$season_id"}, 
+                "totalMatches" : { "$sum": 1},
+                "totalMinutes" : { "$sum": "$minutes"},
+                "totalFantasyScoring" : { "$sum": "$fantasy_scoring"},           
+            } },
+            { $sort: { "totalFantasyScoring": -1 } },
+        ])
+        .exec((err, fstatsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(fstatsStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado estadisticas fantasy de la liga " + leagueId + " para la temporada " + seasonId +"."});
+                } else {
+                    res.status(200).send({ code: 200, ppmazos: fstatsStored });
+                }
+            }
+        });
+}
+
 module.exports = {
     getTotalFantasyStatsByPlayer,
     getTotalFantasyStatsBySeasonPlayerApi,
@@ -782,5 +812,6 @@ module.exports = {
     getFantasyScoringLastGamesByPlayer,
     getFantasyStatsByEvent,
     getFantasyStatsByLeagueByDate,
-    getFantasyScoringByEvents
+    getFantasyScoringByEvents,
+    getPPmazosFromTo
 }

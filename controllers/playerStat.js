@@ -824,8 +824,8 @@ function getStatsEventDataPlayoff(req,res){
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2022-playoff-${event.event_id}.json`);
-                    msf.getData('nba', '2022-playoff', 'game_boxscore', 'json', {game: event.event_id,  force: 'false' });
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2023-playoff-${event.event_id}.json`);
+                    msf.getData('nba', '2023-playoff', 'game_boxscore', 'json', {game: event.event_id,  force: 'false' });
                     res.status(200).send({ code: 200, message: "Fichero de estadísticas generado - "+ eventID});
 
                 }
@@ -860,7 +860,7 @@ function addStatsEventDataPlayoff(req,res){
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2022-playoff-${event.event_id}.json`);
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2023-playoff-${event.event_id}.json`);
                     if (fs.existsSync(jsonPath)) {
                         console.log("FILE existsSync!!!");
                         fs.readFile(jsonPath, (err, data) => {

@@ -25,6 +25,7 @@ api.get("/get-fstats-player/:playerId", FantasyStatController.getFantasyStatsByP
 api.get("/get-fstats/:playerId", FantasyStatController.getFantasyStatsPlayerByLeague);
 api.get("/get-fstats-date/:playerId", FantasyStatController.getFantasyStatsPlayerByLeagueByDate);
 api.get("/get-fstats-league", FantasyStatController.getFantasyStatsByLeagueByDate);
+api.get("/get-ppmazos", FantasyStatController.getPPmazosFromTo);
 
 
 
