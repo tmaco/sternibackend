@@ -27,5 +27,6 @@ api.get("/get-total-fantasy-scoring",FantasyLineupController.getTotalFantasyScor
 api.put("/update-scoring-points/:user", [md_auth.ensureAdmin], FantasyLineupController.updateScoringPointsByJornada);
 api.post("/save-all-lineups", [md_auth.ensureAdmin], FantasyLineupController.saveFantasyLineups);
 api.put("/reset-scoring-lineup/:user", [md_auth.ensureAdmin], FantasyLineupController.resetScoringLineupUser);
+api.put("/update-fantasy-team/:id", [md_auth.ensureAuth], FantasyLineupController.updateFantasyTeamName);
 
 module.exports = api;

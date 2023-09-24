@@ -124,7 +124,6 @@ function updateAvatarFantasyPlayer(req,res){
             if(playersStored.length <= 0) {
                 res.status(404).send({ message: "No se ha encontrado ningun jugador."});
             } else {
-                console.log(playersStored.length);
                 for(var i=0; i<utiles.count(playersStored); i++){
                     var fp = playersStored[i];
                     var fplayer = new FantasyPlayer({
@@ -140,7 +139,7 @@ function updateAvatarFantasyPlayer(req,res){
                     });
                     //console.log(fplayer);
 
-                    FantasyPlayer.collection.updateOne({player_id: fplayer.player_id, season_id: fplayer.season_id, league_id: fplayer.league_id}, { $set: { avatar: fp.avatar }}, {upsert:true}, function (err, docs) {
+                    FantasyPlayer.collection.updateOne({player_id: fplayer.player_id, season_id: fplayer.season_id, league_id: fplayer.league_id}, { $set: { avatar: fp.avatar }}, {upsert:false}, function (err, docs) {
                         if (err){ 
                             //return console.error(err);
                             console.warn("Duplicado");

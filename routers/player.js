@@ -14,6 +14,8 @@ api.get("/get-list-players/:playersName", PlayerController.getListPlayers);
 api.get("/get-player-id/:playerId", PlayerController.getPlayerId);
 api.get("/get-players-data/:team", [md_auth.ensureAdmin], PlayerController.getPlayersData);
 api.put("/update-players-name", [md_auth.ensureAdmin], PlayerController.updateDisplayName);
+api.put("/update-players-avatar", [md_auth.ensureAdmin], PlayerController.updateAvatar);
+
 
 
 module.exports = api;

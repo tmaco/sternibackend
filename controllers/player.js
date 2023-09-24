@@ -252,6 +252,40 @@ function updateDisplayName(req,res) {
     
 }
 
+function updateAvatar(req,res) {
+    Player.find({season_id: "22_23"})
+        .sort({ team_id: "asc", uniform_number: "asc"})
+        .exec((err, playersStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(playersStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado ningun jugador."});
+                } else {
+                    for(var i=0; i<playersStored.length; i++){
+                        if(playersStored[i].avatar !== null){
+                            Player.updateOne(
+                                { player_id: playersStored[i].player_id, season_id: "23_24", avatar: null}, 
+                                { avatar: playersStored[i].avatar }, 
+                                { upsert: false }, 
+                                (err, playerUpdate) => {
+                                if(err) {
+                                    err.status(500).send({ message: "Error del servidor."});
+                                } else {
+                                    if(!playerUpdate) {
+                                        err.status(404).send({ message: "Jugador no encontrado."});
+                                    } 
+                                }
+                            });
+                        }                        
+                    }
+                    res.status(200).send({ message: "Jugadores actualizados correctamente."});
+                }
+            }
+        });
+    
+}
+
 
 
 module.exports = {
@@ -262,5 +296,6 @@ module.exports = {
     getPlayersData,
     updateDisplayName,
     getPlayersByPosition,
-    getListPlayers
+    getListPlayers,
+    updateAvatar
 };
