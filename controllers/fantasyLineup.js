@@ -790,15 +790,16 @@ function saveFantasyLineups(req,res){
 function updateFantasyTeamName(req, res) {
     const fantasyName = req.query.name;
     const seasonId = req.query.season;
+    const leagueId = req.query.season;
 
-    FantasyLineup.findByIdAndUpdate({_id: req.params.id, numer_match: 0, season_id: seasonId}, {name_team: fantasyName}, (err, fantasyTeam) => {
+    FantasyLineup.findByIdAndUpdate({_id: req.params.id, numer_match: 0, season_id: seasonId, league_id: leagueId}, {name_team: fantasyName}, (err, fantasyTeam) => {
         if(err) {
             err.status(500).send({ message: "Error del servidor."});
         } else {
             if(!fantasyTeam) {
                 err.status(404).send({ message: "Usuario no encontrado."});
             } else {
-                res.status(200).send({ message: "Usuario actualizado correctamente."});
+                res.status(200).send({ code: 200, message: "Usuario actualizado correctamente."});
             }
         }
     });
