@@ -17,7 +17,8 @@ function getStatusData(req,res){
                 const fs = require('fs');
                 var path = require('path');
 
-                var jsonPath = path.join(__dirname, '..', '.', '/var/task/tmp/', 'player_injuries-nba-2023-2024-regular.json');
+                //var jsonPath = path.join(__dirname, '..', '.', 'tmp', 'player_injuries-nba-2023-2024-regular.json');
+                var jsonPath = '/tmp/player_injuries-nba-2023-2024-regular.json';
                 await fs.readFile(jsonPath, (err, data) => {
                     if (err) throw err;
 
