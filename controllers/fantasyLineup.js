@@ -605,6 +605,8 @@ function getTotalScoringByLeague(req,res) {
         limit = 19;
     }else if(seasonId==="22_23"){
         limit = 17;
+    }else if(seasonId==="23_24"){
+        limit = 17;
     }
 
 
@@ -640,6 +642,8 @@ function getTotalFantasyScoringByLeague(req,res) {
     }else if(seasonId==="21_22"){
         limit = 19;
     }else if(seasonId==="22_23"){
+        limit = 17;
+    }else if(seasonId==="23_24"){
         limit = 17;
     }
 
