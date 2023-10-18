@@ -24,37 +24,48 @@ function getStatusData(req,res){
 
                     let statusData = JSON.parse(data);
 
-                    //borramos el estado anterior de los jugadores
-                    StatusPlayer.collection.deleteMany({});
-                    var statusPlayer = [];
+                    if(utiles.count(statusData.players) > 0){
 
-                    console.log(utiles.count(statusData.players));
-                    for(var i=0; i<utiles.count(statusData.players); i++){
-                        var status = statusData.players[i];
-                        //console.log(status);
-                            statusPlayer[i] = new StatusPlayer({
-                            player_id: status.id,
-                            last_name: utiles.removeDiacritics(status.lastName), 
-                            first_name: utiles.removeDiacritics(status.firstName), 
-                            player_name: utiles.removeDiacritics(status.firstName) + " " +utiles.removeDiacritics(status.lastName), 
-                            currentInjury: status.currentInjury.description,
-                            currentStatus: status.currentInjury.playingProbability,
-                            lastUpdatedOn: statusData.lastUpdatedOn                    
+                        //borramos el estado anterior de los jugadores
+                        StatusPlayer.collection.deleteMany({});
+                        var statusPlayer = [];
+
+                        console.log(utiles.count(statusData.players));
+
+                        for(var i=0; i<utiles.count(statusData.players); i++){
+                            var status = statusData.players[i];
+                            //console.log(status);
+                                statusPlayer[i] = new StatusPlayer({
+                                player_id: status.id,
+                                last_name: utiles.removeDiacritics(status.lastName), 
+                                first_name: utiles.removeDiacritics(status.firstName), 
+                                player_name: utiles.removeDiacritics(status.firstName) + " " +utiles.removeDiacritics(status.lastName), 
+                                currentInjury: status.currentInjury.description,
+                                currentStatus: status.currentInjury.playingProbability,
+                                lastUpdatedOn: statusData.lastUpdatedOn                    
+                            });
+                        }
+                        StatusPlayer.collection.insertMany( statusPlayer, function (err, docs) {
+                            if (err){ 
+                                //return console.error(err);
+                                console.warn("Warning");
+                            } else {
+                                //console.log("Player inserted to Collection");
+                            }
+                        });
+    
+                        res.status(200).jsonp({
+                            "status": 200,
+                            "message": `Player Status inserted into Database`
+                        });
+                        
+                    }else{
+                        res.status(200).jsonp({
+                            "status": 404,
+                            "message": `File not found`
                         });
                     }
-                    StatusPlayer.collection.insertMany( statusPlayer, function (err, docs) {
-                        if (err){ 
-                            //return console.error(err);
-                            console.warn("Warning");
-                        } else {
-                            //console.log("Player inserted to Collection");
-                        }
-                    });
-
-                    res.status(200).jsonp({
-                        "status": 200,
-                        "message": `Player Status inserted into Database`
-                    });
+                    
                 
                 });
 

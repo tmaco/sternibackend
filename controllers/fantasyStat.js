@@ -739,22 +739,20 @@ function getFantasyScoringLastGamesByPlayer(req,res){
 
 function getFantasyStatsByLeagueByDate(req,res){
     const leagueId = req.query.league;
-    const seasonId = req.query.season;
     const dateFrom = req.query.from;
     const dateTo = req.query.to;
-
-    //season_id : seasonId
     
     FantasyStat.find({ league_id : leagueId, date_match: {
         $gte: dateFrom,
         $lt: dateTo}})
         .sort({ points_per_minute: "desc"})
+        .limit(500)
         .exec((err, statsStored) => {
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
             } else {
                 if(statsStored.length <= 0) {
-                    res.status(404).send({ message: "No se ha encontrado estadisticas dentro de la liga fantasy " + leagueId+ " en la temporada " + seasonId+ "."});
+                    res.status(404).send({ message: "No se ha encontrado estadisticas dentro de la liga fantasy " + leagueId+ "."});
                 } else {
                     res.status(200).send({ code: 200, fantasy: statsStored });
                 }
@@ -764,16 +762,15 @@ function getFantasyStatsByLeagueByDate(req,res){
 }
 
 function getPPmazosFromTo(req,res){
-	const seasonId = req.query.season;
     const leagueId = req.query.league;
     const dateFrom = new Date(req.query.from);
     const dateTo = new Date(req.query.to);
 
-    FantasyStat.aggregate([{$match: { league_id: leagueId, season_id: seasonId, minutes: { $gt: 0}, date_match: {
+    FantasyStat.aggregate([{$match: { league_id: leagueId, minutes: { $gt: 0}, date_match: {
         $gte: dateFrom,
         $lt: dateTo}}},
-            { $group: { "_id": { player_id: "$player_id" , player_name: "$player_name" , team_id: "$team_id", 
-            position: "$position", season: "$season_id"}, 
+            { $group: { "_id": { player_id: "$player_id" , player_name: "$player_name" , 
+            position: "$position"}, 
                 "totalMatches" : { "$sum": 1},
                 "totalMinutes" : { "$sum": "$minutes"},
                 "totalFantasyScoring" : { "$sum": "$fantasy_scoring"},           
@@ -785,7 +782,7 @@ function getPPmazosFromTo(req,res){
                 res.status(500).send({ message: "Error del servidor."});
             } else {
                 if(fstatsStored.length <= 0) {
-                    res.status(404).send({ message: "No se ha encontrado estadisticas fantasy de la liga " + leagueId + " para la temporada " + seasonId +"."});
+                    res.status(404).send({ message: "No se ha encontrado estadisticas fantasy de la liga " + leagueId + "."});
                 } else {
                     res.status(200).send({ code: 200, ppmazos: fstatsStored });
                 }
