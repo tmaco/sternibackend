@@ -746,7 +746,7 @@ function getFantasyStatsByLeagueByDate(req,res){
         $gte: dateFrom,
         $lt: dateTo}})
         .sort({ points_per_minute: "desc"})
-        .limit(500)
+        .limit(2000)
         .exec((err, statsStored) => {
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
