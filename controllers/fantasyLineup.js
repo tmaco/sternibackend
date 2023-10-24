@@ -773,7 +773,7 @@ function saveFantasyLineups(req,res){
                         lineup.number_match = match;         
                         lineup.fantasyLineup=item.fantasyLineup; 
                         console.log("lineup"); 
-                        console.log(lineupCreated); 
+                        console.log(lineup); 
                         lineup.save((err, lineupCreated) => {
                             console.log("err");
                             console.log(err);
