@@ -726,11 +726,6 @@ function updateScoringPointsByJornada(req,res) {
     const {
         puntos_fantasy
     } = req.body;
-
-    console.log(fantasyLineupId);
-
-    console.log(puntos_fantasy);
-
         
     FantasyLineup.updateOne({_id: fantasyLineupId},
     { $set: {"puntos_fantasy": puntos_fantasy }})
@@ -772,13 +767,7 @@ function saveFantasyLineups(req,res){
                         lineup.season_id = item.season_id;
                         lineup.number_match = match;         
                         lineup.fantasyLineup=item.fantasyLineup;  
-                        console.log("lineup");
-                        console.log(lineup);
                         lineup.save((err, lineupCreated) => {
-                            console.log("err");
-                            console.log(err);
-                            console.log("lineupCreated");
-                            console.log(lineupCreated);
                             if(err){
                                 res.status(500).send({ code: 500, message: "Error del servidor."});
                             } else {
