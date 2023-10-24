@@ -45,12 +45,12 @@ function addPlayerLineup(req,res){
                         res.status(403).send({ code: 403, message: "Ya tiene 12 jugadores en su alineación."});
                     } else {
 
-                        FantasyPlayer.find({ player_id: lineupData.player_id, season_id: seasonId, league_id: leagueId}, 
+                        FantasyPlayer.findOne({ player_id: lineupData.player_id, season_id: seasonId, league_id: leagueId}, 
                             (err, fantasyPlayerStored) => {
                                 if(err) {
                                 res.status(500).send({ message: "Error del servidor."});
                             } else {
-                                if(Object.keys(fantasyPlayerStored).length  > 1){
+                                if(!fantasyPlayerStored){
                                     res.status(500).send({ code: 500, message: "Error del servidor."});
                                 } else {
                                     if(fantasyPlayerStored.available === false){
@@ -773,6 +773,7 @@ function saveFantasyLineups(req,res){
                         lineup.number_match = match;         
                         lineup.fantasyLineup=item.fantasyLineup;  
                         lineup.save((err, lineupCreated) => {
+                            console.log(lineupCreated);
                             if(err){
                                 res.status(500).send({ code: 500, message: "Error del servidor."});
                             } else {
