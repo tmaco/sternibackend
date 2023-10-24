@@ -765,19 +765,19 @@ function saveFantasyLineups(req,res){
                     res.status(404).send({ code: 404, message: "No se ha encontrado las fantasy lineups."});
                 } else {
                     fantasyLineup.map((item) =>{
-                        const lineup = new FantasyLineup();
+                        var lineup = new FantasyLineup();
                         lineup.name_team = item.name_team;
                         lineup.user_id = item.user_id;; 
                         lineup.league_id = item.league_id; 
                         lineup.season_id = item.season_id;
                         lineup.number_match = match;         
-                        lineup.fantasyLineup=item.fantasyLineup; 
-                        console.log("lineup"); 
-                        console.log(lineup); 
+                        lineup.fantasyLineup=item.fantasyLineup;  
+                        console.log("lineup");
+                        console.log(lineup);
                         lineup.save((err, lineupCreated) => {
                             console.log("err");
                             console.log(err);
-                            console.log("lineupCreated"); 
+                            console.log("lineupCreated");
                             console.log(lineupCreated);
                             if(err){
                                 res.status(500).send({ code: 500, message: "Error del servidor."});
