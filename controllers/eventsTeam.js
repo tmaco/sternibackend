@@ -624,8 +624,8 @@ function updateEventsDate(req,res){
         const fs = require('fs');
         var path = require('path');
                 
-        //var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2023-2024-regular-from-yesterday-to-tomorrow.json');
-        var jsonPath =  '/tmp/seasonal_games-nba-2023-2024-regular-from-yesterday-to-tomorrow.json';
+        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2023-2024-regular-from-yesterday-to-tomorrow.json');
+        //var jsonPath =  '/tmp/seasonal_games-nba-2023-2024-regular-from-yesterday-to-tomorrow.json';
 
                 
         await fs.readFile(jsonPath, (err, data) => {
