@@ -425,8 +425,8 @@ function getStatsEventData(req,res){
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2022-2023-regular-${event.event_id}.json`);
-                    msf.getData('nba', '2022-2023-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' });
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2023-2024-regular-${event.event_id}.json`);
+                    msf.getData('nba', '2023-2024-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' });
                     res.status(200).send({ code: 200, message: "Fichero de estadísticas generado - "+ eventID});
 
                 }
