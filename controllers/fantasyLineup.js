@@ -553,7 +553,7 @@ function getTotalScoringByJornada(req,res) {
     const numJornada = req.query.match;
 
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId ,number_match: parseInt(numJornada)}},
-        { $group: { "_id" : { _id: "$_id", name_team: "$name_team" , user_id: "$user_id", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes", fantasy_scoring_prev:"$fantasy_scoring_prev", puntos_fantasy:"$puntos_fantasy",
+        { $group: { "_id" : { _id: "$_id", name_team: "$name_team" , user_id: "$user_id", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes", fantasy_scoring_prev:"$fantasy_scoring_prev", position_prev:"$position_prev", puntos_fantasy:"$puntos_fantasy",
         fantasy_scoringG: "$fantasy_scoringG",fantasy_scoringF:"$fantasy_scoringF", fantasy_scoringC:"$fantasy_scoringC"}}},
         { $sort: { "_id.fantasy_scoring": -1, "_id.total_minutes": 1, "_id.fantasy_scoringG": -1 } }
     ])
@@ -587,6 +587,28 @@ function getTotalScoringLineupByJornada(req,res) {
                     res.status(404).send({ code: 404, message: "No se ha encontrado la fantasy lineup."});
                 } else {
                     res.status(200).send({ code: 200, fantasyScoring: fantasyLineup.fantasy_scoring });
+                }
+            }
+        });
+}
+
+function getPuntosLineupByJornada(req,res) {
+
+    const userId = req.params.user;
+
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+    const numMatch = req.query.match;
+
+    FantasyLineup.findOne({ user_id: userId, league_id: leagueId , season_id: seasonId ,number_match: parseInt(numMatch)})
+        .exec((err, fantasyLineup) => {
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+                if(!fantasyLineup || fantasyLineup.length === 0) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado la fantasy lineup."});
+                } else {
+                    res.status(200).send({ code: 200, puntosFantasy: fantasyLineup.puntos_fantasy });
                 }
             }
         });
@@ -678,7 +700,7 @@ function getTotalScoringGroupByJornadaPos(req,res) {
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, number_match : {
         $gte: 1
     } }},
-        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", number_match: "$number_match", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes", fantasy_scoring_prev:"$fantasy_scoring_prev", puntos_fantasy:"$puntos_fantasy",
+        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", number_match: "$number_match", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes", fantasy_scoring_prev:"$fantasy_scoring_prev", position_prev:"$position_prev",puntos_fantasy:"$puntos_fantasy",
         fantasy_scoringPG: "$fantasy_scoringPG",  fantasy_scoringSG: "$fantasy_scoringSG",fantasy_scoringSF: "$fantasy_scoringSF", fantasy_scoringPF:"$fantasy_scoringPF", fantasy_scoringC:"$fantasy_scoringC"}}},
         { $sort: { "_id.number_match": 1, "_id.fantasy_scoring": -1,  } }
     ])
@@ -703,7 +725,7 @@ function getTotalScoringGroupByJornada(req,res) {
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, number_match : {
         $gte: 0
     } }},
-        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", number_match: "$number_match", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes", fantasy_scoring_prev:"$fantasy_scoring_prev", puntos_fantasy:"$puntos_fantasy",
+        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id", number_match: "$number_match", fantasy_scoring:"$fantasy_scoring", total_minutes:"$total_minutes", fantasy_scoring_prev:"$fantasy_scoring_prev", position_prev:"$position_prev",puntos_fantasy:"$puntos_fantasy",
         fantasy_scoringG: "$fantasy_scoringG",  fantasy_scoringF:"$fantasy_scoringF", fantasy_scoringC:"$fantasy_scoringC"}}},
         { $sort: { "_id.number_match": 1, "_id.fantasy_scoring": -1,  } }
     ])
@@ -724,11 +746,11 @@ function updateScoringPointsByJornada(req,res) {
     const fantasyLineupId  = req.params.user;
 
     const {
-        puntos_fantasy
+        puntos_fantasy, position_prev
     } = req.body;
         
     FantasyLineup.updateOne({_id: fantasyLineupId},
-    { $set: {"puntos_fantasy": puntos_fantasy }})
+    { $set: {"puntos_fantasy": puntos_fantasy, "position_prev": position_prev }})
     .exec(
             (err, fantasyLineup) => {
                 if(err){
@@ -828,5 +850,6 @@ module.exports = {
     saveFantasyLineups,
     resetScoringLineupUser,
     getTotalScoringGroupByJornadaPos,
-    updateFantasyTeamName
+    updateFantasyTeamName,
+    getPuntosLineupByJornada
 };
