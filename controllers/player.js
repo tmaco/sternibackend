@@ -287,6 +287,23 @@ function updateAvatar(req,res) {
     
 }
 
+function updatePlayerTeam(req,res) {
+    const { id } = req.params;
+    const { team_id } = req.body;
+
+    Player.findByIdAndUpdate(id, 
+        { team_id:  team_id}, (err, playerStored) => {
+            if(err) {
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(!playerStored) {
+                    res.status(404).send({ message: "Jugador no encontrado."});
+                } else {
+                        res.status(200).send({ message: "Jugador actualizado correctamente."});
+                }
+            }
+        } );
+}
 
 
 module.exports = {
@@ -298,5 +315,6 @@ module.exports = {
     updateDisplayName,
     getPlayersByPosition,
     getListPlayers,
-    updateAvatar
+    updateAvatar,
+    updatePlayerTeam
 };
