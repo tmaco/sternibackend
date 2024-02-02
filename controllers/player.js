@@ -113,7 +113,9 @@ function getPlayerId(req,res){
 
     const playerId = parseInt(req.params.playerId);
 
-    Player.findOne({ season_id: "23_24", player_id : playerId})
+    var season = req.query.season;
+
+    Player.findOne({ season_id: season, player_id : playerId})
         .exec((err, playerStored) => {
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
