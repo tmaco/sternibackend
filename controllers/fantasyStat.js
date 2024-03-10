@@ -805,7 +805,7 @@ function getPPmazosFromTo(req,res){
         $gte: dateFrom,
         $lt: dateTo}}},
             { $group: { "_id": { player_id: "$player_id" , player_name: "$player_name" , 
-            position: "$position"}, 
+            position: checkPosition("$position")},
                 "totalMatches" : { "$sum": 1},
                 "totalMinutes" : { "$sum": "$minutes"},
                 "totalFantasyScoring" : { "$sum": "$fantasy_scoring"},           
@@ -824,6 +824,36 @@ function getPPmazosFromTo(req,res){
             }
         });
 }
+
+function checkPosition(position){
+    let pos = "";
+    switch(position) {
+        case 'PG':
+            pos = "G";
+            break;
+        case 'SG':
+            pos = "G";
+            break;
+        case 'SF':
+            pos = "F";
+            break;
+        case 'PF':
+            pos = "F";
+            break;
+        case 'C':
+            pos = "C";
+            break;
+        case 'G':
+            pos = "G";
+            break;
+        case 'F':
+            pos = "F";
+            break;
+        default:
+            pos = "";
+    };
+    return pos;
+  }
 
 module.exports = {
     getTotalFantasyStatsByPlayer,
