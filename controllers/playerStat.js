@@ -136,7 +136,7 @@ function getStatsBySeason(req,res){
 
 
     PlayerStat.aggregate([{$match: { season_id: seasonId, event_season_type: eventID, seconds: { $gt: 0} }},
-            { $group: { "_id": { player_id: "$player_id" , display_name: "$display_name", position:"$position",team_abbreviation:"$team_abbreviation" }, 
+            { $group: { "_id": { player_id: "$player_id" , display_name: "$display_name", position:checkPosition("$position"),team_abbreviation:"$team_abbreviation" },
                 "totalMatches" : { "$sum": 1},
                 "totalMinutes" : { "$sum": "$minutes"},
                 "totalSeconds" : { "$sum": "$seconds"},
@@ -1241,6 +1241,36 @@ function updateReboundsLocal(req,res){
         });
     
 }
+
+function checkPosition(position){
+    let pos = "";
+    switch(position) {
+        case 'PG':
+            pos = "G";
+            break;
+        case 'SG':
+            pos = "G";
+            break;
+        case 'SF':
+            pos = "F";
+            break;
+        case 'PF':
+            pos = "F";
+            break;
+        case 'C':
+            pos = "C";
+            break;
+        case 'G':
+            pos = "G";
+            break;
+        case 'F':
+            pos = "F";
+            break;
+        default:
+            pos = "";
+    };
+    return pos;
+  }
 
 module.exports = {
     getTotalStatsByPlayer,
