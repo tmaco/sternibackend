@@ -68,7 +68,7 @@ function activateFantasyPlayer(req, res){
 }
 
 function addFantasyPlayers(req,res){
-    Player.find({season_id: "23_24"})
+    Player.find({season_id: "24_25"})
     .sort({ team_id: "asc", last_name: "asc"})
     .exec((err, playersStored) => {
         if(err){
@@ -83,8 +83,8 @@ function addFantasyPlayers(req,res){
                     var fplayer = new FantasyPlayer({
                         player_id: fp.player_id,
                         player_name: utiles.removeDiacritics(fp.display_name),
-                        season_id: "23_24",
-                        league_id: "fa-league-24",
+                        season_id: "24_25",
+                        league_id: "fa-league-25",
                         salary: 1,
                         cost: 1,
                         available: true,
@@ -115,7 +115,7 @@ function addFantasyPlayers(req,res){
 }
 
 function updateAvatarFantasyPlayer(req,res){
-    Player.find({season_id: "23_24"})
+    Player.find({season_id: "24_25"})
     .sort({ team_id: "asc", last_name: "asc"})
     .exec((err, playersStored) => {
         if(err){
@@ -129,8 +129,8 @@ function updateAvatarFantasyPlayer(req,res){
                     var fplayer = new FantasyPlayer({
                         player_id: fp.player_id,
                         //player_name: utiles.removeDiacritics(fp.display_name),
-                        season_id: "23_24",
-                        league_id: "fa-league-24",
+                        season_id: "24_25",
+                        league_id: "fa-league-25",
                         salary: 1,
                         cost: 1,
                         available: true,
