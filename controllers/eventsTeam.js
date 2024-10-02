@@ -708,12 +708,12 @@ function updateEventsDatePlayoff(req,res){
 
     var msf = new MySportsFeeds("2.1", true);
     msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
-    msf.getData('nba', '2023-playoff', 'seasonal_games', 'json', {date: 'from-20230411-to-20230613', force: 'false', sort: 'game.starttime'})
+    msf.getData('nba', '2024-playoff', 'seasonal_games', 'json', {date: 'from-20240415-to-20240619', force: 'false', sort: 'game.starttime'})
     .then(async response => { //status: 'final',  
         const fs = require('fs');
         var path = require('path');
                 
-        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2023-playoff-from-20230411-to-20230613.json');
+        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2024-playoff-from-20240415-to-20240619.json');
                 
         await fs.readFile(jsonPath, (err, data) => {
             if (err) throw err;
@@ -739,7 +739,7 @@ function updateEventsDatePlayoff(req,res){
                 }
 
                 EventsTeam.updateOne({event_id: event.schedule.id, team_id: homeTeam},
-                { season_id: "22_23", event_season_type: "post", team_event_location_type: 'h', 
+                { season_id: "23_24", event_season_type: "post", team_event_location_type: 'h', 
                     event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
                     team_id: homeTeam, opponent_id: awayTeam, team_event_result: team_points_scored > opponent_points_scored ? "win" : "loss", team_points_scored: team_points_scored, 
                     opponent_points_scored: opponent_points_scored, event_status: playedStatus },
@@ -763,7 +763,7 @@ function updateEventsDatePlayoff(req,res){
                 }
 
                 EventsTeam.updateOne({event_id: event.schedule.id, team_id: awayTeam},
-                { season_id: "22_23", event_season_type: "post", team_event_location_type: 'a', 
+                { season_id: "23_24", event_season_type: "post", team_event_location_type: 'a', 
                     event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
                     team_id: awayTeam, opponent_id: homeTeam, team_event_result: team_points_scored_away > opponent_points_scored_away ? "win" : "loss", team_points_scored: team_points_scored_away, 
                     opponent_points_scored: opponent_points_scored_away, event_status: playedStatus},
