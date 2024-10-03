@@ -78,7 +78,8 @@ function addPlayerLineup(req,res){
                                                                     registro.fecha = Date.now();
                                                                     registro.usuario = fantasyUser 
                                                                     registro.mensaje = lineupData.position + " " + lineupData.player_name;
-                                                                    registro.league = leagueId;                     
+                                                                    registro.league = leagueId;           
+                                                                    registro.player_id=lineupData.player_id,          
                                                                     registro.save((err, registroCreated) => {
                                                                         if(err){
                                                                             res.status(500).send({ code: 500, message: "Error del servidor."});
@@ -307,7 +308,8 @@ function deletePlayerFantasyLineup(req, res) {
                                     registro.fecha = Date.now();
                                     registro.usuario = fantasyUser; 
                                     registro.mensaje = position + " " + fantasyPlayerName;
-                                    registro.league = league_id;                   
+                                    registro.league = league_id;   
+                                    registro.player_id=lineupData.player_id,          
                                     registro.save((err, registroCreated) => {
                                         if(err){
                                             res.status(500).send({ code: 500, message: "Error del servidor."});

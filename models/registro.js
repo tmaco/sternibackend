@@ -8,7 +8,9 @@ const RegistroSchema = new Schema(
         usuario: String,
         fecha: Date,
         league: String,
-        mensaje: String
+        mensaje: String,
+        player_id: Number
+
     }
 );
 
