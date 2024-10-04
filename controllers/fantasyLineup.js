@@ -309,7 +309,7 @@ function deletePlayerFantasyLineup(req, res) {
                                     registro.usuario = fantasyUser; 
                                     registro.mensaje = position + " " + fantasyPlayerName;
                                     registro.league = league_id;   
-                                    registro.player_id=lineupData.player_id,          
+                                    registro.player_id=fantasyPlayer_id,          
                                     registro.save((err, registroCreated) => {
                                         if(err){
                                             res.status(500).send({ code: 500, message: "Error del servidor."});
