@@ -78,9 +78,12 @@ function addFantasyPlayers(req,res){
                 res.status(404).send({ message: "No se ha encontrado ningun jugador."});
             } else {
                 console.log(playersStored.length);
-                for(var i=0; i<utiles.count(playersStored); i++){
-                    var fp = playersStored[i];
-                    var fplayer = new FantasyPlayer({
+                //for(var i=0; i<utiles.count(playersStored); i++){
+                playersStored.forEach(async (registro) => {                 
+
+                    //var fp = playersStored[i];
+                    let fp =registro;
+                    let fplayer = new FantasyPlayer({
                         player_id: fp.player_id,
                         player_name: utiles.removeDiacritics(fp.display_name),
                         season_id: "24_25",
@@ -91,19 +94,29 @@ function addFantasyPlayers(req,res){
                         position: fp.position,
                         avatar: fp.avatar
                     });
-                    console.log(fplayer);
+                    //console.log(fplayer);
 
                     //FantasyPlayer.collection.updateOne({player_id: fplayer.player_id, season_id: fplayer.season_id, league_id: fplayer.league_id}, fplayer, {upsert:true}, function (err, docs) {
                     FantasyPlayer.collection.insertOne(fplayer, function (err, docs) {
 
                         if (err){ 
                             //return console.error(err);
-                            console.warn("Duplicado");
+                            if (err){ 
+                                //return console.error(err);
+                                if (err.code === 11000) {
+                                    // Código de error para duplicados
+                                    console.warn("Duplicado: " + fplayer.player_name);
+                                } else {
+                                    console.error("Error al insertar registro: ", err);
+                                }
+                            }
                         } else {
-                            //console.log("Fantasy Player inserted to Collection");
+                            console.log("Fantasy Player inserted to Collection: "+fplayer.player_name);
                         }
                     });
-                }
+               // }
+            });
+
             }
         }
     });

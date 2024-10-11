@@ -147,46 +147,56 @@ function getPlayersData(req,res){
         var jsonPath = path.join(__dirname, '..', '.', 'results', 'players-nba-2024-2025-regular.json');
         //var jsonPath = '/tmp/players-nba-2023-2024-regular.json';
         await fs.readFile(jsonPath, (err, data) => {
-        if (err) throw err;
-        let playersData = JSON.parse(data);
+            if (err) throw err;
+            let playersData = JSON.parse(data);
 
-        team_id = utiles.checkNewAPISportsFeeds(TeamName);
-        
-        //res.status(200).send({ code: 200, data: playersData.players[0] });
-        console.log(utiles.count(playersData.players));
-            for(var i=0; i<utiles.count(playersData.players); i++){
-                var ply = playersData.players[i].player;
-                //console.log(ply.lastName);
-                var player = new Player({
-                    player_id: ply.id,
-                    season_id: "24_25",
-                    team_id: team_id,
-                    last_name: utiles.removeDiacritics(ply.lastName), 
-                    first_name: utiles.removeDiacritics(ply.firstName), 
-                    display_name: utiles.removeDiacritics(ply.firstName) + " " +utiles.removeDiacritics(ply.lastName), 
-                    birthdate: ply.birthDate,
-                    age: ply.age, 
-                    birthplace: ply.birthCity + ", " + ply.birthCountry,
-                    height_formatted: ply.height,
-                    weight_lb: ply.weight, 
-                    weight_kg: ply.weight,
-                    position: ply.primaryPosition, 
-                    uniform_number: ply.jerseyNumber,
-                    roster_status: ply.currentRosterStatus === "ROSTER" ? "active" : "inactive",
-                    avatar: ply.officialImageSrc
-                });
+            team_id = utiles.checkNewAPISportsFeeds(TeamName);
+            
+            //res.status(200).send({ code: 200, data: playersData.players[0] });
+            console.log(utiles.count(playersData.players));
+            //for(var i=0; i<utiles.count(playersData.players); i++){
+            playersData.players.forEach(async (registro) => {                 
 
-                //console.log(player);
-                Player.collection.insertOne(player, function (err, docs) {
-                //Player.collection.updateOne({ player_id: player.player_id, season_id: player.season_id}, player, {upsert:true}, function (err, docs) {
-                    if (err){ 
-                        //return console.error(err);
-                        console.warn("Duplicado");
-                    } else {
-                        //console.log("Player inserted to Collection");
-                    }
-                });
-            }
+                    //let ply = playersData.players[i].player;
+                    let ply = registro.player;
+                    //console.log(ply.lastName);
+                    var player = new Player({
+                        player_id: ply.id,
+                        season_id: "24_25",
+                        team_id: team_id,
+                        last_name: utiles.removeDiacritics(ply.lastName), 
+                        first_name: utiles.removeDiacritics(ply.firstName), 
+                        display_name: utiles.removeDiacritics(ply.firstName) + " " +utiles.removeDiacritics(ply.lastName), 
+                        birthdate: ply.birthDate,
+                        age: ply.age, 
+                        birthplace: ply.birthCity + ", " + ply.birthCountry,
+                        height_formatted: ply.height,
+                        weight_lb: ply.weight, 
+                        weight_kg: ply.weight,
+                        position: ply.primaryPosition, 
+                        uniform_number: ply.jerseyNumber,
+                        roster_status: ply.currentRosterStatus === "ROSTER" ? "active" : "inactive",
+                        avatar: ply.officialImageSrc
+                    });
+
+                    //console.log(player);
+                    Player.collection.insertOne(player, function (err, docs) {
+                    //Player.collection.updateOne({ player_id: player.player_id, season_id: player.season_id}, player, {upsert:true}, function (err, docs) {
+                        if (err){ 
+                            //return console.error(err);
+                            if (err.code === 11000) {
+                                // Código de error para duplicados
+                                console.warn("Duplicado: " + player.display_name);
+                            } else {
+                                console.error("Error al insertar registro: ", err);
+                            }
+                        } else {
+                            console.log("Player inserted to Collection: "+ player.display_name);
+                        }
+                    });
+                //}
+            });
+
             /*player.save((err, playerStored) => {
                     if(err){
                         res.status(500).send({ message: "El usuario ya existe." });
