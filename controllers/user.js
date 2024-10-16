@@ -215,10 +215,12 @@ function uploadAvatar(req, res) {
     
     User.findById({_id: params.id}, (err,userData) => {
         if(err) {
-            err.status(500).send({ message: "Error del servidor."});
+            err.status(500)
+            .send({ message: "Error del servidor."});
         } else {
             if(!userData) {
-                err.status(404).send({ message: "Usuario no encontrado."});
+                res.status(404)
+                .send({ code: 404,message: "Usuario no encontrado."});
             } else {
                 let user = userData;
                 
@@ -230,10 +232,17 @@ function uploadAvatar(req, res) {
                     let extSplit = fileName.split(".");
                     let fileExt = extSplit[1];
 
-                    if(fileExt !== "png" && fileExt !== "jpeg" && fileExt !== "jpg") {
+                    // Verifica el tamaño del archivo
+                    let fileSize = req.files.avatar.size; // Tamaño en bytes
+                    if (fileSize > 300 * 1024) { // 100 KB
+                        return res.status(400)
+                        .send({ code: 400,
+                            message: "El tamaño de la imagen no puede ser mayor de 300 KB." });
+
+                    } else if(fileExt !== "png" && fileExt !== "jpeg" && fileExt !== "jpg") {
                         res.status(400)
-                        .send({ 
-                            message: "La extension de la imagen no es valida. Extensiones permitidas .png y .jpeg"
+                        .send({ code: 400,
+                            message: "La extension de la imagen no es valida. Extensiones permitidas .png, .jpg y .jpeg"
                         });
                     } else {
                         user.avatar = fileName;
@@ -241,18 +250,23 @@ function uploadAvatar(req, res) {
                             _id: params.id
                         }, user, (err, userResult) => {
                             if(err) {
-                                err.status(500).send({ message: "Error del servidor."})
-
+                                err.status(500)
+                                .send({ message: "Error del servidor."})
                             } else {
                                 if(!userResult) {
-                                    err.status(404).send({ message: "Usuario no encontrado."});
+                                    res.status(404)
+                                    .send({ code: 404, message: "Usuario no encontrado."});
                                 } else {
-                                    res.status(200).send({ avatarName: fileName});
+                                    res.status(200)
+                                    .send({ code: 200, avatarName: fileName});
                                 }
                             }
                         });
                     }
 
+                }else{
+                    res.status(404)
+                    .send({ code: 404, message: "Fichero no encontrado."});
                 }
 
             }
@@ -290,7 +304,7 @@ async function updateUser(req, res) {
     if(userData.password) {
         await bcrypt.hash(userData.password, null, null, (err, hash) => {
             if(err) {
-                res.status(500).send({ message: "Error al encriptar la contraseña." })
+                err.status(500).send({ code: 500,message: "Error al encriptar la contraseña." })
             } else {
                 userData.password = hash;
             }
@@ -302,9 +316,9 @@ async function updateUser(req, res) {
             err.status(500).send({ message: "Error del servidor."});
         } else {
             if(!userUpdate) {
-                err.status(404).send({ message: "Usuario no encontrado."});
+                res.status(404).send({ code: 404,message: "Usuario no encontrado."});
             } else {
-                res.status(200).send({ message: "Usuario actualizado correctamente."});
+                res.status(200).send({ code: 200, message: "Usuario actualizado correctamente."});
             }
         }
     });
