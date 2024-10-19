@@ -80,6 +80,24 @@ function getStatusData(req,res){
 
 }
 
+async function getStatusInjData(req,res) {
+   let jugadores=req.body;
+   
+   try {
+    StatusPlayer.collection.deleteMany({});
+    const resultado = await StatusPlayer.insertMany(jugadores);
+    //console.log("Inserciones completadas:", resultado);
+    res.status(200).send({ code: 200, message: "Inserciones completadas en DB"});
+
+  } catch (error) {
+    //console.error("Error al insertar jugadores:", error);
+    res.status(500).send({ code: 500, message: "Error al insertar jugadores:" +error });
+
+  }
+}
+
+
+
 function getStatusPlayers(req,res) {
     StatusPlayer.find({})
         .sort({ last_name: "asc"})
@@ -99,5 +117,6 @@ function getStatusPlayers(req,res) {
 
 module.exports = {
     getStatusData,
-    getStatusPlayers
+    getStatusPlayers,
+    getStatusInjData
 };

@@ -75,19 +75,21 @@ function getPlayer(req,res){
 
     const playerName = req.params.playerName;
 
-    Player.findOne({ season_id: "24_25", display_name : playerName})
+    // Crear una expresión regular que permita coincidencias en medio y al final
+    const regex = new RegExp(playerName.replace(/\*/g, '.*'), 'i'); // 'i' para que sea insensible a mayúsculas
+
+    Player.findOne({ season_id: "24_25", display_name: { $regex: regex } })
         .exec((err, playerStored) => {
-            if(err){
-                res.status(500).send({ message: "Error del servidor."});
+            if (err) {
+                res.status(500).send({ message: "Error del servidor." });
             } else {
-                if(playerStored.length <= 0) {
-                    res.status(404).send({ message: "No se ha encontrado ningun jugador llamado " + playerName + "."});
+                if (!playerStored) {
+                    res.status(404).send({ message: "No se ha encontrado ningún jugador llamado " + playerName + "." });
                 } else {
                     res.status(200).send({ code: 200, player: playerStored });
                 }
             }
         });
-
 }
 
 function getListPlayers(req,res){
