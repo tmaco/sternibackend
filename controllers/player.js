@@ -44,10 +44,10 @@ function getPlayersByPosition(req,res) {
 
     switch(req.params.position) {
         case 'G':
-            position = [ "PG", "SG" ];
+            position = [ "PG", "SG", "G" ];
             break;
         case 'F':
-            position = [ "SF", "PF" ];
+            position = [ "SF", "PF", "F" ];
             break;
         case 'C':
             position = [ "C" ];
