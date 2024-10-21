@@ -22,6 +22,7 @@ const fantasyLeagueRoutes = require("./routers/fantasyLeague");
 const registroRoutes = require("./routers/registro");
 const postRoutes = require("./routers/post");
 const statusPlayerRoutes = require("./routers/statusPlayer");
+const newsPlayerRoutes = require("./routers/newsPlayer");
 
 
 //Configure Body Parser
@@ -63,5 +64,7 @@ app.use(`/api/${API_VERSION}`, fantasyLeagueRoutes);
 app.use(`/api/${API_VERSION}`, registroRoutes);
 app.use(`/api/${API_VERSION}`, postRoutes);
 app.use(`/api/${API_VERSION}`, statusPlayerRoutes);
+app.use(`/api/${API_VERSION}`, newsPlayerRoutes);
+
 
 module.exports = app;
