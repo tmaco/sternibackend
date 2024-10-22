@@ -87,7 +87,7 @@ async function getStatusInjData(req,res) {
     StatusPlayer.collection.deleteMany({});
     const resultado = await StatusPlayer.insertMany(jugadores);
     //console.log("Inserciones completadas:", resultado);
-    res.status(200).send({ code: 200, message: "Inserciones completadas en DB"});
+    res.status(200).send({ code: 200, message: "Lesiones insertadas en DB"});
 
   } catch (error) {
     //console.error("Error al insertar jugadores:", error);
