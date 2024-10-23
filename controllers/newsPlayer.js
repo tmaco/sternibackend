@@ -47,7 +47,7 @@ async function getNewsData(req, res) {
 
 function getNewsPlayers(req,res) {
     NewsPlayer.find({})
-        .sort({ last_name: "asc"})
+        .sort({ lastUpdatedOn: "desc"})
         .exec((err, newsStored) => {
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
@@ -61,7 +61,25 @@ function getNewsPlayers(req,res) {
         });
 }
 
+function getNewsPlayer(req, res) {
+    NewsPlayer.find({ player_id: req.params.playerId }) // Corregido aquí
+        .sort({ lastUpdatedOn: "desc" })
+        .exec((err, newsStored) => {
+            if (err) {
+                res.status(500).send({ message: "Error del servidor." });
+            } else {
+                if (newsStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado ninguna noticia de jugador." });
+                } else {
+                    res.status(200).send({ code: 200, news: newsStored });
+                }
+            }
+        });
+}
+
+
 module.exports = {
     getNewsData,
-    getNewsPlayers
+    getNewsPlayers,
+    getNewsPlayer
 };

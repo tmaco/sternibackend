@@ -11,7 +11,7 @@ const newsPlayerSchema = new Schema(
         currentTitle: { type: String, required: true } ,
         currentDescription: { type: String, required: true } ,
         translate: { type: String, required: true } ,
-        lastUpdatedOn: { type: String, required: true },
+        lastUpdatedOn: { type: Date, required: true },
 
     }
 );

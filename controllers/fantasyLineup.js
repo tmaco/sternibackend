@@ -621,7 +621,9 @@ function getTotalScoringByLeague(req,res) {
 
     const seasonId = req.query.season;
     const leagueId = req.query.league;
-    var limit = 17;
+    let limit = 17;
+    let limit1 = 17;
+    let limit2 = 17;
 
     if(seasonId==="20_21"){
         limit = 19;
@@ -632,13 +634,16 @@ function getTotalScoringByLeague(req,res) {
     }else if(seasonId==="23_24"){
         limit = 17;
     }else if(seasonId==="24_25"){
-        limit = 12;
+        limit = 9;
+        limit1 = 11;
+        limit2 = 16;
     }
 
 
-    FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, number_match : {
-        $gte: 0, $lt: limit 
-    }}},
+    FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, $or: [
+        { number_match: { $gt: 0, $lt: limit } },   // Rango del 1 al 8
+        { number_match: { $gt: limit1, $lt: limit2 } }  // Rango del 12 al 15
+    ]}},
         { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id"},
         "totalFScoring" : { "$sum": "$puntos_fantasy"},
         "totalScoring" : { "$sum": "$fantasy_scoring"}}},
@@ -661,7 +666,9 @@ function getTotalFantasyScoringByLeague(req,res) {
 
     const seasonId = req.query.season;
     const leagueId = req.query.league;
-    var limit = 17;
+    let limit = 17;
+    let limit1 = 17;
+    let limit2 = 17;
 
     if(seasonId==="20_21"){
         limit = 19;
@@ -672,12 +679,15 @@ function getTotalFantasyScoringByLeague(req,res) {
     }else if(seasonId==="23_24"){
         limit = 17;
     }else if(seasonId==="24_25"){
-        limit = 12;
+        limit = 9;
+        limit1 = 11;
+        limit2 = 16;
     }
 
-    FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, number_match : {
-        $gte: 0, $lt: limit 
-    }}},
+    FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, $or: [
+        { number_match: { $gt: 0, $lt: limit } },   // Rango del 1 al 8
+        { number_match: { $gt: limit1, $lt: limit2 } }  // Rango del 12 al 15
+    ]}},
         { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id"},
         "totalFScoring" : { "$sum": "$fantasy_scoring"},
         "totalScoring" : { "$sum": "$puntos_fantasy"},
