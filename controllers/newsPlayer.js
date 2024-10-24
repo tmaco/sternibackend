@@ -12,6 +12,9 @@ async function getNewsData(req, res) {
         // Insertar cada noticia uno a uno
         for (const item of news) {
             try {
+                if (item.lastUpdatedOn) {
+                    item.lastUpdatedOn = new Date(item.lastUpdatedOn); // Hacer el casting
+                }
                 const result = await NewsPlayer.collection.insertOne(item);
                 insertedNews.push(result.ops[0]); // Guardar la noticia insertada
             } catch (err) {
