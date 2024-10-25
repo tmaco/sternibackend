@@ -10,7 +10,6 @@ const newsPlayerSchema = new Schema(
         player_name : { type: String, required: true } ,
         currentTitle: { type: String, required: true } ,
         currentDescription: { type: String, required: true } ,
-        translate: { type: String, required: true } ,
         lastUpdatedOn: { type: Date, required: true },
 
     }
