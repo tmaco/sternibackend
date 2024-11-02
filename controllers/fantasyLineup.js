@@ -253,6 +253,30 @@ function getUserFantasyLineup(req,res){
         });
 }
 
+function getUserFantasyLineupMatch(req,res){
+
+    const userId = req.query.user;
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+    const match = isNaN(req.query.match) ? req.query.match : parseInt(req.query.match, 10); // El segundo argumento es la base numérica
+
+    FantasyLineup.aggregate([{$match: { user_id: userId, league_id: leagueId , season_id: seasonId ,number_match: match}},
+        { $unwind: "$fantasyLineup" },
+        { $sort: { "fantasyLineup.order": 1 } },
+        { $group: { _id: "$_id", fantasyLineup: { $push: "$fantasyLineup" } } }])
+        .exec((err, fantasyLineup) => {
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+                if(!fantasyLineup || fantasyLineup.length === 0 || !fantasyLineup[0] ) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado fantasy lineup para " +userId +"."});
+                } else {
+                    res.status(200).send({ code: 200, fantasyLineup: fantasyLineup[0] });
+                }
+            }
+        });
+}
+
 function updateFantasyLineup(req,res) {
     const FantasyLineupId = req.params.id;
     const {
@@ -850,6 +874,7 @@ module.exports = {
     getFantasyLineupId,
     getFantasyLineupLimit,
     getUserFantasyLineup,
+    getUserFantasyLineupMatch,
     updateFantasyLineup,
     deletePlayerFantasyLineup,
     getUsersFantasyLineups,
