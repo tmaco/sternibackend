@@ -7,6 +7,7 @@ const md_auth = require("../middleware/authenticate");
 const api = express.Router();
 
 api.get("/get-total-fantasy/:playerName", FantasyStatController.getTotalFantasyStatsByPlayer);
+api.get("/get-fleague/:league", FantasyStatController.getTotalFantasyStatsByLeague);
 api.get("/get-season-fantasy/:playerName", FantasyStatController.getTotalFantasyStatsBySeasonPlayerApi);
 api.get("/get-fantasy/:playerName", FantasyStatController.getFantasyStatsByPlayer);
 api.get("/get-fantasy-league/:playerName", FantasyStatController.getFantasyStatsByLeague);

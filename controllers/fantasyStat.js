@@ -26,6 +26,29 @@ function getTotalFantasyStatsByPlayer(req,res){
 
 }
 
+function getTotalFantasyStatsByLeague(req,res){
+    const leagueId = req.params.league;
+    const eventId = req.query.event;
+
+    FantasyStat.find({ league_id : leagueId, type_match: eventId },
+        { player_id: 1, season_id:1, date_match:1, fantasy_scoring: 1, points_per_minute: 1 }
+    )
+    .sort({ fantasy_scoring: "desc"})
+    .limit(2000)
+        .exec((err, fstatsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(fstatsStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado estadisticas de " + leagueId +"."});
+                } else {
+                    res.status(200).send({ code: 200, fstats: fstatsStored });
+                }
+            }
+        });
+
+}
+
 function getTotalFantasyStatsBySeasonPlayerApi(req,res){
     const playerName = req.params.playerName;
     const seasonId = req.query.season;
@@ -906,5 +929,6 @@ module.exports = {
     getFantasyStatsByLeagueByDate,
     getFantasyScoringByEvents,
     getPPmazosFromTo,
-    getAllFantasyStatsBySeason
+    getAllFantasyStatsBySeason,
+    getTotalFantasyStatsByLeague
 }

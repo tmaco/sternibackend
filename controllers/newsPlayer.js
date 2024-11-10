@@ -1,4 +1,6 @@
 const NewsPlayer = require("../models/newsPlayer");
+const jwt = require("jwt-simple");
+const moment = require('moment');
 
 async function getNewsData(req, res) {
     try {
@@ -80,9 +82,49 @@ function getNewsPlayer(req, res) {
         });
 }
 
+async function updateNewsKey(req, res) {
+  try {
+    // Obtén los documentos que coinciden con player_id: 144253
+    const players = await NewsPlayer.find({ });
+
+    if (players.length === 0) {
+      return res.status(404).json({ message: 'No se encontraron jugadores con ese ID.' });
+    }
+
+    // Genera el JWT para cada documento y actualiza en la base de datos
+    const updates = players.map(async (player) => {
+      const payload = {
+        title: player.currentTitle,
+        player_id: player.player_id,
+        fecha:  moment(player.lastUpdatedOn).format('YYYY-MM-DD')
+      };
+
+      // Genera el JWT con los datos del jugador y la clave secreta
+      const token = jwt.encode(payload, "lol", 'HS256');  // Usa una clave secreta más segura en producción
+
+      // Actualiza el documento con el JWT generado
+      await NewsPlayer.updateOne(
+        { _id: player._id },  // Usamos el _id del documento para la actualización
+        { $set: { key: token } }
+      );
+    });
+
+    // Espera a que todas las actualizaciones terminen
+    await Promise.all(updates);
+
+    res.json({ message: 'JWTs generados y documentos actualizados exitosamente.' });
+  } catch (error) {
+    console.error('Error al actualizar:', error);
+    res.status(500).json({
+      message: 'Error al actualizar los documentos.',
+      error: error.message
+    });
+  }
+}
 
 module.exports = {
     getNewsData,
     getNewsPlayers,
-    getNewsPlayer
+    getNewsPlayer,
+    updateNewsKey
 };
