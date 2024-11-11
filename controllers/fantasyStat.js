@@ -33,8 +33,8 @@ function getTotalFantasyStatsByLeague(req,res){
     FantasyStat.find({ league_id : leagueId, type_match: eventId },
         { player_id: 1, season_id:1, date_match:1, fantasy_scoring: 1, points_per_minute: 1 }
     )
-    .sort({ fantasy_scoring: "desc"})
-    .limit(2000)
+    .sort({ points_per_minute: "desc", fantasy_scoring: "desc"})
+    .limit(5000)
         .exec((err, fstatsStored) => {
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
