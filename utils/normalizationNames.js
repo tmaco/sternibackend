@@ -141,7 +141,7 @@ exports.checkTeam = function(team_name){
           abv = "DET";
           break;
       case 'golden-state-warriors':
-          abv = "GS";
+          abv = "GSW";
           break;
       case 'houston-rockets':
           abv = "HOU";
@@ -168,10 +168,10 @@ exports.checkTeam = function(team_name){
           abv = "MIN";
           break;
       case 'new-orleans-pelicans':
-          abv = "NO";
+          abv = "NOP";
           break;
       case 'new-york-knicks':
-          abv = "NY";
+          abv = "NYK";
           break;
       case 'oklahoma-city-thunder':
           abv = "OKC";
