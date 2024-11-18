@@ -1,4 +1,5 @@
 const FantasyPlayer = require("../models/fantasyPlayer");
+const FantasyLineup = require("../models/fantasyLineup");
 const Player = require("../models/player");
 const utiles = require("../utils/normalizationNames");
 
@@ -30,7 +31,41 @@ function getFantasyPlayer(req,res){
     const leagueId = req.query.league;
     const PlayerId = req.params.player;
 
-    FantasyPlayer.findOne({ league_id: leagueId , season_id: seasonId , player_id: PlayerId })
+    FantasyLineup.findOne({  league_id: leagueId , season_id: seasonId ,number_match: 0,
+        "fantasyLineup.player_id":PlayerId}, { "name_team": 1, "_id": 0})
+        .exec((err, fantasyLineup) => {
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+
+                    FantasyPlayer.findOne({ 
+                        league_id: leagueId, 
+                        season_id: seasonId, 
+                        player_id: PlayerId 
+                    })
+                    .sort({ last_name: "asc" })
+                    .exec((err, fantasyPlayer) => {
+                        if (err) {
+                            return res.status(500).send({ code: 500, message: "Error del servidor." });
+                        }
+                        
+                        if (!fantasyPlayer) {
+                            return res.status(404).send({ code: 404, message: "No se ha encontrado el jugador fantasy." });
+                        }
+                
+                        // Añadir el name_team al objeto fantasyPlayer
+                        fantasyLineup && fantasyLineup.name_team ? fantasyPlayer.name_team=fantasyLineup.name_team : fantasyPlayer.name_team="FA";
+                
+                        // Devolver la respuesta con el fantasyPlayer y el name_team añadido
+                        return res.status(200).send({ 
+                            code: 200, 
+                            fantasyPlayer: fantasyPlayer 
+                        });
+                    });
+            }
+        });
+
+    /*FantasyPlayer.findOne({ league_id: leagueId , season_id: seasonId , player_id: PlayerId })
         .sort({ last_name: "asc" })
         .exec((err, fantasyPlayer) => {
             if(err){
@@ -42,7 +77,7 @@ function getFantasyPlayer(req,res){
                     res.status(200).send({ code: 200, fantasyPlayer: fantasyPlayer });
                 }
             }
-        });
+        });*/
 
 }
 

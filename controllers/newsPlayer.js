@@ -10,44 +10,43 @@ async function getNewsData(req, res) {
         if (!Array.isArray(news)) {
             return res.status(400).send({ code: 400, message: "El body debe ser un array de noticias." });
         }
+
+        // Calcular la fecha límite (hace un mes desde hoy)
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);  // Establecer la fecha a 1 mes atrás
+
+        // Borrar las noticias anteriores a un mes
+        await NewsPlayer.collection.deleteMany({ lastUpdatedOn: { $lt: oneMonthAgo } });
+
         const insertedNews = [];
         // Insertar cada noticia uno a uno
         for (const item of news) {
             try {
                 if (item.lastUpdatedOn) {
-                    item.lastUpdatedOn = new Date(item.lastUpdatedOn); // Hacer el casting
+                    item.lastUpdatedOn = new Date(item.lastUpdatedOn); // Asegurarse de que la fecha sea un objeto Date
                 }
+
+                // Insertar la noticia en la colección
                 const result = await NewsPlayer.collection.insertOne(item);
                 insertedNews.push(result.ops[0]); // Guardar la noticia insertada
             } catch (err) {
                 if (err.code === 11000) {
-                    // Código de error para duplicados
-                    console.warn("Duplicada.");
+                    // Si el error es un duplicado, lo ignoramos
+                    console.warn("Noticia duplicada.");
                 } else {
-                    //console.error("Error al insertar noticia: ", err);
+                    // Si es otro tipo de error, respondemos con un mensaje de error
                     return res.status(500).send({ code: 500, message: "Error al insertar noticia: " + err.message });
                 }
             }
         }
+
         // Responder al cliente con las noticias insertadas
-        res.status(200).send({ code: 200, message: "Noticias insertadas en DB" });
+        res.status(200).send({ code: 200, message: "Noticias insertadas en DB", insertedNews });
     } catch (error) {
-        //console.error("Error general al procesar las noticias: ", error);
+        // Si ocurre algún error, respondemos con un mensaje genérico
         res.status(500).send({ code: 500, message: "Error general: " + error.message });
     }
 }
-
-    /*try {
-    NewsPlayer.collection.deleteMany({});
-    const resultado = await NewsPlayer.insertMany(news);
-    //console.log("Inserciones completadas:", resultado);
-    res.status(200).send({ code: 200, message: "Inserciones completadas en DB"});
-
-  } catch (error) {
-    //console.error("Error al insertar jugadores:", error);
-    res.status(500).send({ code: 500, message: "Error al insertar noticias:" +error });
-
-  }*/
 
 
 function getNewsPlayers(req,res) {
