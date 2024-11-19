@@ -697,7 +697,7 @@ function getFantasyScoringByPlayerSeason(req,res){
                 res.status(500).send({ message: "Error del servidor."});
             } else {
                 if(fstatsStored.length <= 0) {
-                    res.status(404).send({ message: "No se ha encontrado estadisticas fantasy de " + playerId +"."});
+                    res.status(404).send({ code: 404, message: "No se ha encontrado estadisticas fantasy de " + playerId +"."});
                 } else {
                     res.status(200).send({ code: 200, fstats: fstatsStored });
                 }
