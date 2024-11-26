@@ -300,7 +300,7 @@ function updateFantasyLineup(req,res) {
         );
 }
 
-function deletePlayerFantasyLineup(req, res) {
+/*function deletePlayerFantasyLineup(req, res) {
     const { id } = req.params;
 
     const {
@@ -353,7 +353,85 @@ function deletePlayerFantasyLineup(req, res) {
                 }
             }
         );
+}*/
+
+function deletePlayerFantasyLineup(req, res) {
+    const { id } = req.params;
+    const {
+        fantasyPlayerId, fantasyPlayerName, fantasyPlayer_id, fantasyUser, season_id, league_id, available, position
+    } = req.body;
+
+    // Buscar la alineación fantasy en la base de datos
+    FantasyLineup.findOne({ _id: id })
+        .exec((err, fantasyLineup) => {
+            if (err) {
+                return res.status(500).send({ message: "Error del servidor." });
+            }
+
+            if (!fantasyLineup) {
+                return res.status(404).send({ message: "No se ha encontrado la alineación fantasy." });
+            }
+
+            // Verificar si el jugador ya ha sido eliminado (si no está en la alineación)
+            const playerIndex = fantasyLineup.fantasyLineup.findIndex(player => player._id.toString() === fantasyPlayerId);
+            if (playerIndex === -1) {
+                // El jugador ya ha sido eliminado, no hacer nada
+                return res.status(404).send({ message: "El jugador ya ha sido eliminado de la alineación." });
+            }
+
+            // Si el jugador está en la alineación, proceder con la eliminación
+            FantasyLineup.updateOne(
+                { _id: id },
+                { $pull: { fantasyLineup: { _id: fantasyPlayerId } } }
+            ).exec((err, updatedLineup) => {
+                if (err) {
+                    return res.status(500).send({ message: "Error del servidor." });
+                }
+
+                if (!updatedLineup) {
+                    return res.status(404).send({ message: "No se pudo actualizar la alineación." });
+                }
+
+                // Actualizar la disponibilidad del jugador en la base de datos
+                FantasyPlayer.updateOne(
+                    { player_id: fantasyPlayer_id, season_id: season_id, league_id: league_id },
+                    { available }
+                ).exec((err, fantasyStored) => {
+                    if (err) {
+                        return res.status(500).send({ message: "Error del servidor." });
+                    }
+
+                    if (!fantasyStored) {
+                        return res.status(404).send({ message: "Jugador Fantasy no encontrado." });
+                    }
+
+                    // Crear un registro de la acción
+                    const registro = new Registro();
+                    registro.tabla = "fantasyLineup";
+                    registro.tipo = "drop";
+                    registro.fecha = Date.now();
+                    registro.usuario = fantasyUser;
+                    registro.mensaje = position + " " + fantasyPlayerName;
+                    registro.league = league_id;
+                    registro.player_id = fantasyPlayer_id;
+
+                    registro.save((err, registroCreated) => {
+                        if (err) {
+                            return res.status(500).send({ code: 500, message: "Error del servidor." });
+                        }
+
+                        if (!registroCreated) {
+                            return res.status(404).send({ code: 404, message: "Error al crear el registro." });
+                        }
+
+                        // Responder con éxito
+                        return res.status(200).send({ code: 200, message: "Alineación actualizada correctamente." });
+                    });
+                });
+            });
+        });
 }
+
 
 function getUsersFantasyLineups(req,res){
 
