@@ -46,6 +46,43 @@ function addPlayerLineup(req,res){
                         res.status(403).send({ code: 403, message: "Ya tiene 12 jugadores en su alineación."});
                     } else {
 
+                         //Comprobar que en la IL no tenga jugadores sanos
+                        const playersIL = fantasyLimit.injuryList.map(player => player.player_id);
+                        if(playersIL && playersIL.length > 0){
+                            StatusPlayer.aggregate([
+                            {
+                                $match: {
+                                player_id: { $in: playersIL },  // Filtrar por player_id que esté en el array playerIds
+                                currentStatus: "INJ"  // Filtrar por los que tienen currentStatus igual a "INJ"
+                                }
+                            },
+                            {
+                                $group: {
+                                _id: null,
+                                count: { $sum: 1 }  // Contamos cuántos player_id coinciden
+                                }
+                            },
+                            {
+                                $project: {
+                                    _id: 0,
+                                    allPlayersMatch: {
+                                    $eq: [
+                                        { $literal: playersIL.length },  // Usa $literal para referirse a la longitud del array
+                                        "$count"
+                                    ]
+                                    }
+                                }
+                            }
+                            ]).then(result => {
+                                // Si result.allPlayersMatch es true, significa que todos los player_id están en StatusPlayer con currentStatus "INJ"
+                                if (result.length > 0 && result[0].allPlayersMatch) {
+                                    //console.log("Todos los jugadores de la IL están en StatusPlayer con currentStatus INJ.");
+                                } else {
+                                    return res.status(404).send({ code: 404, message: "Hay jugadores en tu IL que no están lesionados." });
+                                }
+                            });
+                        }
+
                         FantasyPlayer.findOne({ player_id: lineupData.player_id, season_id: seasonId, league_id: leagueId}, 
                             (err, fantasyPlayerStored) => {
                                 if(err) {
@@ -249,6 +286,29 @@ function getUserFantasyLineup(req,res){
                     res.status(404).send({ code: 404, message: "No se ha encontrado fantasy lineup para " +userId +"."});
                 } else {
                     res.status(200).send({ code: 200, fantasyLineup: fantasyLineup[0] });
+                }
+            }
+        });
+}
+
+function getUserFantasyIL(req,res){
+
+    const userId = req.query.user;
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+
+    FantasyLineup.aggregate([{$match: { user_id: userId, league_id: leagueId , season_id: seasonId ,number_match: 0}},
+        { $unwind: "$injuryList" },
+        { $sort: { "injuryList.date": 1 } },
+        { $group: { _id: "$_id", injuryList: { $push: "$injuryList" } } }])
+        .exec((err, injuryList) => {
+            if(err){
+                res.status(500).send({ code: 500, message: "Error del servidor."});
+            } else {
+                if(!injuryList || injuryList.length === 0 || !injuryList[0] ) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado IL para " +userId +"."});
+                } else {
+                    res.status(200).send({ code: 200, injuryList: injuryList[0] });
                 }
             }
         });
@@ -993,20 +1053,56 @@ function addInjuryList(req, res) {
                     return res.status(404).send({ code: 404, message: "El jugador no está en la última alineación del equipo" });
                 }
 
-                // Paso 3: Eliminar el jugador de fantasyLineup para number_match === 0
                 // Seleccionar el equipo cuyo number_match sea igual a 0
                 const firstFantasyTeam = fantasyTeams.find(team => team.number_match === 0);
-
                 if (!firstFantasyTeam) {
                     return res.status(404).send({ code: 404, message: "No se encontró una alineación fantasy del equipo" });
                 }
-                
+
+                 //Pase 3: Comprobar que en la IL no tenga jugadores sanos
+                 const playersIL = firstFantasyTeam.injuryList.map(player => player.player_id);
+                if(playersIL && playersIL.length > 0){
+                    StatusPlayer.aggregate([
+                    {
+                        $match: {
+                        player_id: { $in: playersIL },  // Filtrar por player_id que esté en el array playerIds
+                        currentStatus: "INJ"  // Filtrar por los que tienen currentStatus igual a "INJ"
+                        }
+                    },
+                    {
+                        $group: {
+                        _id: null,
+                        count: { $sum: 1 }  // Contamos cuántos player_id coinciden
+                        }
+                    },
+                    {
+                        $project: {
+                            _id: 0,
+                            allPlayersMatch: {
+                              $eq: [
+                                { $literal: playersIL.length },  // Usa $literal para referirse a la longitud del array
+                                "$count"
+                              ]
+                            }
+                        }
+                    }
+                    ]).then(result => {
+                        // Si result.allPlayersMatch es true, significa que todos los player_id están en StatusPlayer con currentStatus "INJ"
+                        if (result.length > 0 && result[0].allPlayersMatch) {
+                            //console.log("Todos los jugadores de la IL están en StatusPlayer con currentStatus INJ.");
+                        } else {
+                            return res.status(404).send({ code: 404, message: "Hay jugadores en tu IL que no están lesionados." });
+                        }
+                    });
+                }
+
+                // Paso 4: Eliminar el jugador de fantasyLineup para number_match === 0
                 const playerToInjured = firstFantasyTeam.fantasyLineup.find(player => player.player_id === parseInt(playerId, 10));
                 
                 if (playerToInjured) {
                     firstFantasyTeam.fantasyLineup = firstFantasyTeam.fantasyLineup.filter(player => player.player_id !== parseInt(playerId, 10));
 
-                    // Paso 4: Añadir el jugador a injuryList para number_match === 0
+                    // Paso 5: Añadir el jugador a injuryList para number_match === 0
                     firstFantasyTeam.injuryList.push({
                         player_id: playerToInjured.player_id,
                         player_name: playerToInjured.player_name,
@@ -1154,6 +1250,7 @@ module.exports = {
     getFantasyLineupId,
     getFantasyLineupLimit,
     getUserFantasyLineup,
+    getUserFantasyIL,
     getUserFantasyLineupMatch,
     updateFantasyLineup,
     deletePlayerFantasyLineup,
