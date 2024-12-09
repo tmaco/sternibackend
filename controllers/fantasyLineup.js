@@ -1120,7 +1120,7 @@ function addInjuryList(req, res) {
                         // Crear un registro de la acción
                         const registro = new Registro();
                         registro.tabla = "fantasyLineup";
-                        registro.tipo = "add IL";
+                        registro.tipo = "+IL";
                         registro.fecha = Date.now();
                         registro.usuario = userId;
                         registro.mensaje = playerToInjured.position + " " + playerToInjured.player_name;
@@ -1135,12 +1135,22 @@ function addInjuryList(req, res) {
                             if (!registroCreated) {
                                 return res.status(404).send({ code: 404, message: "Error al crear el registro." });
                             }
+
+                            FantasyPlayer.updateOne({ player_name: playerToInjured.player_name, season_id: seasonId, league_id: leagueId}, 
+                                { "isIL" : true }, (err, fantasyStored) => {
+                                if(err) {
+                                    return res.status(500).send({ message: "Error del servidor."});
+                                } else {
+                                    if(!fantasyStored) {
+                                        return res.status(404).send({ message: "Jugador Fantasy no encontrado."});
+                                    } 
+                                }
+                            } );
     
                             // Responder con éxito
                             return res.status(200).send({ code: 200, message: "Jugador movido a la IL", data: firstFantasyTeam });
                         });
 
-                        // Responder con éxito
                     });
                 } else {
                     return res.status(404).send({ code: 404, message: "Jugador no encontrado en la alineacion fantasy" });
@@ -1161,7 +1171,6 @@ function removeInjuryList(req, res){
 
     try{
                 
-        //Comprobar que player_id está en fantasyLineup para el último number_match o mayor
         FantasyLineup.find({ user_id: userId, season_id: seasonId, league_id: leagueId }, (err, fantasyTeams) => {
             if (err) {
                 return res.status(500).json({ success: false, message: 'Error en la búsqueda de equipos' });
@@ -1171,8 +1180,6 @@ function removeInjuryList(req, res){
                 return res.status(404).json({ success: false, message: 'No se encontró ningún equipo fantasy' });
             }
 
-
-            // Añadir el jugador de fantasyLineup para number_match === 0
             // Seleccionar el equipo cuyo number_match sea igual a 0
             const firstFantasyTeam = fantasyTeams.find(team => team.number_match === 0);
 
@@ -1181,16 +1188,17 @@ function removeInjuryList(req, res){
             }else{
                 //Devolver error si la alineacion fantasy tiene ya 12 jugadores
                 if(Object.keys(firstFantasyTeam.fantasyLineup).length  >= 12){
-                    res.status(403).send({ code: 403, message: "Ya tiene 12 jugadores en su alineación."});
+                    return res.status(403).send({ code: 403, message: "Ya tiene 12 jugadores en su alineación."});
                 }
             }
             
             const playerToInjured = firstFantasyTeam.injuryList.find(player => player.player_id === parseInt(playerId, 10));
             
-            if (playerToInjured) {
+            if (playerToInjured) {  
+                // Paso 4: Eliminar el jugador de la injuryList para number_match === 0
                 firstFantasyTeam.injuryList = firstFantasyTeam.injuryList.filter(player => player.player_id !== parseInt(playerId, 10));
 
-                // Paso 4: Añadir el jugador a injuryList para number_match === 0
+                // Paso 4: Añadir el jugador a fantasyLineup para number_match === 0
                 firstFantasyTeam.fantasyLineup.push({
                     player_id: playerToInjured.player_id,
                     player_name: playerToInjured.player_name,
@@ -1208,7 +1216,7 @@ function removeInjuryList(req, res){
                      // Crear un registro de la acción
                      const registro = new Registro();
                      registro.tabla = "fantasyLineup";
-                     registro.tipo = "drop IL";
+                     registro.tipo = "-IL";
                      registro.fecha = Date.now();
                      registro.usuario = userId;
                      registro.mensaje = playerToInjured.position + " " + playerToInjured.player_name;
@@ -1223,6 +1231,17 @@ function removeInjuryList(req, res){
                          if (!registroCreated) {
                              return res.status(404).send({ code: 404, message: "Error al crear el registro." });
                          }
+
+                         FantasyPlayer.updateOne({ player_name: playerToInjured.player_name, season_id: seasonId, league_id: leagueId}, 
+                            { "isIL" : false }, (err, fantasyStored) => {
+                            if(err) {
+                                return res.status(500).send({ message: "Error del servidor."});
+                            } else {
+                                if(!fantasyStored) {
+                                    return res.status(404).send({ message: "Jugador Fantasy no encontrado."});
+                                } 
+                            }
+                        } );
  
                          // Responder con éxito
                         return res.status(200).send({ code: 200, message: "Jugador movido a la alineacion", data: firstFantasyTeam });
@@ -1236,6 +1255,181 @@ function removeInjuryList(req, res){
         return res.status(500).send({ code: 500, message: error.message });
     }
 
+}
+
+function dropInjuryList(req, res){
+
+    let userId = req.params.user;
+    let playerId = req.query.playerId;
+    let seasonId = req.query.seasonId;
+    let leagueId = req.query.leagueId;
+
+
+    try{
+        FantasyLineup.find({ user_id: userId, season_id: seasonId, league_id: leagueId }, (err, fantasyTeams) => {
+            if (err) {
+                return res.status(500).json({ success: false, message: 'Error en la búsqueda de equipos' });
+            }
+
+            if (!fantasyTeams || fantasyTeams.length === 0) {
+                return res.status(404).json({ success: false, message: 'No se encontró ningún equipo fantasy' });
+            }
+
+            // Seleccionar el equipo cuyo number_match sea igual a 0
+            const firstFantasyTeam = fantasyTeams.find(team => team.number_match === 0);
+
+            if (!firstFantasyTeam) {
+                return res.status(404).send({ code: 404, message: "No se encontró una alineación fantasy del equipo" });
+            }
+            //Eliminar de la IL
+            const playerToInjured = firstFantasyTeam.injuryList.find(player => player.player_id === parseInt(playerId, 10));
+            if (playerToInjured) {
+                firstFantasyTeam.injuryList = firstFantasyTeam.injuryList.filter(player => player.player_id !== parseInt(playerId, 10));
+
+                // Guardar los cambios en la base de datos
+                firstFantasyTeam.save((saveErr) => {
+                    if (saveErr) {
+                        return res.status(500).send({ code: 500, message: "Error al guardar el equipo" });
+                    }
+
+                     // Crear un registro de la acción
+                     const registro = new Registro();
+                     registro.tabla = "fantasyLineup";
+                     registro.tipo = "drop";
+                     registro.fecha = Date.now();
+                     registro.usuario = userId;
+                     registro.mensaje = playerToInjured.position + " " + playerToInjured.player_name;
+                     registro.league = leagueId;
+                     registro.player_id = playerId;
+ 
+                     registro.save((err, registroCreated) => {
+                         if (err) {
+                             return res.status(500).send({ code: 500, message: "Error del servidor." });
+                         }
+ 
+                         if (!registroCreated) {
+                             return res.status(404).send({ code: 404, message: "Error al crear el registro." });
+                         }
+
+                         FantasyPlayer.updateOne({ player_name: playerToInjured.player_name, season_id: seasonId, league_id: leagueId}, 
+                            { "available" : true }, (err, fantasyStored) => {
+                            if(err) {
+                                return res.status(500).send({ code: 500, message: "Error del servidor."});
+                            } else {
+                                if(!fantasyStored) {
+                                    return res.status(404).send({ code: 404, message: "Jugador Fantasy no encontrado."});
+                                } 
+                            }
+                        } );
+ 
+                         // Responder con éxito
+                        return res.status(200).send({ code: 200, message: "Jugador eliminado de la IL", data: firstFantasyTeam });
+                     });                    
+                });
+            } else {
+                return res.status(404).send({ code: 404, message: "Jugador no encontrado en la alineacion fantasy" });
+            }
+        });
+    } catch (error) {
+        return res.status(500).send({ code: 500, message: error.message });
+    }
+}
+
+function addInjuryListManually(req, res) {
+    let userId = req.params.user;
+    let playerId = req.query.playerId;
+    let seasonId = req.query.seasonId;
+    let leagueId = req.query.leagueId;
+
+    try {
+        // Paso 1: Comprobar que player_id está en StatusPlayer y que el currentStatus es INJ
+        StatusPlayer.find({ player_id: playerId }, (err, statusPlayers) => {
+            if (err) {
+                return res.status(500).send({ code: 500, message: "Error al obtener el estado del jugador" });
+            }
+
+            // Verificar si no se encuentra ningún jugador
+            if (!statusPlayers || statusPlayers.length === 0) {
+                return res.status(404).send({ code: 404, message: "El jugador no es IL" });
+            }
+
+            // Acceder al primer jugador en el array (en caso de que haya múltiples entradas, lo ajustas según tu lógica)
+            const statusPlayer = statusPlayers[0];
+
+            // Verificar si el estado del jugador es "INJ" (lesionado)
+            if (statusPlayer.currentStatus !== 'INJ') {
+                return res.status(404).send({ code: 404, message: "El jugador no está en la lista de INJ" });
+            }
+
+            // Paso 2: Comprobar que player_id está en fantasyLineup para el último number_match o mayor
+            FantasyLineup.find({ user_id: userId, season_id: seasonId, league_id: leagueId }, (err, fantasyTeams) => {
+                if (err) {
+                    return res.status(500).json({ success: false, message: 'Error en la búsqueda de equipos' });
+                }
+
+                if (!fantasyTeams || fantasyTeams.length === 0) {
+                    return res.status(404).json({ success: false, message: 'No se encontró ningún equipo fantasy' });
+                }
+
+                
+
+                // Seleccionar el equipo cuyo number_match sea igual a 0
+                const firstFantasyTeam = fantasyTeams.find(team => team.number_match === 0);
+                if (!firstFantasyTeam) {
+                    return res.status(404).send({ code: 404, message: "No se encontró una alineación fantasy del equipo" });
+                }
+
+                
+
+                    // Paso 5: Añadir el jugador a injuryList para number_match === 0
+                    firstFantasyTeam.injuryList.push({
+                        player_id: statusPlayer.player_id,
+                        player_name: statusPlayer.player_name,
+                        avatar: "test",
+                        position: "G",
+                        date: new Date()  // Fecha actual
+                    });
+
+                    // Guardar los cambios en la base de datos
+                    firstFantasyTeam.save((saveErr) => {
+                        console.log(saveErr);
+                        
+                        if (saveErr) {
+                            return res.status(500).send({ code: 500, message: "Error al guardar el equipo" });
+                        }
+
+                        // Crear un registro de la acción
+                        const registro = new Registro();
+                        registro.tabla = "fantasyLineup";
+                        registro.tipo = "+IL";
+                        registro.fecha = Date.now();
+                        registro.usuario = userId;
+                        registro.mensaje = statusPlayer.player_name;
+                        registro.league = leagueId;
+                        registro.player_id = playerId;
+    
+                        registro.save((err, registroCreated) => {
+                            if (err) {
+                                return res.status(500).send({ code: 500, message: "Error del servidor." });
+                            }
+    
+                            if (!registroCreated) {
+                                return res.status(404).send({ code: 404, message: "Error al crear el registro." });
+                            }
+
+                            
+    
+                            // Responder con éxito
+                            return res.status(200).send({ code: 200, message: "Jugador movido a la IL", data: firstFantasyTeam });
+                        });
+
+                    });
+
+            });
+        });
+    } catch (error) {
+        return res.status(500).send({ code: 500, message: error.message });
+    }
 }
 
 
@@ -1271,5 +1465,7 @@ module.exports = {
     updateFantasyTeamName,
     getPuntosLineupByJornada,
     addInjuryList,
-    removeInjuryList
+    removeInjuryList,
+    addInjuryListManually,
+    dropInjuryList
 };
