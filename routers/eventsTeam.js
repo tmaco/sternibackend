@@ -16,6 +16,7 @@ api.get("/get-home-events-date", EventsTeamController.getHomeEventsDate);
 api.get("/get-events-date-team/:team", EventsTeamController.getEventsDateTeam);
 api.get("/get-events-id-date", EventsTeamController.getEventsDateById);
 api.put("/update-events-date", [md_auth.ensureAdmin], EventsTeamController.updateEventsDate);
+api.put("/update-events-one-week", [md_auth.ensureAdmin], EventsTeamController.updateEventsDateOneWeek);
 api.put("/update-events-date-playoff", [md_auth.ensureAdmin], EventsTeamController.updateEventsDatePlayoff);
 api.get("/get-event/:eventId", EventsTeamController.getEvent);
 

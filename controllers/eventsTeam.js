@@ -790,6 +790,95 @@ function updateEventsDate(req, res) {
     });
 }
 
+function updateEventsDateOneWeek(req, res) {
+    const dateFrom = req.query.from;
+    const dateTo = req.query.to;
+
+    var MySportsFeeds = require("mysportsfeeds-node");
+    var msf = new MySportsFeeds("2.1", true);
+    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+    
+    msf.getData('nba', '2024-2025-regular', 'seasonal_games', 'json', { date: 'from-today-to-7-days-from-now', force: 'true', sort: 'game.starttime' })
+    .then(async (response) => { 
+        const fs = require('fs');
+        var path = require('path');
+                
+        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2024-2025-regular-from-today-to-7-days-from-now.json');
+        
+        await fs.readFile(jsonPath, (err, data) => {
+            if (err) {
+                return res.status(500).send({ message: "Error reading the file." });
+            }
+
+            let eventsData = JSON.parse(data);
+            let updatePromises = []; // Store promises to ensure we handle all async operations
+
+            console.log(utiles.count(eventsData.games));
+            for (var i = 0; i < utiles.count(eventsData.games); i++) {
+                var event = eventsData.games[i];
+
+                var homeTeam = utiles.checkAbv(event.schedule.homeTeam.abbreviation);
+                var awayTeam = utiles.checkAbv(event.schedule.awayTeam.abbreviation);
+                var playedStatus = event.schedule.playedStatus;
+
+                var team_points_scored = event.score.homeScoreTotal;
+                var opponent_points_scored = event.score.awayScoreTotal;
+
+                var team_event_result = null;
+                if (team_points_scored > opponent_points_scored) {
+                    team_event_result = "win";
+                } else if (team_points_scored && opponent_points_scored) {
+                    team_event_result = "loss";
+                }
+
+                // Create promises for each update
+                updatePromises.push(EventsTeam.updateOne({ event_id: event.schedule.id, team_id: homeTeam },
+                    {
+                        season_id: "24_25", event_season_type: "regular", team_event_location_type: 'h',
+                        event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
+                        team_id: homeTeam, opponent_id: awayTeam, team_event_result: team_points_scored > opponent_points_scored ? "win" : "loss",
+                        team_points_scored: team_points_scored, opponent_points_scored: opponent_points_scored, event_status: playedStatus
+                    },
+                    { upsert: true })
+                );
+
+                var team_points_scored_away = event.score.awayScoreTotal;
+                var opponent_points_scored_away = event.score.homeScoreTotal;
+
+                if (team_points_scored_away > opponent_points_scored_away) {
+                    team_event_result = "win";
+                } else if (team_points_scored_away && opponent_points_scored_away) {
+                    team_event_result = "loss";
+                }
+
+                updatePromises.push(EventsTeam.updateOne({ event_id: event.schedule.id, team_id: awayTeam },
+                    {
+                        season_id: "24_25", event_season_type: "regular", team_event_location_type: 'a',
+                        event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
+                        team_id: awayTeam, opponent_id: homeTeam, team_event_result: team_points_scored_away > opponent_points_scored_away ? "win" : "loss",
+                        team_points_scored: team_points_scored_away, opponent_points_scored: opponent_points_scored_away, event_status: playedStatus
+                    },
+                    { upsert: true })
+                );
+            }
+
+            // Wait for all updates to finish
+            Promise.all(updatePromises)
+                .then((results) => {
+                    console.log('All events updated successfully');
+                    res.status(200).send({ code: 200, message: "Events actualizados en la BD" });
+                })
+                .catch((error) => {
+                    console.error('Error updating events:', error);
+                    res.status(500).send({ code: 500, message: "Error del servidor." });
+                });
+        });
+    })
+    .catch((error) => {
+        console.error('Error fetching data from MySportsFeeds:', error);
+        res.status(500).send({ code: 500, message: "Error al obtener los datos." });
+    });
+}
 
 function updateEventsDatePlayoff(req,res){
     const dateFrom = req.query.from;
@@ -908,5 +997,6 @@ module.exports = {
     updateEventsDate,
     getEventsDateById,
     getEvent,
-    updateEventsDatePlayoff
+    updateEventsDatePlayoff,
+    updateEventsDateOneWeek
 };

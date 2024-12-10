@@ -34,6 +34,7 @@ api.put("/update-fantasy-team/:id", [md_auth.ensureAuth], FantasyLineupControlle
 api.post("/add-player-IL/:user", [md_auth.ensureAuth],FantasyLineupController.addInjuryList);
 api.delete("/remove-player-IL/:user", [md_auth.ensureAuth],FantasyLineupController.removeInjuryList);
 api.delete("/drop-player-IL/:user", [md_auth.ensureAuth],FantasyLineupController.dropInjuryList);
-api.post("/add-player-IL-manual/:user",FantasyLineupController.addInjuryListManually);
+api.post("/add-player-IL-manual/:user",[md_auth.ensureAdmin], FantasyLineupController.addInjuryListManually);
+api.put("/update-avatar-IL",FantasyLineupController.updateAvatarIL);
 
 module.exports = api;
