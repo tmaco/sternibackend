@@ -1335,7 +1335,7 @@ function dropInjuryList(req, res){
                          }
 
                          FantasyPlayer.updateOne({ player_name: playerToInjured.player_name, season_id: seasonId, league_id: leagueId}, 
-                            { "available" : true }, (err, fantasyStored) => {
+                            { "available" : true, "isIL": false }, (err, fantasyStored) => {
                             if(err) {
                                 return res.status(500).send({ code: 500, message: "Error del servidor."});
                             } else {
