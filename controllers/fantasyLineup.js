@@ -1144,7 +1144,7 @@ function addInjuryList(req, res) {
                          registro.tipo = "+IL";
                          registro.fecha = Date.now();
                          registro.usuario = userId;
-                         registro.mensaje = playerToInjured.position + " " + playerToInjured.player_name;
+                         registro.mensaje = utiles.checkPosition(playerToInjured.position) + " " + playerToInjured.player_name;
                          registro.league = leagueId;
                          registro.player_id = playerId;
      
@@ -1222,7 +1222,7 @@ function removeInjuryList(req, res){
                             player_id: playerToInjured.player_id,
                             player_name: playerToInjured.player_name,
                             avatar: playerToInjured.avatar,
-                            position: playerToInjured.position,
+                            position: utiles.checkPosition(playerToInjured.position),
                             order: 3000
                         });                
 
@@ -1238,7 +1238,7 @@ function removeInjuryList(req, res){
                             registro.tipo = "-IL";
                             registro.fecha = Date.now();
                             registro.usuario = userId;
-                            registro.mensaje = playerToInjured.position + " " + playerToInjured.player_name;
+                            registro.mensaje = utiles.checkPosition(playerToInjured.position) + " " + playerToInjured.player_name;
                             registro.league = leagueId;
                             registro.player_id = playerId;
         
@@ -1321,7 +1321,7 @@ function dropInjuryList(req, res){
                      registro.tipo = "drop";
                      registro.fecha = Date.now();
                      registro.usuario = userId;
-                     registro.mensaje = playerToInjured.position + " " + playerToInjured.player_name;
+                     registro.mensaje = utiles.checkPosition(playerToInjured.position) + " " + playerToInjured.player_name;
                      registro.league = leagueId;
                      registro.player_id = playerId;
  

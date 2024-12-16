@@ -337,3 +337,37 @@ exports.checkNewAPISportsFeeds = function(TeamName){
 
   return team_id;
 }
+
+exports.checkPosition= function(position){
+
+    let pos = "";
+  
+    switch(position) {
+        case 'PG':
+            pos = "G";
+            break;
+        case 'SG':
+            pos = "G";
+            break;
+        case 'SF':
+            pos = "F";
+            break;
+        case 'PF':
+            pos = "F";
+            break;
+        case 'C':
+            pos = "C";
+            break;
+        case 'G':
+            pos = "G";
+            break;
+        case 'F':
+            pos = "F";
+            break;
+        default:
+            pos = "";
+    };
+  
+    return pos;
+  
+  }
