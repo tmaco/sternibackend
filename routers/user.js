@@ -18,6 +18,7 @@ api.put("/update-user/:id", [md_auth.ensureAuth], UserController.updateUser);
 api.put("/activate-user/:id", [md_auth.ensureAdmin], UserController.activateUser);
 api.delete("/delete-user/:id", [md_auth.ensureAdmin], UserController.deleteUser);
 api.post("/create-user", [md_auth.ensureAdmin], UserController.createUser);
+api.put("/update-ppmazos/:id", [md_auth.ensureAuth], UserController.updatePPMazos);
 
 
 module.exports = api;

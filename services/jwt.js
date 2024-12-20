@@ -10,6 +10,7 @@ exports.createAccessToken = function(user) {
         email: user.email,
         role: user.role,
         avatar: user.avatar,
+        isPPMazos: user.isPPMazos,
         createToken: moment().unix(),
         exp: moment()
         .add(3, "hours")

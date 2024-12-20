@@ -429,6 +429,27 @@ function createUser(req, res){
     }
 }
 
+function updatePPMazos(req, res){
+    const { id } = req.params;
+    const { isPPMazos } = req.body;
+
+    User.findByIdAndUpdate(id, { isPPMazos}, (err, userStored) => {
+        if(err) {
+            res.status(500).send({ message: "Error del servidor."});
+        } else {
+            if(!userStored) {
+                res.status(404).send({ message: "Usuario no encontrado."});
+            } else {
+                if(isPPMazos === true) {
+                    res.status(200).send({ code: 200, message: "PPmazos activado correctamente."});
+                } else {
+                    res.status(200).send({ code: 200, message: "PPmazos desactivado correctamente."});
+                }
+            }
+        }
+    } )
+}
+
 module.exports = {
     signUp,
     signIn,
@@ -440,5 +461,6 @@ module.exports = {
     updateUser,
     activateUser,
     deleteUser,
-    createUser
+    createUser,
+    updatePPMazos
 };

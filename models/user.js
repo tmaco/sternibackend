@@ -15,7 +15,9 @@ const UserSchema = new Schema(
             enum: ['admin', 'commish', 'user'] 
         },
         active: Boolean,
-        avatar: String
+        avatar: String,
+        isPPMazos: Boolean,
+
 
     }
 );
