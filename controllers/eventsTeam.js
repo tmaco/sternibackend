@@ -565,11 +565,19 @@ function getEventsDateTeam(req,res){
     const nameTeam = req.params.team;
     const dateFrom = req.query.from;
     const dateTo = req.query.to;
-    const eventStatus = req.query.status; 
+    var eventStatus = req.query.status; 
 
-    EventsTeam.find({ team_id: nameTeam, event_status: eventStatus, event_start_date_time: {
-        $gte: dateFrom,
-        $lt: dateTo}})
+    if (eventStatus === 'null') {
+        eventStatus = null;
+    }
+
+    const query = {
+        team_id: nameTeam,
+        ...(eventStatus ? { event_status: eventStatus } : {}),
+        event_start_date_time: { $gte: dateFrom, $lt: dateTo }
+    };
+    
+    EventsTeam.find(query)
         .sort({event_start_date_time: "asc"})
         .exec((err, eventsStored) => {
             if(err){

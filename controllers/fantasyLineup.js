@@ -586,7 +586,7 @@ function getScoringLineupUser(req,res){
         { $unwind: "$fantasyLineup" },
         { $sort: { "fantasyLineup.order": 1 } },
         { $group: { _id: "$_id", playersList: { $push: { player_id: "$fantasyLineup.player_id", player_name: "$fantasyLineup.player_name", name_team : "$name_team", 
-        numMatches: "$fantasyLineup.numMatches",  fScoring: "$fantasyLineup.fScoring", minutes: "$fantasyLineup.minutes", position: "$fantasyLineup.position", order: "$fantasyLineup.order", avatar: "$fantasyLineup.avatar" } } }}])
+        numMatches: "$fantasyLineup.numMatches",  fScoring: "$fantasyLineup.fScoring", fScoring_prev: "$fantasyLineup.fScoring_prev", minutes: "$fantasyLineup.minutes", position: "$fantasyLineup.position", order: "$fantasyLineup.order", avatar: "$fantasyLineup.avatar" } } }}])
         .exec((err, fantasyLineup) => {
             if(err){
                 res.status(500).send({ code: 500, message: "Error del servidor."});
