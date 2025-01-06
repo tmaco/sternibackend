@@ -607,13 +607,14 @@ function updateScoringLineupUser(req,res) {
     const leagueID = req.query.league;
     const numMatch = req.query.match;
     const {
-        player_id, fScoring, minutes
+        player_id, fScoring, minutes, fScoring_prev
     } = req.body;
         
     FantasyLineup.updateOne({"user_id": FantasyLineupUser, "season_id": seasonID,"league_id": leagueID,
     "number_match": parseInt(numMatch), "fantasyLineup.player_id": parseInt(player_id)},
     { $inc: { "fantasyLineup.$.fScoring": parseFloat(fScoring),
             "fantasyLineup.$.minutes": parseFloat(minutes),
+            "fantasyLineup.$.fScoring_prev": parseFloat(fScoring_prev),
             "fantasyLineup.$.numMatches":1  
         } 
     })
