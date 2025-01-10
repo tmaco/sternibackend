@@ -612,9 +612,8 @@ function updateScoringLineupUser(req,res) {
         
     FantasyLineup.updateOne({"user_id": FantasyLineupUser, "season_id": seasonID,"league_id": leagueID,
     "number_match": parseInt(numMatch), "fantasyLineup.player_id": parseInt(player_id)},
-    { $inc: { "fantasyLineup.$.fScoring": parseFloat(fScoring),
+    { "fantasyLineup.$.fScoring_prev": parseFloat(fScoring_prev), $inc: { "fantasyLineup.$.fScoring": parseFloat(fScoring),
             "fantasyLineup.$.minutes": parseFloat(minutes),
-            "fantasyLineup.$.fScoring_prev": parseFloat(fScoring_prev),
             "fantasyLineup.$.numMatches":1  
         } 
     })
