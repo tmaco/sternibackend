@@ -122,7 +122,7 @@ function getPlayerId(req,res){
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
             } else {
-                if(playerStored.length <= 0) {
+                if(!playerStored || (playerStored && playerStored.length <= 0)) {
                     res.status(404).send({ message: "No se ha encontrado ningun jugador con id " + playerId + "."});
                 } else {
                     res.status(200).send({ code: 200, player: playerStored });
