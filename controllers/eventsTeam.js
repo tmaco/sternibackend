@@ -1,6 +1,7 @@
 const utiles = require("../utils/normalizationNames");
 const EventsTeam = require("../models/eventsTeam");
 const FantasyCalendar = require("../models/fantasyCalendar");
+const { log } = require("console");
 
 
 function getEventsTeamRegularData(req,res){
@@ -564,18 +565,24 @@ function getHomeEventsDate(req,res){
 function getEventsDateTeam(req,res){
     const nameTeam = req.params.team;
     const dateFrom = req.query.from;
-    const dateTo = req.query.to;
+    var  dateTo = req.query.to;
     var eventStatus = req.query.status; 
 
     if (eventStatus === 'null') {
         eventStatus = null;
     }
 
+    if (dateTo === 'null') {
+        dateTo = null;
+    }
+
     const query = {
         team_id: nameTeam,
         ...(eventStatus ? { event_status: eventStatus } : {}),
-        event_start_date_time: { $gte: dateFrom, $lt: dateTo }
-    };
+        ...(dateTo ? { event_start_date_time: { $gte: dateFrom, $lt: dateTo } } : 
+            { event_start_date_time: { $gte: dateFrom } } 
+        )
+    };    
     
     EventsTeam.find(query)
         .sort({event_start_date_time: "asc"})
