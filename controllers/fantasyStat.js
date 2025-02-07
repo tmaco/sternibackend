@@ -583,6 +583,64 @@ function getFantasyStatsBySeason(req,res){
         });
 }
 
+function getFantasyStatsBySeasonAll(req,res){
+	const leagueId = req.params.league;
+	const seasonId = req.query.season;
+	const eventID = req.query.event;
+    const Last = req.query.last;
+    var lastDate = null;
+
+    if(Last == '1week'){
+        const currentDate = new Date(); // Fecha actual
+        currentDate.setDate(currentDate.getDate() - 7); // Restamos 7 días
+        // Establecemos la hora a las 12:00:00
+        currentDate.setHours(12, 0, 0, 0);
+        // Formateamos la fecha al formato "YYYY-MM-DDTHH:mm:ssZ"
+        const daysAgo = currentDate.toISOString(); // Esto devuelve la fecha en formato ISO 8601
+        // Si necesitas solo la fecha sin horas, minutos o segundos
+        lastDate = daysAgo.split('T')[0] + "T12:00:00.000Z"; // Esto te da la fecha como "YYYY-MM-DDT12:00:00Z"
+    }else if(Last == '2week'){
+        const currentDate = new Date(); // Fecha actual
+        currentDate.setDate(currentDate.getDate() - 14); // Restamos 7 días
+        currentDate.setHours(12, 0, 0, 0);
+        const daysAgo = currentDate.toISOString(); // Esto devuelve la fecha en formato ISO 8601
+        lastDate = daysAgo.split('T')[0] + "T12:00:00.000Z"; // Esto te da la fecha como "YYYY-MM-DDT12:00:00Z"
+    }else if(Last == 'month'){
+        const currentDate = new Date(); // Fecha actual
+        currentDate.setDate(currentDate.getDate() - 30); // Restamos 7 días
+        currentDate.setHours(12, 0, 0, 0);
+        const daysAgo = currentDate.toISOString(); // Esto devuelve la fecha en formato ISO 8601
+        lastDate = daysAgo.split('T')[0] + "T12:00:00.000Z"; // Esto te da la fecha como "YYYY-MM-DDT12:00:00Z"
+    }else{
+        lastDate = null;
+    }
+
+
+    FantasyStat.aggregate([{$match: { league_id: leagueId, season_id: seasonId, type_match: eventID, 
+        minutes: { $gt: 0},
+        // Usamos $or para incluir el filtro solo si lastDate no es null
+        ...(lastDate ? { date_match: { $gte: new Date(lastDate) } } : {})  // Si lastDate no es null, aplicamos el filtro
+            }},
+            { $group: { "_id": { player_id: "$player_id" , player_name: "$player_name",  }, 
+                "totalMatches" : { "$sum": 1},
+                "totalMinutes" : { "$sum": "$minutes"},
+                "totalFantasyScoring" : { "$sum": "$fantasy_scoring"},                           
+            } },
+            { $sort: { "totalFantasyScoring": -1 } },
+        ])
+        .exec((err, fstatsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(fstatsStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado estadisticas fantasy de " + leagueId + " para la temporada " + seasonId +"."});
+                } else {
+                    res.status(200).send({ code: 200, fstats: fstatsStored });
+                }
+            }
+        });
+}
+
 function getAllFantasyStatsBySeason(req,res){
 	const leagueId = req.params.league;
 	const seasonId = req.query.season;
@@ -988,5 +1046,6 @@ module.exports = {
     getFantasyScoringByEvents,
     getPPmazosFromTo,
     getAllFantasyStatsBySeason,
-    getTotalFantasyStatsByLeague
+    getTotalFantasyStatsByLeague,
+    getFantasyStatsBySeasonAll
 }
