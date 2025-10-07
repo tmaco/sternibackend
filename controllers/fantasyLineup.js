@@ -1457,8 +1457,8 @@ function addInjuryListManually(req, res) {
 
 async function updateAvatarIL(req, res) {
     try {
-        // Paso 1: Obtener la lista de jugadores de la temporada "24_25"
-        const playerList = await FantasyPlayer.find({ "season_id": "24_25" });
+        // Paso 1: Obtener la lista de jugadores de la temporada "25_26"
+        const playerList = await FantasyPlayer.find({ "season_id": "25_26" });
 
         // Paso 2: Crear un mapa de player_id a { avatar, position }
         const playerAvatars = playerList.reduce((acc, player) => {
@@ -1470,7 +1470,7 @@ async function updateAvatarIL(req, res) {
         }, {});
 
         // Paso 3: Obtener la lista de equipos de FantasyLineup
-        const fantasyTeams = await FantasyLineup.find({ season_id: "24_25", number_match: 0 }).exec();
+        const fantasyTeams = await FantasyLineup.find({ season_id: "25_26", number_match: 0 }).exec();
 
         // Paso 4: Recorrer cada equipo y cada jugador lesionado en injuryList
         for (let team of fantasyTeams) {

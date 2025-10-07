@@ -425,8 +425,8 @@ function getStatsEventData(req,res){
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2024-2025-regular-${event.event_id}.json`);
-                    msf.getData('nba', '2024-2025-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' });
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2025-2026-regular-${event.event_id}.json`);
+                    msf.getData('nba', '2025-2026-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' });
                     res.status(200).send({ code: 200, message: "Fichero de estadísticas generado - "+ eventID});
 
                 }
@@ -461,7 +461,7 @@ function addStatsEventData(req,res){
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2024-2025-regular-${event.event_id}.json`);
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2025-2026-regular-${event.event_id}.json`);
                     //var jsonPath = `/tmp/game_boxscore-nba-2023-2024-regular-${event.event_id}.json`;
 
                     if (fs.existsSync(jsonPath)) {
@@ -630,7 +630,7 @@ function addStatsEventData(req,res){
                         
                     } else{
                         console.log("FILE NOT!!! existsSync");
-                        msf.getData('nba', '2024-2025-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
+                        msf.getData('nba', '2025-2026-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
                         .then( async response => {
                             await fs.readFile(jsonPath, (err, data) => {
                             //fs.readFile(jsonPath, (err, data) => {
