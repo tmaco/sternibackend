@@ -12,8 +12,9 @@ kill_timeout = '5s'
   auto_rollback = true
 
 [build]
-  builder = 'paketobuildpacks/builder-jammy-base'
-  buildpacks = ['gcr.io/paketo-buildpacks/nodejs']
+  buildpacks = ['registry.paketo.io/nodejs']
+  buildpacks = ['registry.paketo.io/nodejs']
+
 
 [env]
   PORT = '8080'
