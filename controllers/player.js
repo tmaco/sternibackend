@@ -19,6 +19,22 @@ function getPlayers(req,res) {
         });
 }
 
+function getPlayersAll(req,res) {
+    Player.find({season_id: "25_26"})
+        .sort({ team_id: "asc", last_name: "asc"})
+        .exec((err, playersStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(playersStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado ningun jugador."});
+                } else {
+                    res.status(200).send({ code: 200, players: playersStored });
+                }
+            }
+        });
+}
+
 function getPlayersByTeam(req,res) {
 
     const TeamName = req.params.teamName;
@@ -319,6 +335,29 @@ function updatePlayerTeam(req,res) {
         } );
 }
 
+function updatePlayerStatus(req,res) {
+    const { id } = req.params;
+    const { roster_status } = req.body;
+
+    Player.findByIdAndUpdate(id, 
+        { roster_status:  roster_status}, (err, playerStored) => {
+            if(err) {
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(!playerStored) {
+                    res.status(404).send({ message: "Jugador no encontrado."});
+                } else {
+                    if(roster_status==="inactive")
+                        res.status(200).send({ message: "Jugador desactivado correctamente."});
+                    else if(roster_status==="active")
+                        res.status(200).send({ message: "Jugador activado correctamente."});
+                    else
+                    res.status(404).send({ message: "Estado no correcto"});
+                }
+            }
+        } );
+}
+
 
 module.exports = {
     getPlayers,
@@ -330,5 +369,7 @@ module.exports = {
     getPlayersByPosition,
     getListPlayers,
     updateAvatar,
-    updatePlayerTeam
+    updatePlayerTeam,
+    updatePlayerStatus,
+    getPlayersAll
 };
