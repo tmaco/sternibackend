@@ -858,6 +858,9 @@ function getTotalScoringByLeague(req,res) {
         limit = 9;
         limit1 = 11;
         limit2 = 16;
+     }else if(seasonId==="25_26"){
+        limit = 20;
+
     }
 
 
@@ -903,6 +906,9 @@ function getTotalFantasyScoringByLeague(req,res) {
         limit = 9;
         limit1 = 11;
         limit2 = 16;
+    }else if(seasonId==="25_26"){
+        limit = 20;
+
     }
 
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, $or: [
