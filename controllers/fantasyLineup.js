@@ -865,7 +865,7 @@ function getTotalScoringByLeague(req,res) {
 
 
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, $or: [
-        { number_match: { $gt: 0, $lt: limit } },   // Rango del 1 al 8
+        { number_match: { $gte: 0, $lt: limit } },   // Rango del 1 al 8
         { number_match: { $gt: limit1, $lt: limit2 } }  // Rango del 12 al 15
     ]}},
         { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id"},
@@ -912,7 +912,7 @@ function getTotalFantasyScoringByLeague(req,res) {
     }
 
     FantasyLineup.aggregate([{$match: { league_id: leagueId , season_id: seasonId, $or: [
-        { number_match: { $gt: 0, $lt: limit } },   // Rango del 1 al 8
+        { number_match: { $gte: 0, $lt: limit } },   // Rango del 1 al 8
         { number_match: { $gt: limit1, $lt: limit2 } }  // Rango del 12 al 15
     ]}},
         { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id"},
