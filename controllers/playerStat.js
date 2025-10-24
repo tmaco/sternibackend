@@ -133,9 +133,21 @@ function getStatsBySeason(req,res){
 
     const seasonId = req.params.season;
     const eventID = req.query.event;
+    const location = req.query.location;    
+    var locationMatch = null;
+
+        if(location === 'h'){
+            locationMatch='h';
+        }else if(location === 'a'){
+            locationMatch='a';
+        }else{
+            locationMatch=null;
+        }
 
 
-    PlayerStat.aggregate([{$match: { season_id: seasonId, event_season_type: eventID, seconds: { $gt: 0} }},
+    PlayerStat.aggregate([{$match: { season_id: seasonId, event_season_type: eventID, seconds: { $gt: 0},
+            ...(locationMatch ? { team_event_location_type:  locationMatch } : {})  // Si location no es null, aplicamos el filtro
+            }},
             { $group: { "_id": { player_id: "$player_id" , display_name: "$display_name", position:checkPosition("$position"),team_abbreviation:"$team_abbreviation" },
                 "totalMatches" : { "$sum": 1},
                 "totalMinutes" : { "$sum": "$minutes"},
@@ -171,6 +183,61 @@ function getStatsBySeason(req,res){
         });
 
 }
+
+function getStatsTotal(req,res){
+
+    const eventID = req.query.event;
+    const location = req.query.location;    
+    var locationMatch = null;
+
+        if(location === 'h'){
+            locationMatch='h';
+        }else if(location === 'a'){
+            locationMatch='a';
+        }else{
+            locationMatch=null;
+        }
+
+
+    PlayerStat.aggregate([{$match: { event_season_type: eventID, seconds: { $gt: 0},
+                ...(locationMatch ? { team_event_location_type:  locationMatch } : {})  // Si location no es null, aplicamos el filtro
+             }},
+            { $group: { "_id": { player_id: "$player_id" , display_name: "$display_name", position:checkPosition("$position"),team_abbreviation:"$team_abbreviation" },
+                "totalMatches" : { "$sum": 1},
+                "totalMinutes" : { "$sum": "$minutes"},
+                "totalSeconds" : { "$sum": "$seconds"},
+                "totalPoints" : { "$sum": "$points"},
+                "totalRebounds" : { "$sum": "$rebounds"} ,
+                "totalDefRebounds" : { "$sum": "$defensive_rebounds"} ,
+                "totalOfRebounds" : { "$sum": "$offensive_rebounds"} ,
+                "totalAssists" : { "$sum": "$assists"} ,
+                "totalSteals" : { "$sum": "$steals"} ,
+                "totalBlocks" : { "$sum": "$blocks"} ,
+                "totalTOs" : { "$sum": "$turnovers"} ,
+                "totalFGMs" : { "$sum": "$field_goals_made"} ,
+                "total3PTMs" : { "$sum": "$three_point_field_goals_made"} ,
+                "totalFTMs" : { "$sum": "$free_throws_made"} ,
+                "totalFGAs" : { "$sum": "$field_goals_attempted"} ,
+                "total3PTAs" : { "$sum": "$three_point_field_goals_attempted"} ,
+                "totalFTAs" : { "$sum": "$free_throws_attempted"} ,
+                "totalFouls" : { "$sum": "$personal_fouls"} ,                
+            } },
+            { $sort: { "totalPoints": -1 } },
+        ])
+        .exec((err, statsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(statsStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado estadisticas."});
+                } else {
+                    res.status(200).send({ code: 200, stats: statsStored });
+                }
+            }
+        });
+
+}
+
 
 function updateStatDisplayName(req,res) {
     PlayerStat.find({season_id: "19_20"})
@@ -1281,6 +1348,7 @@ module.exports = {
     updateStatDisplayName,
     getStatsData,
     getStatsBySeason,
+    getStatsTotal,
     addStatsEventData,
     getStatsEventData,
     updateReboundsLocal,

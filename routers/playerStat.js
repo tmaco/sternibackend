@@ -11,6 +11,7 @@ api.get("/get-stats/:playerName", PlayerStatController.getStatsByPlayer);
 api.get("/get-stats-match/:playerName", PlayerStatController.getStatsByPlayerAndMatch);
 api.get("/get-stats-date/:playerName", PlayerStatController.getStatsByPlayerAndDate);
 api.get("/get-stats-season/:season", PlayerStatController.getStatsBySeason);
+api.get("/get-stats-total/", PlayerStatController.getStatsTotal);
 api.put("/update-stats-name", [md_auth.ensureAdmin], PlayerStatController.updateStatDisplayName);
 api.get("/add-stats/:team", [md_auth.ensureAdmin], PlayerStatController.getStatsData);
 api.get("/add-stats-event/:event",[md_auth.ensureAdmin],PlayerStatController.addStatsEventData);
