@@ -716,7 +716,17 @@ function getFantasyScoringByPlayerSeason(req,res){
     const eventID = req.query.event;
     const leagueId = req.query.league;
     const Last = req.query.last;
+    const location = req.query.location;
     var lastDate = null;
+    var locationMatch = null;
+
+        if(location === 'h'){
+            locationMatch='h';
+        }else if(location === 'a'){
+            locationMatch='a';
+        }else{
+            locationMatch=null;
+        }
 
     if(Last == '1week'){
         const currentDate = new Date(); // Fecha actual
@@ -746,7 +756,9 @@ function getFantasyScoringByPlayerSeason(req,res){
     FantasyStat.aggregate([{$match: { league_id: leagueId, type_match: eventID, 
         player_id: playerId, minutes: { $gt: 0},
          // Usamos $or para incluir el filtro solo si lastDate no es null
-         ...(lastDate ? { date_match: { $gte: new Date(lastDate) } } : {})  // Si lastDate no es null, aplicamos el filtro
+         ...(lastDate ? { date_match: { $gte: new Date(lastDate) } } : {}),  // Si lastDate no es null, aplicamos el filtro
+         ...(locationMatch ? { location_match:  locationMatch } : {})  // Si location no es null, aplicamos el filtro
+
             }},
             { $group: { "_id": { player_id: "$player_id" , player_name: "$player_name", 
             season_id: "$season_id"}, 
@@ -827,6 +839,15 @@ function getFantasyScoringByPlayerMonth(req, res) {
     const eventID = req.query.event;
     const leagueId = req.query.league;
     const location = req.query.location;
+     var locationMatch = null;
+
+        if(location === 'h'){
+            locationMatch='h';
+        }else if(location === 'a'){
+            locationMatch='a';
+        }else{
+            locationMatch=null;
+        }
 
 
     FantasyStat.aggregate([
@@ -836,7 +857,7 @@ function getFantasyScoringByPlayerMonth(req, res) {
                 type_match: eventID,
                 player_id: playerId,
                 minutes: { $gt: 0 },
-                ...(location ? { location_match:  location } : {})  // Si location no es null, aplicamos el filtro
+                ...(locationMatch ? { location_match:  locationMatch } : {})  // Si location no es null, aplicamos el filtro
             }
         },
         {
