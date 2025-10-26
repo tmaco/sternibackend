@@ -837,18 +837,7 @@ function getFantasyScoringSeason(req,res){
 function getFantasyScoringByPlayerMonth(req, res) {
     const playerId = parseInt(req.params.player);
     const eventID = req.query.event;
-    const leagueId = req.query.league;
-    const location = req.query.location;
-     var locationMatch = null;
-
-        if(location === 'h'){
-            locationMatch='h';
-        }else if(location === 'a'){
-            locationMatch='a';
-        }else{
-            locationMatch=null;
-        }
-
+    const leagueId = req.query.league;       
 
     FantasyStat.aggregate([
         {
@@ -856,8 +845,7 @@ function getFantasyScoringByPlayerMonth(req, res) {
                 league_id: leagueId,
                 type_match: eventID,
                 player_id: playerId,
-                minutes: { $gt: 0 },
-                ...(locationMatch ? { location_match:  locationMatch } : {})  // Si location no es null, aplicamos el filtro
+                minutes: { $gt: 0 }
             }
         },
         {
@@ -901,6 +889,64 @@ function getFantasyScoringByPlayerMonth(req, res) {
         }
     });
 }
+
+function getFantasyScoringByPlayerTeam(req, res) {
+    const playerId = parseInt(req.params.player);
+    const eventID = req.query.event;
+    const leagueId = req.query.league;
+
+    FantasyStat.aggregate([
+        {
+            $match: {
+                league_id: leagueId,
+                type_match: eventID,
+                player_id: playerId,
+                minutes: { $gt: 0 }
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    season_id: "$season_id",
+                    opponent_id: "$opponent_id",
+                    player_id: "$player_id",
+                    player_name: "$player_name"
+                },
+                totalMatches: { $sum: 1 },
+                totalMinutes: { $sum: "$minutes" },
+                totalFantasyScoring: { $sum: "$fantasy_scoring" },
+                totalPoints: { $sum: "$points" },
+                totalRebounds: { $sum: "$rebounds" },
+                totalAssists: { $sum: "$assists" },
+                totalSteals: { $sum: "$steals" },
+                totalBlocks: { $sum: "$blocks" },
+                totalTOs: { $sum: "$turnovers" }
+            }
+        },
+        {
+            $sort: {
+                "_id.season_id": -1,
+                "_id.opponent_id": 1
+            }
+        }
+    ])
+    .exec((err, fstatsStored) => {
+        if (err) {
+            res.status(500).send({ message: "Error del servidor." });
+        } else {
+            if (fstatsStored.length <= 0) {
+                res.status(404).send({
+                    code: 404,
+                    message: `No se han encontrado estadísticas fantasy del jugador ${playerId}.`
+                });
+            } else {
+                res.status(200).send({ code: 200, fstats: fstatsStored });
+            }
+        }
+    });
+}
+
+
 
 
 function getFantasyScoringByEvent(req,res){
@@ -1170,6 +1216,7 @@ module.exports = {
     getFantasyScoringByPlayerSeason,
     getFantasyScoringSeason,
     getFantasyScoringByPlayerMonth,
+    getFantasyScoringByPlayerTeam,
     getFantasyStatsByLeague,
     getFantasyStatsByPlayerAndMatch,
     getFantasyStatsByPlayerAndDate,
