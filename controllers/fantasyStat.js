@@ -946,6 +946,61 @@ function getFantasyScoringByPlayerTeam(req, res) {
     });
 }
 
+function getFantasyScoringByPlayerResult(req, res) {
+    const playerId = parseInt(req.params.player);
+    const eventID = req.query.event;
+    const leagueId = req.query.league;
+
+    FantasyStat.aggregate([
+        {
+            $match: {
+                league_id: leagueId,
+                type_match: eventID,
+                player_id: playerId,
+                minutes: { $gt: 0 }
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    season_id: "$season_id",
+                    result_match: "$result_match",
+                    player_id: "$player_id",
+                    player_name: "$player_name"
+                },
+                totalMatches: { $sum: 1 },
+                totalMinutes: { $sum: "$minutes" },
+                totalFantasyScoring: { $sum: "$fantasy_scoring" },
+                totalPoints: { $sum: "$points" },
+                totalRebounds: { $sum: "$rebounds" },
+                totalAssists: { $sum: "$assists" },
+                totalSteals: { $sum: "$steals" },
+                totalBlocks: { $sum: "$blocks" },
+                totalTOs: { $sum: "$turnovers" }
+            }
+        },
+        {
+            $sort: {
+                "_id.season_id": -1,
+                "_id.opponent_id": 1
+            }
+        }
+    ])
+    .exec((err, fstatsStored) => {
+        if (err) {
+            res.status(500).send({ message: "Error del servidor." });
+        } else {
+            if (fstatsStored.length <= 0) {
+                res.status(404).send({
+                    code: 404,
+                    message: `No se han encontrado estadísticas fantasy del jugador ${playerId}.`
+                });
+            } else {
+                res.status(200).send({ code: 200, fstats: fstatsStored });
+            }
+        }
+    });
+}
 
 
 
@@ -1217,6 +1272,7 @@ module.exports = {
     getFantasyScoringSeason,
     getFantasyScoringByPlayerMonth,
     getFantasyScoringByPlayerTeam,
+    getFantasyScoringByPlayerResult,
     getFantasyStatsByLeague,
     getFantasyStatsByPlayerAndMatch,
     getFantasyStatsByPlayerAndDate,
