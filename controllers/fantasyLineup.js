@@ -838,7 +838,7 @@ function getPuntosLineupByJornada(req,res) {
 }
 
 
-function getTotalScoringByLeague(req,res) {
+/*function getTotalScoringByLeague(req,res) {
 
     const seasonId = req.query.season;
     const leagueId = req.query.league;
@@ -868,7 +868,7 @@ function getTotalScoringByLeague(req,res) {
         { number_match: { $gte: 0, $lt: limit } },   // Rango del 1 al 8
         { number_match: { $gt: limit1, $lt: limit2 } }  // Rango del 12 al 15
     ]}},
-        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id"},
+        { $group: { "_id" : {  user_id: "$user_id"}, //remove name_team: "$name_team" 
         "totalFScoring" : { "$sum": "$puntos_fantasy"},
         "totalScoring" : { "$sum": "$fantasy_scoring"}}},
         { $sort: { "totalFScoring": -1, "totalScoring": -1 } }
@@ -884,9 +884,99 @@ function getTotalScoringByLeague(req,res) {
                 }
             }
         });
+}*/
+
+function getTotalScoringByLeague(req, res) {
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+    let limit = 17;
+    let limit1 = 17;
+    let limit2 = 17;
+
+    if (seasonId === "20_21") {
+        limit = 19;
+    } else if (seasonId === "21_22") {
+        limit = 19;
+    } else if (seasonId === "22_23") {
+        limit = 17;
+    } else if (seasonId === "23_24") {
+        limit = 17;
+    } else if (seasonId === "24_25") {
+        limit = 9;
+        limit1 = 11;
+        limit2 = 16;
+    } else if (seasonId === "25_26") {
+        limit = 20;
+    }
+
+    FantasyLineup.aggregate([
+        {
+            $match: {
+                league_id: leagueId,
+                season_id: seasonId,
+                $or: [
+                    { number_match: { $gte: 0, $lt: limit } },
+                    { number_match: { $gt: limit1, $lt: limit2 } }
+                ]
+            }
+        },
+        {
+            $group: {
+                _id: { user_id: "$user_id" },
+                totalFScoring: { $sum: "$puntos_fantasy" },
+                totalScoring: { $sum: "$fantasy_scoring" },
+                // Guardamos name_team de cada documento
+                name_team_docs: {
+                    $push: {
+                        number_match: "$number_match",
+                        name_team: "$name_team"
+                    }
+                }
+            }
+        },
+        {
+            // Tomamos el name_team del match = 0
+            $addFields: {
+                "_id.name_team": {
+                    $first: {
+                        $map: {
+                            input: {
+                                $filter: {
+                                    input: "$name_team_docs",
+                                    as: "nt",
+                                    cond: { $eq: ["$$nt.number_match", 0] }
+                                }
+                            },
+                            as: "filtered",
+                            in: "$$filtered.name_team"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                name_team_docs: 0 // limpiamos los docs auxiliares
+            }
+        },
+        {
+            $sort: { totalFScoring: -1, totalScoring: -1 }
+        }
+    ])
+        .exec((err, fantasyScoring) => {
+            if (err) {
+                res.status(500).send({ code: 500, message: "Error del servidor." });
+            } else {
+                if (!fantasyScoring || fantasyScoring.length === 0) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado fantasy lineups." });
+                } else {
+                    res.status(200).send({ code: 200, fantasyScoring: fantasyScoring });
+                }
+            }
+        });
 }
 
-function getTotalFantasyScoringByLeague(req,res) {
+/*function getTotalFantasyScoringByLeague(req,res) {
 
     const seasonId = req.query.season;
     const leagueId = req.query.league;
@@ -915,7 +1005,7 @@ function getTotalFantasyScoringByLeague(req,res) {
         { number_match: { $gte: 0, $lt: limit } },   // Rango del 1 al 8
         { number_match: { $gt: limit1, $lt: limit2 } }  // Rango del 12 al 15
     ]}},
-        { $group: { "_id" : { name_team: "$name_team" , user_id: "$user_id"},
+        { $group: { "_id" : { user_id: "$user_id"}, //remove name_team: "$name_team" 
         "totalFScoring" : { "$sum": "$fantasy_scoring"},
         "totalScoring" : { "$sum": "$puntos_fantasy"},
 
@@ -933,9 +1023,99 @@ function getTotalFantasyScoringByLeague(req,res) {
                 }
             }
         });
+}*/
+
+function getTotalFantasyScoringByLeague(req, res) {
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+    let limit = 17;
+    let limit1 = 17;
+    let limit2 = 17;
+
+    if (seasonId === "20_21") {
+        limit = 19;
+    } else if (seasonId === "21_22") {
+        limit = 19;
+    } else if (seasonId === "22_23") {
+        limit = 17;
+    } else if (seasonId === "23_24") {
+        limit = 17;
+    } else if (seasonId === "24_25") {
+        limit = 9;
+        limit1 = 11;
+        limit2 = 16;
+    } else if (seasonId === "25_26") {
+        limit = 20;
+    }
+
+    FantasyLineup.aggregate([
+        {
+            $match: {
+                league_id: leagueId,
+                season_id: seasonId,
+                $or: [
+                    { number_match: { $gte: 0, $lt: limit } },
+                    { number_match: { $gt: limit1, $lt: limit2 } }
+                ]
+            }
+        },
+        {
+            $group: {
+                _id: { user_id: "$user_id" },
+                totalFScoring: { $sum: "$fantasy_scoring" },
+                totalScoring: { $sum: "$puntos_fantasy" },
+                // Guardamos el name_team del number_match = 0
+                name_team_docs: {
+                    $push: {
+                        number_match: "$number_match",
+                        name_team: "$name_team"
+                    }
+                }
+            }
+        },
+        {
+            // Tomamos el name_team del match = 0
+            $addFields: {
+                "_id.name_team": {
+                    $first: {
+                        $map: {
+                            input: {
+                                $filter: {
+                                    input: "$name_team_docs",
+                                    as: "nt",
+                                    cond: { $eq: ["$$nt.number_match", 0] }
+                                }
+                            },
+                            as: "filtered",
+                            in: "$$filtered.name_team"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                name_team_docs: 0 // Limpiamos los docs auxiliares
+            }
+        },
+        {
+            $sort: { totalScoring: -1, totalFScoring: -1 }
+        }
+    ])
+        .exec((err, fantasyScoring) => {
+            if (err) {
+                res.status(500).send({ code: 500, message: "Error del servidor." });
+            } else {
+                if (!fantasyScoring || fantasyScoring.length === 0) {
+                    res.status(404).send({ code: 404, message: "No se ha encontrado fantasy lineups." });
+                } else {
+                    res.status(200).send({ code: 200, fantasyScoring: fantasyScoring });
+                }
+            }
+        });
 }
 
-function getTotalScoringGroupByJornadaPos(req,res) {
+/*function getTotalScoringGroupByJornadaPos(req,res) {
 
     const seasonId = req.query.season;
     const leagueId = req.query.league;
@@ -958,9 +1138,92 @@ function getTotalScoringGroupByJornadaPos(req,res) {
                 }
             }
         });
+}*/
+
+function getTotalScoringGroupByJornadaPos(req, res) {
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+
+    FantasyLineup.aggregate([
+        {
+            $match: {
+                league_id: leagueId,
+                season_id: seasonId,
+                number_match: { $gte: 1 }
+            }
+        },
+        {
+            $group: {
+                "_id": {
+                    name_team: "$name_team",
+                    user_id: "$user_id",
+                    number_match: "$number_match",
+                    fantasy_scoring: "$fantasy_scoring",
+                    total_minutes: "$total_minutes",
+                    fantasy_scoring_prev: "$fantasy_scoring_prev",
+                    position_prev: "$position_prev",
+                    puntos_fantasy: "$puntos_fantasy",
+                    fantasy_scoringPG: "$fantasy_scoringPG",
+                    fantasy_scoringSG: "$fantasy_scoringSG",
+                    fantasy_scoringSF: "$fantasy_scoringSF",
+                    fantasy_scoringPF: "$fantasy_scoringPF",
+                    fantasy_scoringC: "$fantasy_scoringC"
+                }
+            }
+        },
+        // 🔹 Lookup para traer el name_team del number_match = 0 (por user_id)
+        {
+            $lookup: {
+                from: "fantasylineups", // nombre de la colección
+                let: { uid: "$_id.user_id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ["$user_id", "$$uid"] },
+                                    { $eq: ["$number_match", 0] },
+                                    { $eq: ["$season_id", seasonId] },
+                                    { $eq: ["$league_id", leagueId] }
+                                ]
+                            }
+                        }
+                    },
+                    { $limit: 1 },
+                    { $project: { name_team: 1, _id: 0 } }
+                ],
+                as: "team_match0"
+            }
+        },
+        // 🔹 Reemplazamos el name_team del _id por el del number_match=0
+        {
+            $addFields: {
+                "_id.name_team": {
+                    $ifNull: [{ $arrayElemAt: ["$team_match0.name_team", 0] }, "$_id.name_team"]
+                }
+            }
+        },
+        { $project: { team_match0: 0 } },
+        {
+            $sort: {
+                "_id.number_match": 1,
+                "_id.fantasy_scoring": -1
+            }
+        }
+    ])
+        .exec((err, fantasyScoring) => {
+            if (err) {
+                res.status(500).send({ code: 500, message: "Error del servidor." });
+            } else if (!fantasyScoring || fantasyScoring.length === 0) {
+                res.status(404).send({ code: 404, message: "No se ha encontrado fantasy lineups." });
+            } else {
+                res.status(200).send({ code: 200, fantasyScoring });
+            }
+        });
 }
 
-function getTotalScoringGroupByJornada(req,res) {
+
+/*function getTotalScoringGroupByJornada(req,res) {
 
     const seasonId = req.query.season;
     const leagueId = req.query.league;
@@ -981,6 +1244,86 @@ function getTotalScoringGroupByJornada(req,res) {
                 } else {
                     res.status(200).send({ code: 200, fantasyScoring: fantasyScoring });
                 }
+            }
+        });
+}*/
+
+function getTotalScoringGroupByJornada(req, res) {
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+
+    FantasyLineup.aggregate([
+        {
+            $match: {
+                league_id: leagueId,
+                season_id: seasonId,
+                number_match: { $gte: 0 }
+            }
+        },
+        {
+            $group: {
+                "_id": {
+                    name_team: "$name_team",
+                    user_id: "$user_id",
+                    number_match: "$number_match",
+                    fantasy_scoring: "$fantasy_scoring",
+                    total_minutes: "$total_minutes",
+                    fantasy_scoring_prev: "$fantasy_scoring_prev",
+                    position_prev: "$position_prev",
+                    puntos_fantasy: "$puntos_fantasy",
+                    fantasy_scoringG: "$fantasy_scoringG",
+                    fantasy_scoringF: "$fantasy_scoringF",
+                    fantasy_scoringC: "$fantasy_scoringC"
+                }
+            }
+        },
+        // 🔹 Lookup para traer el name_team del number_match = 0
+        {
+            $lookup: {
+                from: "fantasylineups", // nombre de la colección
+                let: { uid: "$_id.user_id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ["$user_id", "$$uid"] },
+                                    { $eq: ["$number_match", 0] },
+                                    { $eq: ["$season_id", seasonId] },
+                                    { $eq: ["$league_id", leagueId] }
+                                ]
+                            }
+                        }
+                    },
+                    { $limit: 1 },
+                    { $project: { name_team: 1, _id: 0 } }
+                ],
+                as: "team_match0"
+            }
+        },
+        // 🔹 Reemplazamos el name_team del _id por el del number_match=0
+        {
+            $addFields: {
+                "_id.name_team": {
+                    $ifNull: [{ $arrayElemAt: ["$team_match0.name_team", 0] }, "$_id.name_team"]
+                }
+            }
+        },
+        { $project: { team_match0: 0 } },
+        {
+            $sort: {
+                "_id.number_match": 1,
+                "_id.fantasy_scoring": -1
+            }
+        }
+    ])
+        .exec((err, fantasyScoring) => {
+            if (err) {
+                res.status(500).send({ code: 500, message: "Error del servidor." });
+            } else if (!fantasyScoring || fantasyScoring.length === 0) {
+                res.status(404).send({ code: 404, message: "No se ha encontrado fantasy lineups." });
+            } else {
+                res.status(200).send({ code: 200, fantasyScoring: fantasyScoring });
             }
         });
 }
