@@ -770,7 +770,13 @@ function getFantasyScoringByPlayerSeason(req,res){
                 "totalAssists" : { "$sum": "$assists"},                           
                 "totalSteals" : { "$sum": "$steals"},         
                 "totalBlocks" : { "$sum": "$blocks"},                           
-                "totalTOs" : { "$sum": "$turnovers"},                     
+                "totalTOs" : { "$sum": "$turnovers"},   
+                "totalFGMade" : { "$sum": "$field_goals_made"},  
+                "totalFGAtt" : { "$sum": "$field_goals_attempted"},  
+                "total3PTmade" : { "$sum": "$three_point_field_goals_made"},  
+                "total3PTAtt" : { "$sum": "$three_point_field_goals_attempted"},  
+                "totalFTMade" : { "$sum": "$free_throws_made"},  
+                "totalFTAtt" : { "$sum": "$free_throws_attempted"},  
             } },
             { $sort: { "_id.season_id": -1 } },
         ])
@@ -864,7 +870,13 @@ function getFantasyScoringByPlayerMonth(req, res) {
                 totalAssists: { $sum: "$assists" },
                 totalSteals: { $sum: "$steals" },
                 totalBlocks: { $sum: "$blocks" },
-                totalTOs: { $sum: "$turnovers" }
+                totalTOs: { $sum: "$turnovers" },
+                totalFGMade : { $sum: "$field_goals_made"},  
+                totalFGAtt : { $sum: "$field_goals_attempted"},  
+                total3PTmade : { $sum: "$three_point_field_goals_made"},  
+                total3PTAtt : { $sum: "$three_point_field_goals_attempted"},  
+                totalFTMade : { $sum: "$free_throws_made"},  
+                totalFTAtt : { $sum: "$free_throws_attempted"},  
             }
         },
         {
@@ -920,7 +932,13 @@ function getFantasyScoringByPlayerTeam(req, res) {
                 totalAssists: { $sum: "$assists" },
                 totalSteals: { $sum: "$steals" },
                 totalBlocks: { $sum: "$blocks" },
-                totalTOs: { $sum: "$turnovers" }
+                totalTOs: { $sum: "$turnovers" },
+                totalFGMade : { $sum: "$field_goals_made"},  
+                totalFGAtt : { $sum: "$field_goals_attempted"},  
+                total3PTmade : { $sum: "$three_point_field_goals_made"},  
+                total3PTAtt : { $sum: "$three_point_field_goals_attempted"},  
+                totalFTMade : { $sum: "$free_throws_made"},  
+                totalFTAtt : { $sum: "$free_throws_attempted"},  
             }
         },
         {
@@ -976,7 +994,13 @@ function getFantasyScoringByPlayerResult(req, res) {
                 totalAssists: { $sum: "$assists" },
                 totalSteals: { $sum: "$steals" },
                 totalBlocks: { $sum: "$blocks" },
-                totalTOs: { $sum: "$turnovers" }
+                totalTOs: { $sum: "$turnovers" },
+                totalFGMade : { $sum: "$field_goals_made"},  
+                totalFGAtt : { $sum: "$field_goals_attempted"},  
+                total3PTmade : { $sum: "$three_point_field_goals_made"},  
+                total3PTAtt : { $sum: "$three_point_field_goals_attempted"},  
+                totalFTMade : { $sum: "$free_throws_made"},  
+                totalFTAtt : { $sum: "$free_throws_attempted"},  
             }
         },
         {
