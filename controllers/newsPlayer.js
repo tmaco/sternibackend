@@ -66,7 +66,8 @@ function getNewsPlayers(req,res) {
 }
 
 function getNewsPlayer(req, res) {
-    NewsPlayer.find({ player_id: req.params.playerId }) // Corregido aquí
+    NewsPlayer.find({ player_id: req.params.playerId },{"_id":0,"player_id":1,"player_name":1,"currentTitle":1,
+        "currentDescription":1,"lastUpdatedOn":1}) // Corregido aquí
         .sort({ lastUpdatedOn: "desc" })
         .exec((err, newsStored) => {
             if (err) {
@@ -79,6 +80,27 @@ function getNewsPlayer(req, res) {
                 }
             }
         });
+}
+
+function getListNewsPlayers(req,res){
+
+    let players = req.params.playersName.split(',');
+
+    NewsPlayer.find({ player_name : { $in: players }},{"_id":0,"player_id":1,"player_name":1,"currentTitle":1,
+        "currentDescription":1,"lastUpdatedOn":1})
+        .sort({ lastUpdatedOn: "desc"})
+        .exec((err, newsStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(newsStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado ninguna noticia de los jugadores." });
+                } else {
+                    res.status(200).send({ code: 200, news: newsStored });
+                }
+            }
+        });
+
 }
 
 async function updateNewsKey(req, res) {
@@ -125,5 +147,6 @@ module.exports = {
     getNewsData,
     getNewsPlayers,
     getNewsPlayer,
+    getListNewsPlayers,
     updateNewsKey
 };
