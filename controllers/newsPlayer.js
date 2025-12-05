@@ -50,7 +50,8 @@ async function getNewsData(req, res) {
 
 
 function getNewsPlayers(req,res) {
-    NewsPlayer.find({})
+    NewsPlayer.find({},{"_id":0,"player_id":1,"player_name":1,"currentTitle":1,
+        "currentDescription":1,"lastUpdatedOn":1})
         .sort({ lastUpdatedOn: "desc"})
         .exec((err, newsStored) => {
             if(err){
