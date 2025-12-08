@@ -101,7 +101,7 @@ async function getStatusInjData(req,res) {
 
 
 function getStatusPlayers(req,res) {
-    StatusPlayer.find({})
+    StatusPlayer.find({}, {"_id":0,"player_id":1, "player_name":1,"currentStatus":1, "currentInjury":1,"lastUpdatedOn":1 })
         .sort({ last_name: "asc"})
         .exec((err, statusStored) => {
             if(err){

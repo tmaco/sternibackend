@@ -2,7 +2,7 @@ const Registro = require("../models/registro");
 const utiles = require("../utils/normalizationNames");
 
 function getRegistros(req, res) {
-    const { league } = req.query;
+    const { league, limit } = req.query;
 
     Registro.find({tabla: "fantasyLineup", league: league,
         fecha : {
@@ -10,6 +10,7 @@ function getRegistros(req, res) {
         }
     })
     .sort({fecha: "desc"})
+    .limit(Number.isInteger(+limit) && +limit > 0 ? +limit : 0) // Usamos 0 para no aplicar límite
     .then(registros => {
         if(!registros) {
             res.status(404).send({ message: "No se ha encontrado ningun registro."});
