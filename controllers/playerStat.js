@@ -135,6 +135,8 @@ function getStatsBySeason(req,res){
     const eventID = req.query.event;
     const location = req.query.location;    
     var locationMatch = null;
+    const Last = req.query.last;
+    var lastDate = null;
 
         if(location === 'h'){
             locationMatch='h';
@@ -144,8 +146,33 @@ function getStatsBySeason(req,res){
             locationMatch=null;
         }
 
+        if(Last == '1week'){
+            const currentDate = new Date(); // Fecha actual
+            currentDate.setDate(currentDate.getDate() - 7); // Restamos 7 días
+            // Establecemos la hora a las 12:00:00
+            currentDate.setHours(12, 0, 0, 0);
+            // Formateamos la fecha al formato "YYYY-MM-DDTHH:mm:ssZ"
+            const daysAgo = currentDate.toISOString(); // Esto devuelve la fecha en formato ISO 8601
+            // Si necesitas solo la fecha sin horas, minutos o segundos
+            lastDate = daysAgo.split('T')[0] + "T12:00:00.000Z"; // Esto te da la fecha como "YYYY-MM-DDT12:00:00Z"
+        }else if(Last == '2week'){
+            const currentDate = new Date(); // Fecha actual
+            currentDate.setDate(currentDate.getDate() - 14); // Restamos 7 días
+            currentDate.setHours(12, 0, 0, 0);
+            const daysAgo = currentDate.toISOString(); // Esto devuelve la fecha en formato ISO 8601
+            lastDate = daysAgo.split('T')[0] + "T12:00:00.000Z"; // Esto te da la fecha como "YYYY-MM-DDT12:00:00Z"
+        }else if(Last == 'month'){
+            const currentDate = new Date(); // Fecha actual
+            currentDate.setDate(currentDate.getDate() - 30); // Restamos 7 días
+            currentDate.setHours(12, 0, 0, 0);
+            const daysAgo = currentDate.toISOString(); // Esto devuelve la fecha en formato ISO 8601
+            lastDate = daysAgo.split('T')[0] + "T12:00:00.000Z"; // Esto te da la fecha como "YYYY-MM-DDT12:00:00Z"
+        }else{
+            lastDate = null;
+        }
 
     PlayerStat.aggregate([{$match: { season_id: seasonId, event_season_type: eventID, seconds: { $gt: 0},
+            ...(lastDate ? { event_start_date_time: { $gte: new Date(lastDate) } } : {}),  // Si lastDate no es null, aplicamos el filtro
             ...(locationMatch ? { team_event_location_type:  locationMatch } : {})  // Si location no es null, aplicamos el filtro
             }},
             { $group: { "_id": { player_id: "$player_id" , display_name: "$display_name", position:checkPosition("$position"),team_abbreviation:"$team_abbreviation" },
