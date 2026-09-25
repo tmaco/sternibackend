@@ -10,10 +10,6 @@ const AWS_ACCESS_KEY_ID="AKIATKYPEGCQWQXQXNAS";
 const AWS_SECRET_ACCESS_KEY= "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";
 const AWS_REGION = "us-east-2";
 
-USER_DB="ydb55lol";
-PASS_DB="jygMmLJ3r3oNSrhl";
-HOST_DB="sterni2k21.cczox.mongodb.net";
-
 module.exports = {
     API_VERSION,
     IP_SERVER,

@@ -9,15 +9,15 @@ function getStatusData(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
-    msf.getData('nba', '2025-2026-regular', 'player_injuries', 'json', {force: 'true' })
+    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.getData('nba', '2026-2027-regular', 'player_injuries', 'json', {force: 'true' })
     .then(async response => {
 
         if(response.lastUpdatedOn){
                 const fs = require('fs');
                 var path = require('path');
 
-                var jsonPath = path.join(__dirname, '..', '.', 'results', 'player_injuries-nba-2025-2026-regular.json');
+                var jsonPath = path.join(__dirname, '..', '.', 'results', 'player_injuries-nba-2026-2027-regular.json');
                 //var jsonPath = '/tmp/player_injuries-nba-2023-2024-regular.json';
                 await fs.readFile(jsonPath, (err, data) => {
                     if (err) throw err;

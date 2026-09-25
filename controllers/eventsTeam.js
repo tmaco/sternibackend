@@ -3,7 +3,6 @@ const EventsTeam = require("../models/eventsTeam");
 const FantasyCalendar = require("../models/fantasyCalendar");
 const { log } = require("console");
 
-
 function getEventsTeamRegularData(req,res){
     console.log(req.params.team);
     var TeamName = req.params.team;
@@ -12,13 +11,13 @@ function getEventsTeamRegularData(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
-    msf.getData('nba', '2025-2026-regular', 'seasonal_games', 'json', {team: TeamName,  force: 'true', sort: 'game.starttime'})
+    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.getData('nba', '2026-2027-regular', 'seasonal_games', 'json', {team: TeamName,  force: 'true', sort: 'game.starttime'})
     .then(async response => {
         const fs = require('fs');
         var path = require('path');
 
-        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2025-2026-regular.json');
+        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2026-2027-regular.json');
         //var jsonPath = '/tmp/seasonal_games-nba-2023-2024-regular.json';
 
 
@@ -83,7 +82,7 @@ function getEventsTeamRegularData(req,res){
                 });*/
 
                 var eventTeam = new EventsTeam({
-                    season_id: "25_26",
+                    season_id: "26_27",
                     event_id: event.schedule.id,
                     event_status: event.schedule.playedStatus,
                     event_start_date_time: event.schedule.startTime,
@@ -122,7 +121,7 @@ function getEventsTeamRegularSeason1920Data(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
     msf.getData('nba', '2019-2020-regular', 'seasonal_games', 'json', {team: TeamName,  force: 'true', sort: 'game.starttime'})
     .then(async response => {
         const fs = require('fs');
@@ -229,7 +228,7 @@ function getEventsTeamPlayoffsSeason1920Data(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
     msf.getData('nba', '2020-playoff', 'seasonal_games', 'json', {team: TeamName,  force: 'true', sort: 'game.starttime'})
     .then(async response => {
         const fs = require('fs');
@@ -336,7 +335,7 @@ function getEventsTeamPlayoffsSeason2122Data(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
    var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
     msf.getData('nba', '2022-playoff', 'seasonal_games', 'json', {team: TeamName, force: 'true', sort: 'game.starttime'})
     .then(async response => {
         const fs = require('fs');
@@ -432,7 +431,7 @@ function getEventsTeamPlayoffsSeason2223Data(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
    var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
     msf.getData('nba', '2023-playoff', 'seasonal_games', 'json', {team: TeamName, force: 'true', sort: 'game.starttime'})
     .then(async response => {
         const fs = require('fs');
@@ -527,7 +526,7 @@ function getEventsTeamPlayoffsSeason2425Data(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
    var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
     msf.getData('nba', '2025-playoff', 'seasonal_games', 'json', {team: TeamName, force: 'true', sort: 'game.starttime'})
     .then(async response => {
         const fs = require('fs');
@@ -614,6 +613,132 @@ function getEventsTeamPlayoffsSeason2425Data(req,res){
         "message": `Events team ${team_id} inserted into Database`
       });	
 }
+
+const API_KEY = "e7a59c53-512d-40aa-97b1-f70375";
+const PASSWORD = "MYSPORTSFEEDS";
+const authToken = Buffer.from(`${API_KEY}:${PASSWORD}`).toString('base64');
+
+async function getEventsTeamPlayoffsSeason2526Data(req, res) {
+    console.log(req.params.team);
+    const TeamName = req.params.team; // Ej: "atlanta-hawks"
+    const team_id = utiles.checkNewAPISportsFeeds(TeamName);
+
+    try {
+        // 1. Apuntamos al recurso real 'games.json' bajo la temporada de playoffs correcta
+        const season = "2026-playoff"; 
+        const url = `https://api.mysportsfeeds.com/v2.1/pull/nba/${season}/games.json?team=${TeamName}&sort=game.starttime&force=false`;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos es más que suficiente
+
+        console.log(`Conectando directamente a: ${url}`);
+
+        const apiResponse = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Basic ${authToken}`,
+                'Accept-Encoding': 'gzip'
+            },
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!apiResponse.ok) {
+            throw new Error(`Error de comunicación con MySportsFeeds: ${apiResponse.status} ${apiResponse.statusText}`);
+        }
+
+        const response = await apiResponse.json();
+
+        if (!response || !response.games) {
+            return res.status(404).json({ status: 404, message: `No se encontraron partidos para el equipo ${TeamName}` });
+        }
+
+        const eventsToInsert = [];
+        let numMatch = 0;
+
+        // 2. Procesamos el JSON mapeando los campos exactamente igual
+        for (let i = 0; i < response.games.length; i++) {
+            const event = response.games[i];
+            numMatch++;
+
+            const homeTeam = utiles.checkAbv(event.schedule.homeTeam.abbreviation);
+            const awayTeam = utiles.checkAbv(event.schedule.awayTeam.abbreviation);
+        
+            let team_event_location_type = 'lol';
+            if (team_id === homeTeam) {
+                team_event_location_type = 'h';
+            } else if (team_id === awayTeam) {
+                team_event_location_type = 'a';
+            }
+
+            let team_points_scored = 0;
+            let opponent_points_scored = 0;
+            let opponent_id = "";
+
+            if (team_event_location_type === 'h') {
+                team_points_scored = event.score.homeScoreTotal;
+                opponent_points_scored = event.score.awayScoreTotal;
+                opponent_id = awayTeam;
+            } else if (team_event_location_type === 'a') {
+                team_points_scored = event.score.awayScoreTotal;
+                opponent_points_scored = event.score.homeScoreTotal;
+                opponent_id = homeTeam;
+            }
+            
+            let team_event_result = null;
+            if (team_points_scored > opponent_points_scored) {
+                team_event_result = "win";
+            } else if (team_points_scored < opponent_points_scored) {
+                team_event_result = "loss";
+            }
+
+            eventsToInsert.push({
+                season_id: "25_26",
+                event_id: event.schedule.id,
+                event_status: event.schedule.playedStatus,
+                event_start_date_time: event.schedule.startTime,
+                event_season_type: "post",
+                team_event_number_in_season: numMatch,
+                team_event_location_type: team_event_location_type,
+                team_event_result: team_event_result,
+                team_points_scored: team_points_scored,
+                team_id: team_id, 
+                opponent_id: opponent_id, 
+                opponent_points_scored: opponent_points_scored
+            });
+        }
+
+        // 3. Inserción directa en la base de datos sin duplicar conexiones
+        if (eventsToInsert.length > 0) {
+            await EventsTeam.collection.insertMany(eventsToInsert);
+        }
+
+        return res.status(200).json({
+            status: 200,
+            message: `Eventos del equipo ${team_id} persistidos correctamente.`,
+            gamesCount: eventsToInsert.length
+        });
+
+    } catch (error) {
+        console.error("Fallo controlado en la petición:", error);
+
+        if (error.name === 'AbortError') {
+            return res.status(504).json({
+                status: 504,
+                message: "La API externa no resolvió la solicitud dentro del tiempo límite."
+            });
+        }
+
+        return res.status(500).json({
+            status: 500,
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
+}
+
+
 
 function getEventsDate(req,res){
     const dateFrom = req.query.from;
@@ -728,13 +853,13 @@ function getEventsDateById(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
-    msf.getData('nba', '2025-2026-regular', 'seasonal_games', 'json', {date: 'from-yesterday-to-tomorrow', force: 'true', sort: 'game.starttime'})
+    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.getData('nba', '2026-2027-regular', 'seasonal_games', 'json', {date: 'from-yesterday-to-tomorrow', force: 'true', sort: 'game.starttime'})
     .then(async response => { //status: 'final',  
         const fs = require('fs');
         var path = require('path');
                 
-        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2025-2026-regular-from-yesterday-to-tomorrow.json');
+        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2026-2027-regular-from-yesterday-to-tomorrow.json');
         //var jsonPath =  '/tmp/seasonal_games-nba-2023-2024-regular-from-yesterday-to-tomorrow.json';
 
                 
@@ -762,7 +887,7 @@ function getEventsDateById(req,res){
                 }
 
                 EventsTeam.updateOne({event_id: event.schedule.id, team_id: homeTeam},
-                { season_id: "25_26", event_season_type: "regular", team_event_location_type: 'h', 
+                { season_id: "26_27", event_season_type: "regular", team_event_location_type: 'h', 
                     event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
                     team_id: homeTeam, opponent_id: awayTeam, team_event_result: team_points_scored > opponent_points_scored ? "win" : "loss", team_points_scored: team_points_scored, 
                     opponent_points_scored: opponent_points_scored, event_status: playedStatus },
@@ -786,7 +911,7 @@ function getEventsDateById(req,res){
                 }
 
                 EventsTeam.updateOne({event_id: event.schedule.id, team_id: awayTeam},
-                { season_id: "25_26", event_season_type: "regular", team_event_location_type: 'a', 
+                { season_id: "26_27", event_season_type: "regular", team_event_location_type: 'a', 
                     event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
                     team_id: awayTeam, opponent_id: homeTeam, team_event_result: team_points_scored_away > opponent_points_scored_away ? "win" : "loss", team_points_scored: team_points_scored_away, 
                     opponent_points_scored: opponent_points_scored_away, event_status: playedStatus},
@@ -816,14 +941,14 @@ function updateEventsDate(req, res) {
 
     var MySportsFeeds = require("mysportsfeeds-node");
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
     
-    msf.getData('nba', '2025-2026-regular', 'seasonal_games', 'json', { date: 'from-yesterday-to-tomorrow', force: 'true', sort: 'game.starttime' })
+    msf.getData('nba', '2026-2027-regular', 'seasonal_games', 'json', { date: 'from-yesterday-to-tomorrow', force: 'true', sort: 'game.starttime' })
     .then(async (response) => { 
         const fs = require('fs');
         var path = require('path');
                 
-        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2025-2026-regular-from-yesterday-to-tomorrow.json');
+        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2026-2027-regular-from-yesterday-to-tomorrow.json');
         
         await fs.readFile(jsonPath, (err, data) => {
             if (err) {
@@ -854,7 +979,7 @@ function updateEventsDate(req, res) {
                 // Create promises for each update
                 updatePromises.push(EventsTeam.updateOne({ event_id: event.schedule.id, team_id: homeTeam },
                     {
-                        season_id: "25_26", event_season_type: "regular", team_event_location_type: 'h',
+                        season_id: "26_27", event_season_type: "regular", team_event_location_type: 'h',
                         event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
                         team_id: homeTeam, opponent_id: awayTeam, team_event_result: team_points_scored > opponent_points_scored ? "win" : "loss",
                         team_points_scored: team_points_scored, opponent_points_scored: opponent_points_scored, event_status: playedStatus
@@ -873,7 +998,7 @@ function updateEventsDate(req, res) {
 
                 updatePromises.push(EventsTeam.updateOne({ event_id: event.schedule.id, team_id: awayTeam },
                     {
-                        season_id: "25_26", event_season_type: "regular", team_event_location_type: 'a',
+                        season_id: "26_27", event_season_type: "regular", team_event_location_type: 'a',
                         event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
                         team_id: awayTeam, opponent_id: homeTeam, team_event_result: team_points_scored_away > opponent_points_scored_away ? "win" : "loss",
                         team_points_scored: team_points_scored_away, opponent_points_scored: opponent_points_scored_away, event_status: playedStatus
@@ -906,14 +1031,14 @@ function updateEventsDateOneWeek(req, res) {
 
     var MySportsFeeds = require("mysportsfeeds-node");
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
     
-    msf.getData('nba', '2025-2026-regular', 'seasonal_games', 'json', { date: 'from-today-to-7-days-from-now', force: 'true', sort: 'game.starttime' })
+    msf.getData('nba', '2026-2027-regular', 'seasonal_games', 'json', { date: 'from-today-to-7-days-from-now', force: 'true', sort: 'game.starttime' })
     .then(async (response) => { 
         const fs = require('fs');
         var path = require('path');
                 
-        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2025-2026-regular-from-today-to-7-days-from-now.json');
+        var jsonPath = path.join(__dirname, '..', '.', 'results', 'seasonal_games-nba-2026-2027-regular-from-today-to-7-days-from-now.json');
         
         await fs.readFile(jsonPath, (err, data) => {
             if (err) {
@@ -944,7 +1069,7 @@ function updateEventsDateOneWeek(req, res) {
                 // Create promises for each update
                 updatePromises.push(EventsTeam.updateOne({ event_id: event.schedule.id, team_id: homeTeam },
                     {
-                        season_id: "25_26", event_season_type: "regular", team_event_location_type: 'h',
+                        season_id: "26_27", event_season_type: "regular", team_event_location_type: 'h',
                         event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
                         team_id: homeTeam, opponent_id: awayTeam, team_event_result: team_points_scored > opponent_points_scored ? "win" : "loss",
                         team_points_scored: team_points_scored, opponent_points_scored: opponent_points_scored, event_status: playedStatus
@@ -963,7 +1088,7 @@ function updateEventsDateOneWeek(req, res) {
 
                 updatePromises.push(EventsTeam.updateOne({ event_id: event.schedule.id, team_id: awayTeam },
                     {
-                        season_id: "25_26", event_season_type: "regular", team_event_location_type: 'a',
+                        season_id: "26_27", event_season_type: "regular", team_event_location_type: 'a',
                         event_id: event.schedule.id, event_start_date_time: event.schedule.startTime,
                         team_id: awayTeam, opponent_id: homeTeam, team_event_result: team_points_scored_away > opponent_points_scored_away ? "win" : "loss",
                         team_points_scored: team_points_scored_away, opponent_points_scored: opponent_points_scored_away, event_status: playedStatus
@@ -997,7 +1122,7 @@ function updateEventsDatePlayoff(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
     msf.getData('nba', '2024-playoff', 'seasonal_games', 'json', {date: 'from-20240415-to-20240619', force: 'false', sort: 'game.starttime'})
     .then(async response => { //status: 'final',  
         const fs = require('fs');
@@ -1102,6 +1227,7 @@ module.exports = {
     getEventsTeamPlayoffsSeason2122Data,
     getEventsTeamPlayoffsSeason2223Data,
     getEventsTeamPlayoffsSeason2425Data,
+    getEventsTeamPlayoffsSeason2526Data,
     getEventsDate,
     getHomeEventsDate,
     getEventsDateTeam,

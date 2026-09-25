@@ -1,3 +1,6 @@
+// index.js
+require('dotenv').config(); 
+
 const mongoose = require("mongoose");
 const app = require("./app");
 const PORT_SERVER = process.env.PORT || 3977;
@@ -13,7 +16,8 @@ var options = {
 };
 
 //mongoose.connect(`mongodb://${IP_SERVER}:${PORT_DB}/${DB}?authSource=admin`, options, (err, res) => {
-mongoose.connect(`mongodb+srv://${USER_DB}:${PASS_DB}@${HOST_DB}/${DB}?retryWrites=true&w=majority`, options, (err, res) => {
+//mongoose.connect(`mongodb+srv://${USER_DB}:${PASS_DB}@${HOST_DB}/${DB}?retryWrites=true&w=majority`, options, (err, res) => {
+mongoose.connect(`mongodb+srv://${process.env.USER_DB}:${process.env.PASS_DB}@${process.env.HOST_DB}/${process.env.DB_NAME}?retryWrites=true&w=majority`, options, (err, res) => {
   if (err) {
     throw err;
   } else {
@@ -24,7 +28,7 @@ mongoose.connect(`mongodb+srv://${USER_DB}:${PASS_DB}@${HOST_DB}/${DB}?retryWrit
       console.log("######### API REST  ###########");
       console.log("###############################");
       //console.log(`TESTBED - http://${IP_SERVER}:${PORT_SERVER}/api/${API_VERSION}/`);
-      console.log(`mongodb+srv://${HOST_DB}/api/${API_VERSION}/`);
+      console.log(`mongodb+srv://${process.env.HOST_DB}/api/${API_VERSION}/`);
     });
   }
 });

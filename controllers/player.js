@@ -4,7 +4,7 @@ const Player = require("../models/player");
 const { log } = require("console");
 
 function getPlayers(req,res) {
-    Player.find({season_id: "25_26", roster_status: "active"})
+    Player.find({season_id: "26_27", roster_status: "active"})
         .sort({ team_id: "asc", last_name: "asc"})
         .exec((err, playersStored) => {
             if(err){
@@ -20,7 +20,7 @@ function getPlayers(req,res) {
 }
 
 function getPlayersAll(req,res) {
-    Player.find({season_id: "25_26"})
+    Player.find({season_id: "26_27"})
         .sort({ team_id: "asc", last_name: "asc"})
         .exec((err, playersStored) => {
             if(err){
@@ -39,7 +39,7 @@ function getPlayersByTeam(req,res) {
 
     const TeamName = req.params.teamName;
 
-    Player.find({ season_id: "25_26", team_id : TeamName, roster_status: "active"})
+    Player.find({ season_id: "26_27", team_id : TeamName, roster_status: "active"})
         .sort({ last_name: "asc"})
         .exec((err, playersStored) => {
             if(err){
@@ -72,7 +72,7 @@ function getPlayersByPosition(req,res) {
             position = [ "C" ];
     };
 
-    Player.find({ season_id: "25_26", position : { $in: position }, roster_status: "active"})
+    Player.find({ season_id: "26_27", position : { $in: position }, roster_status: "active"})
         .sort({ last_name: "asc"})
         .exec((err, playersStored) => {
             if(err){
@@ -94,7 +94,7 @@ function getPlayer(req,res){
     // Crear una expresión regular que permita coincidencias en medio y al final
     const regex = new RegExp(playerName.replace(/\*/g, '.*'), 'i'); // 'i' para que sea insensible a mayúsculas
 
-    Player.findOne({ season_id: "25_26", display_name: { $regex: regex } })
+    Player.findOne({ season_id: "26_27", display_name: { $regex: regex } })
         .exec((err, playerStored) => {
             if (err) {
                 res.status(500).send({ message: "Error del servidor." });
@@ -112,7 +112,7 @@ function getListPlayers(req,res){
 
     let players = req.params.playersName.split(',');
 
-    Player.find({ season_id: "25_26", display_name : { $in: players }})
+    Player.find({ season_id: "26_27", display_name : { $in: players }})
         .exec((err, playersStored) => {
             if(err){
                 res.status(500).send({ message: "Error del servidor."});
@@ -156,13 +156,13 @@ function getPlayersData(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
-    msf.getData('nba', '2025-2026-regular', 'players', 'json', {team: TeamName,  force: 'false' })
+    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.getData('nba', '2026-2027-regular', 'players', 'json', {team: TeamName,  force: 'false' })
     .then(async response => {
         const fs = require('fs');
         var path = require('path');
 
-        var jsonPath = path.join(__dirname, '..', '.', 'results', 'players-nba-2025-2026-regular.json');
+        var jsonPath = path.join(__dirname, '..', '.', 'results', 'players-nba-2026-2027-regular.json');
         //var jsonPath = '/tmp/players-nba-2023-2024-regular.json';
         await fs.readFile(jsonPath, (err, data) => {
             if (err) throw err;
@@ -180,7 +180,7 @@ function getPlayersData(req,res){
                     //console.log(ply.lastName);
                     var player = new Player({
                         player_id: ply.id,
-                        season_id: "25_26",
+                        season_id: "26_27",
                         team_id: team_id,
                         last_name: utiles.removeDiacritics(ply.lastName), 
                         first_name: utiles.removeDiacritics(ply.firstName), 
@@ -284,7 +284,7 @@ function updateDisplayName(req,res) {
 }
 
 function updateAvatar(req,res) {
-    Player.find({season_id: "24_25"})
+    Player.find({season_id: "26_27"})
         .sort({ team_id: "asc", uniform_number: "asc"})
         .exec((err, playersStored) => {
             if(err){
@@ -296,7 +296,7 @@ function updateAvatar(req,res) {
                     for(var i=0; i<playersStored.length; i++){
                         if(playersStored[i].avatar !== null){
                             Player.updateOne(
-                                { player_id: playersStored[i].player_id, season_id: "25_26", avatar: null}, 
+                                { player_id: playersStored[i].player_id, season_id: "26_27", avatar: null}, 
                                 { avatar: playersStored[i].avatar }, 
                                 { upsert: false }, 
                                 (err, playerUpdate) => {

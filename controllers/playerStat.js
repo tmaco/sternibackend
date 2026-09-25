@@ -325,7 +325,7 @@ function getStatsData(req,res){
                     var MySportsFeeds = require("mysportsfeeds-node");
 
                     var msf = new MySportsFeeds("2.1", true);
-                    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+                    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
                     msf.getData('nba', '2020-playoff', 'game_boxscore', 'json', {game: eventsStored.event_id,  force: 'false' })
                     .then(async response => {
                         const fs = require('fs');
@@ -513,14 +513,14 @@ function getStatsEventData(req,res){
                     var MySportsFeeds = require("mysportsfeeds-node");
     
                     var msf = new MySportsFeeds("2.1", true);
-                    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+                    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
 
                     var event = eventsStored;
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2025-2026-regular-${event.event_id}.json`);
-                    msf.getData('nba', '2025-2026-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' });
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2026-2027-regular-${event.event_id}.json`);
+                    msf.getData('nba', '2026-2027-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' });
                     res.status(200).send({ code: 200, message: "Fichero de estadísticas generado - "+ eventID});
 
                 }
@@ -549,13 +549,13 @@ function addStatsEventData(req,res){
                     var MySportsFeeds = require("mysportsfeeds-node");
     
                     var msf = new MySportsFeeds("2.1", true);
-                    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+                    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
 
                     var event = eventsStored;
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2025-2026-regular-${event.event_id}.json`);
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2026-2027-regular-${event.event_id}.json`);
                     //var jsonPath = `/tmp/game_boxscore-nba-2023-2024-regular-${event.event_id}.json`;
 
                     if (fs.existsSync(jsonPath)) {
@@ -724,7 +724,7 @@ function addStatsEventData(req,res){
                         
                     } else{
                         console.log("FILE NOT!!! existsSync");
-                        msf.getData('nba', '2025-2026-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
+                        msf.getData('nba', '2026-2027-regular', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
                         .then( async response => {
                             await fs.readFile(jsonPath, (err, data) => {
                             //fs.readFile(jsonPath, (err, data) => {
@@ -914,14 +914,14 @@ function getStatsEventDataPlayoff(req,res){
                     var MySportsFeeds = require("mysportsfeeds-node");
     
                     var msf = new MySportsFeeds("2.1", true);
-                    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+                    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
 
                     var event = eventsStored;
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2025-playoff-${event.event_id}.json`);
-                    msf.getData('nba', '2025-playoff', 'game_boxscore', 'json', {game: event.event_id,  force: 'false' });
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2026-playoff-${event.event_id}.json`);
+                    msf.getData('nba', '2026-playoff', 'game_boxscore', 'json', {game: event.event_id,  force: 'false' });
                     res.status(200).send({ code: 200, message: "Fichero de estadísticas generado - "+ eventID});
 
                 }
@@ -950,13 +950,13 @@ function addStatsEventDataPlayoff(req,res){
                     var MySportsFeeds = require("mysportsfeeds-node");
     
                     var msf = new MySportsFeeds("2.1", true);
-                    msf.authenticate("363e84d9-dc73-4fa6-9c91-dc2378", "MYSPORTSFEEDS");
+                    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
 
                     var event = eventsStored;
                     const fs = require('fs');
                     var path = require('path');
     
-                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2025-playoff-${event.event_id}.json`);
+                    var jsonPath = path.join(__dirname, '..', '.', 'results', `game_boxscore-nba-2026-playoff-${event.event_id}.json`);
                     if (fs.existsSync(jsonPath)) {
                         console.log("FILE existsSync!!!");
                         fs.readFile(jsonPath, (err, data) => {
@@ -1123,7 +1123,7 @@ function addStatsEventDataPlayoff(req,res){
                         
                     } else{
                         console.log("FILE NOT!!! existsSync");
-                        msf.getData('nba', '2025-playoff', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
+                        msf.getData('nba', '2026-playoff', 'game_boxscore', 'json', {game: event.event_id,  force: 'true' })
                         .then( async response => {
                             await fs.readFile(jsonPath, (err, data) => {
                             //fs.readFile(jsonPath, (err, data) => {
