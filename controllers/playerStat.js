@@ -1,6 +1,7 @@
 const PlayerStat = require("../models/playerStat");
 const utiles = require("../utils/normalizationNames");
 const EventsTeam = require("../models/eventsTeam");
+const { API_KEY, PASSWORD } = require("../config");
 
 
 function getTotalStatsByPlayer(req,res){
@@ -325,7 +326,7 @@ function getStatsData(req,res){
                     var MySportsFeeds = require("mysportsfeeds-node");
 
                     var msf = new MySportsFeeds("2.1", true);
-                    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+                    msf.authenticate(API_KEY, PASSWORD);
                     msf.getData('nba', '2020-playoff', 'game_boxscore', 'json', {game: eventsStored.event_id,  force: 'false' })
                     .then(async response => {
                         const fs = require('fs');
@@ -513,7 +514,7 @@ function getStatsEventData(req,res){
                     var MySportsFeeds = require("mysportsfeeds-node");
     
                     var msf = new MySportsFeeds("2.1", true);
-                    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+                    msf.authenticate(API_KEY, PASSWORD);
 
                     var event = eventsStored;
                     const fs = require('fs');
@@ -549,7 +550,7 @@ function addStatsEventData(req,res){
                     var MySportsFeeds = require("mysportsfeeds-node");
     
                     var msf = new MySportsFeeds("2.1", true);
-                    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+                    msf.authenticate(API_KEY, PASSWORD);
 
                     var event = eventsStored;
                     const fs = require('fs');
@@ -914,7 +915,7 @@ function getStatsEventDataPlayoff(req,res){
                     var MySportsFeeds = require("mysportsfeeds-node");
     
                     var msf = new MySportsFeeds("2.1", true);
-                    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+                    msf.authenticate(API_KEY, PASSWORD);
 
                     var event = eventsStored;
                     const fs = require('fs');
@@ -950,7 +951,7 @@ function addStatsEventDataPlayoff(req,res){
                     var MySportsFeeds = require("mysportsfeeds-node");
     
                     var msf = new MySportsFeeds("2.1", true);
-                    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+                    msf.authenticate(API_KEY, PASSWORD);
 
                     var event = eventsStored;
                     const fs = require('fs');

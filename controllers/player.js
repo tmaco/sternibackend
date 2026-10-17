@@ -2,6 +2,8 @@
 const utiles = require("../utils/normalizationNames");
 const Player = require("../models/player");
 const { log } = require("console");
+const { API_KEY, PASSWORD } = require("../config");
+
 
 function getPlayers(req,res) {
     Player.find({season_id: "26_27", roster_status: "active"})
@@ -156,7 +158,7 @@ function getPlayersData(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.authenticate(API_KEY, PASSWORD);
     msf.getData('nba', '2026-2027-regular', 'players', 'json', {team: TeamName,  force: 'false' })
     .then(async response => {
         const fs = require('fs');

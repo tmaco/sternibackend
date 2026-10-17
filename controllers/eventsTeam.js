@@ -2,6 +2,8 @@ const utiles = require("../utils/normalizationNames");
 const EventsTeam = require("../models/eventsTeam");
 const FantasyCalendar = require("../models/fantasyCalendar");
 const { log } = require("console");
+const { API_KEY, PASSWORD } = require("../config");
+
 
 function getEventsTeamRegularData(req,res){
     console.log(req.params.team);
@@ -11,7 +13,7 @@ function getEventsTeamRegularData(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.authenticate(API_KEY, PASSWORD);
     msf.getData('nba', '2026-2027-regular', 'seasonal_games', 'json', {team: TeamName,  force: 'true', sort: 'game.starttime'})
     .then(async response => {
         const fs = require('fs');
@@ -121,7 +123,7 @@ function getEventsTeamRegularSeason1920Data(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.authenticate(API_KEY, PASSWORD);
     msf.getData('nba', '2019-2020-regular', 'seasonal_games', 'json', {team: TeamName,  force: 'true', sort: 'game.starttime'})
     .then(async response => {
         const fs = require('fs');
@@ -228,7 +230,7 @@ function getEventsTeamPlayoffsSeason1920Data(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.authenticate(API_KEY, PASSWORD);
     msf.getData('nba', '2020-playoff', 'seasonal_games', 'json', {team: TeamName,  force: 'true', sort: 'game.starttime'})
     .then(async response => {
         const fs = require('fs');
@@ -335,7 +337,7 @@ function getEventsTeamPlayoffsSeason2122Data(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
    var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.authenticate(API_KEY, PASSWORD);
     msf.getData('nba', '2022-playoff', 'seasonal_games', 'json', {team: TeamName, force: 'true', sort: 'game.starttime'})
     .then(async response => {
         const fs = require('fs');
@@ -431,7 +433,7 @@ function getEventsTeamPlayoffsSeason2223Data(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
    var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.authenticate(API_KEY, PASSWORD);
     msf.getData('nba', '2023-playoff', 'seasonal_games', 'json', {team: TeamName, force: 'true', sort: 'game.starttime'})
     .then(async response => {
         const fs = require('fs');
@@ -526,7 +528,7 @@ function getEventsTeamPlayoffsSeason2425Data(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
    var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.authenticate(API_KEY, PASSWORD);
     msf.getData('nba', '2025-playoff', 'seasonal_games', 'json', {team: TeamName, force: 'true', sort: 'game.starttime'})
     .then(async response => {
         const fs = require('fs');
@@ -614,8 +616,6 @@ function getEventsTeamPlayoffsSeason2425Data(req,res){
       });	
 }
 
-const API_KEY = "e7a59c53-512d-40aa-97b1-f70375";
-const PASSWORD = "MYSPORTSFEEDS";
 const authToken = Buffer.from(`${API_KEY}:${PASSWORD}`).toString('base64');
 
 async function getEventsTeamPlayoffsSeason2526Data(req, res) {
@@ -853,7 +853,7 @@ function getEventsDateById(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.authenticate(API_KEY, PASSWORD);
     msf.getData('nba', '2026-2027-regular', 'seasonal_games', 'json', {date: 'from-yesterday-to-tomorrow', force: 'true', sort: 'game.starttime'})
     .then(async response => { //status: 'final',  
         const fs = require('fs');
@@ -941,7 +941,7 @@ function updateEventsDate(req, res) {
 
     var MySportsFeeds = require("mysportsfeeds-node");
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.authenticate(API_KEY, PASSWORD);
     
     msf.getData('nba', '2026-2027-regular', 'seasonal_games', 'json', { date: 'from-yesterday-to-tomorrow', force: 'true', sort: 'game.starttime' })
     .then(async (response) => { 
@@ -1031,7 +1031,7 @@ function updateEventsDateOneWeek(req, res) {
 
     var MySportsFeeds = require("mysportsfeeds-node");
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.authenticate(API_KEY, PASSWORD);
     
     msf.getData('nba', '2026-2027-regular', 'seasonal_games', 'json', { date: 'from-today-to-7-days-from-now', force: 'true', sort: 'game.starttime' })
     .then(async (response) => { 
@@ -1122,7 +1122,7 @@ function updateEventsDatePlayoff(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.authenticate(API_KEY, PASSWORD);
     msf.getData('nba', '2024-playoff', 'seasonal_games', 'json', {date: 'from-20240415-to-20240619', force: 'false', sort: 'game.starttime'})
     .then(async response => { //status: 'final',  
         const fs = require('fs');

@@ -1,14 +1,18 @@
-const API_VERSION = "v1";
-const IP_SERVER = "localhost";
-const PORT_DB= 27017;
-const DB= "NBA";
-const SECRET_KEY="gR7ch9SvftgqwcnIFnSaC1234893SdAj4Nd3M0r3NL0L4s04U1R3";
-const UPLOADPATH="./uploads/avatar/";
-const S3_BUCKET = "sterni";
-//const UPLOADPATH=`https://${S3_BUCKET}.s3.amazonaws.com/`;
-const AWS_ACCESS_KEY_ID="AKIATKYPEGCQWQXQXNAS";
-const AWS_SECRET_ACCESS_KEY= "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";
-const AWS_REGION = "us-east-2";
+// Carga las variables del archivo .env
+require('dotenv').config();
+
+const API_VERSION = process.env.API_VERSION;
+const IP_SERVER = process.env.IP_SERVER;
+const PORT_DB = Number(process.env.PORT_DB); // El puerto suele ser mejor manejarlo como número
+const DB = process.env.DB;
+const SECRET_KEY = process.env.SECRET_KEY;
+const UPLOADPATH = process.env.UPLOADPATH;
+const S3_BUCKET = process.env.S3_BUCKET;
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+const AWS_REGION = process.env.AWS_REGION;
+const API_KEY = process.env.API_KEY;
+const PASSWORD =process.env.PASSWORD;
 
 module.exports = {
     API_VERSION,
@@ -20,5 +24,7 @@ module.exports = {
     S3_BUCKET,
     AWS_ACCESS_KEY_ID,
     AWS_SECRET_ACCESS_KEY,
-    AWS_REGION
+    AWS_REGION,
+    API_KEY,
+    PASSWORD
 }

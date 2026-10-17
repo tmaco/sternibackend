@@ -1,5 +1,6 @@
 const StatusPlayer = require("../models/statusPlayer");
 const utiles = require("../utils/normalizationNames");
+const { API_KEY, PASSWORD } = require("../config");
 
 function getStatusData(req,res){
 
@@ -9,7 +10,7 @@ function getStatusData(req,res){
     var MySportsFeeds = require("mysportsfeeds-node");
 
     var msf = new MySportsFeeds("2.1", true);
-    msf.authenticate("e7a59c53-512d-40aa-97b1-f70375", "MYSPORTSFEEDS");
+    msf.authenticate(API_KEY, PASSWORD);
     msf.getData('nba', '2026-2027-regular', 'player_injuries', 'json', {force: 'true' })
     .then(async response => {
 
