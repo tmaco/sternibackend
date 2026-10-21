@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-// 1. Importamos la conexión correspondiente desde el archivo que creamos antes
-//const { dbPrincipal } = require("../database"
-//const { dbSecundaria } = require('../database'); 
+
+const { dbPrincipal } = require("../database");
 
 const EventsTeamSchema = new Schema(
     {
@@ -26,7 +25,4 @@ const EventsTeamSchema = new Schema(
     }
 );
 
-module.exports = mongoose.model('eventsteam', EventsTeamSchema);
-// 2. CAMBIO AQUÍ: En lugar de usar 'mongoose.model', usamos 'dbSecundaria.model'
-//module.exports = dbPrincipal.model("eventsteam", UserSchema);
-//module.exports = dbSecundaria.model('eventsteam', EventsTeamSchema);
+module.exports = dbPrincipal.model("eventsteam", EventsTeamSchema);

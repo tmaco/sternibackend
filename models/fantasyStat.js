@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const { dbSecundaria } = require("../database");
+
+
 const fantasyStatSchema = new Schema(
     {
         league_id: { type: String, required: true } ,
@@ -46,4 +49,4 @@ const fantasyStatSchema = new Schema(
     }
 );
 
-module.exports = mongoose.model('fantasystat', fantasyStatSchema);
+module.exports = dbSecundaria.model('fantasystat', fantasyStatSchema);

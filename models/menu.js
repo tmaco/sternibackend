@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const { dbPrincipal } = require("../database");
+
+
 const MenuSchema = new Schema(
     {   
         title: String,
@@ -10,4 +13,4 @@ const MenuSchema = new Schema(
     }
 );
 
-module.exports = mongoose.model('menu', MenuSchema);
+module.exports = dbPrincipal.model('menu', MenuSchema);

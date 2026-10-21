@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const { dbPrincipal } = require("../database");
+
 const eventosSchema = mongoose.Schema({
     event_id: { type: Number, require: true }
 },{ _id : false });
@@ -14,4 +16,5 @@ const FantasyCalendarSchema = new Schema(
     }
 );
 
-module.exports = mongoose.model('fantasycalendar', FantasyCalendarSchema);
+//module.exports = mongoose.model('fantasycalendar', FantasyCalendarSchema);
+module.exports = dbPrincipal.model("fantasycalendar", FantasyCalendarSchema);

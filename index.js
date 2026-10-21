@@ -1,34 +1,15 @@
-// index.js
+// index.js with 2 different database endpoints
 require('dotenv').config(); 
 
-const mongoose = require("mongoose");
+require("./database"); // Esto inicializa las conexiones de forma inmediata al arrancar
 const app = require("./app");
 const PORT_SERVER = process.env.PORT || 3977;
-const { API_VERSION, IP_SERVER, PORT_DB, DB } = require("./config");
+const { API_VERSION } = require("./config");
 
-var options = {
-  keepAlive: 300000,
-  connectTimeoutMS: 30000,
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useFindAndModify: false,
-  useCreateIndex: true
-};
-
-//mongoose.connect(`mongodb://${IP_SERVER}:${PORT_DB}/${DB}?authSource=admin`, options, (err, res) => {
-//mongoose.connect(`mongodb+srv://${USER_DB}:${PASS_DB}@${HOST_DB}/${DB}?retryWrites=true&w=majority`, options, (err, res) => {
-mongoose.connect(`mongodb+srv://${process.env.USER_DB}:${process.env.PASS_DB}@${process.env.HOST_DB}/${process.env.DB_NAME}?retryWrites=true&w=majority`, options, (err, res) => {
-  if (err) {
-    throw err;
-  } else {
-    console.log('La conexión a la base de datos es correcta.');
-
-    app.listen(PORT_SERVER, () => {
-      console.log("###############################");
-      console.log("######### API REST  ###########");
-      console.log("###############################");
-      //console.log(`TESTBED - http://${IP_SERVER}:${PORT_SERVER}/api/${API_VERSION}/`);
-      console.log(`mongodb+srv://${process.env.HOST_DB}/api/${API_VERSION}/`);
-    });
-  }
+app.listen(PORT_SERVER, () => {
+  console.log("###############################");
+  console.log("######### API REST  ###########");
+  console.log("###############################");
+  console.log(`Servidor único corriendo en el puerto ${PORT_SERVER}`);
+  console.log(`Endpoint base: http://localhost:${PORT_SERVER}/api/${API_VERSION}/`);
 });

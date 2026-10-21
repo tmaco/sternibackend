@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const { dbPrincipal } = require("../database");
+
+
 const playersStatSchema = new Schema(
     {
         player_id: { type: Number, required: true },
@@ -45,4 +48,4 @@ const playersStatSchema = new Schema(
     }
 );
 
-module.exports = mongoose.model('playersstat', playersStatSchema);
+module.exports = dbPrincipal.model('playersstat', playersStatSchema);

@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const { dbPrincipal } = require("../database");
+
 const fantasyLeagueSchema = new Schema(
     {
       season_id: { type: String, required: true } ,
@@ -44,4 +46,5 @@ const fantasyLeagueSchema = new Schema(
       }
     }
 );
-module.exports = mongoose.model('fantasyleague', fantasyLeagueSchema);
+
+module.exports = dbPrincipal.model("fantasyleague", fantasyLeagueSchema);

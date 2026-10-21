@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const { dbPrincipal } = require("../database");
+
 const fantasyLineupSchema = new Schema(
     {
         name_team: { type: String, required: true } ,
@@ -36,4 +38,5 @@ const fantasyLineupSchema = new Schema(
         } ]
     }
 );
-module.exports = mongoose.model('fantasylineup', fantasyLineupSchema);
+
+module.exports = dbPrincipal.model('fantasylineup', fantasyLineupSchema);

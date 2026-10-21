@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const { dbPrincipal } = require("../database");
+
+
 const newsPlayerSchema = new Schema(
     {
         key:{ type: String, required: true } ,
@@ -15,4 +18,4 @@ const newsPlayerSchema = new Schema(
     }
 );
 
-module.exports = mongoose.model('newsplayer', newsPlayerSchema);
+module.exports = dbPrincipal.model('newsplayer', newsPlayerSchema);

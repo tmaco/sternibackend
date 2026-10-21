@@ -13,8 +13,7 @@ node_modules/
 /results
 /tmp
 .env
-index2.js
-database.js
+index_.js
 
 # misc
 .DS_Store

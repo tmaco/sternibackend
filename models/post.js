@@ -2,6 +2,9 @@ const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
 
+const { dbPrincipal } = require("../database");
+
+
 const PostSchema = new Schema(
     {
       title: { type: String },
@@ -16,4 +19,4 @@ const PostSchema = new Schema(
 );
 PostSchema.plugin(mongoosePaginate);
 
-module.exports = mongoose.model('post', PostSchema);
+module.exports = dbPrincipal.model('post', PostSchema);

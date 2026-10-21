@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const { dbPrincipal } = require("../database");
+
+
 const TeamSchema = new Schema(
     {
       team_id: { type: String, required: true },
@@ -17,4 +20,4 @@ const TeamSchema = new Schema(
     }
 );
 
-module.exports = mongoose.model('teams', TeamSchema);
+module.exports = dbPrincipal.model('teams', TeamSchema);

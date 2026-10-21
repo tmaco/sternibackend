@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const { dbPrincipal } = require("../database");
+
+
 const RegistroSchema = new Schema(
     {   
         tabla: String,
@@ -14,4 +17,5 @@ const RegistroSchema = new Schema(
     }
 );
 
-module.exports = mongoose.model('registro', RegistroSchema);
+//module.exports = mongoose.model('registro', RegistroSchema);
+module.exports = dbPrincipal.model('registro', RegistroSchema);

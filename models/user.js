@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const { dbPrincipal } = require("../database");
+
 const UserSchema = new Schema(
     {
         first_name: String,
@@ -21,4 +23,5 @@ const UserSchema = new Schema(
 
     }
 );
-module.exports = mongoose.model('user', UserSchema);
+
+module.exports = dbPrincipal.model('user', UserSchema);
