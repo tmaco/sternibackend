@@ -53,7 +53,8 @@ function addPlayerLineup(req,res){
                             {
                                 $match: {
                                 player_id: { $in: playersIL },  // Filtrar por player_id que esté en el array playerIds
-                                currentStatus: "INJ"  // Filtrar por los que tienen currentStatus igual a "INJ"
+                                //currentStatus: "INJ"  // Filtrar por los que tienen currentStatus igual a "INJ"
+                                currentStatus: { $in: ["INJ","O", "OFS"] } // Ahora busca tanto "O" como "OFS"
                                 }
                             },
                             {
@@ -1443,8 +1444,18 @@ function addInjuryList(req, res) {
             const statusPlayer = statusPlayers[0];
 
             // Verificar si el estado del jugador es "INJ" (lesionado)
-            if (statusPlayer.currentStatus !== 'INJ') {
+            /*if (statusPlayer.currentStatus !== 'INJ') {
                 return res.status(404).send({ code: 404, message: "El jugador no está en la lista de INJ" });
+            }*/
+
+            // Verificar si el estado del jugador es O u OFS (lesionado)
+            const estadosLesionado = ['INJ','O', 'OFS'];
+
+            if (!estadosLesionado.includes(statusPlayer.currentStatus)) {
+                return res.status(404).send({ 
+                    code: 404, 
+                    message: 'El jugador no está en la lista de lesionados' 
+                });
             }
 
             // Paso 2: Comprobar que player_id está en fantasyLineup para el último number_match o mayor
@@ -1738,8 +1749,17 @@ function addInjuryListManually(req, res) {
             const statusPlayer = statusPlayers[0];
 
             // Verificar si el estado del jugador es "INJ" (lesionado)
-            if (statusPlayer.currentStatus !== 'INJ') {
+            /*if (statusPlayer.currentStatus !== 'INJ') {
                 return res.status(404).send({ code: 404, message: "El jugador no está en la lista de INJ" });
+            }*/
+
+            const estadosLesionado = ['INJ','O', 'OFS'];
+
+            if (!estadosLesionado.includes(statusPlayer.currentStatus)) {
+                return res.status(404).send({ 
+                    code: 404, 
+                    message: 'El jugador no está en la lista de lesionados' 
+                });
             }
 
             // Paso 2: Comprobar que player_id está en fantasyLineup para el último number_match o mayor
