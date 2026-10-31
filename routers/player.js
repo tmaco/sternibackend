@@ -18,5 +18,6 @@ api.put("/update-players-name", [md_auth.ensureAdmin], PlayerController.updateDi
 api.put("/update-players-avatar", [md_auth.ensureAdmin], PlayerController.updateAvatar);
 api.put("/update-player-team/:id", [md_auth.ensureAdmin], PlayerController.updatePlayerTeam);
 api.put("/update-player-status/:id", [md_auth.ensureAdmin], PlayerController.updatePlayerStatus);
+api.get("/get-rookies/:season", PlayerController.getRookies);
 
 module.exports = api;

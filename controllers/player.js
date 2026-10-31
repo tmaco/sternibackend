@@ -150,7 +150,7 @@ function getPlayerId(req,res){
 
 }
 
-function getPlayersData(req,res){
+function getPlayersDataOld(req,res){
     console.log(req.params.team);
     var TeamName = req.params.team;
     let team_id = TeamName;
@@ -196,7 +196,8 @@ function getPlayersData(req,res){
                         position: ply.primaryPosition, 
                         uniform_number: ply.jerseyNumber,
                         roster_status: ply.currentRosterStatus === "ROSTER" ? "active" : "inactive",
-                        avatar: ply.officialImageSrc
+                        avatar: ply.officialImageSrc,
+                        rookie: ply.drafter.year===2026 && ply.rookie ? ply.rookie : "false"
                     });
 
                     //console.log(player);
@@ -236,6 +237,92 @@ function getPlayersData(req,res){
         "status": 200,
         "message": `Team ${team_id} inserted into Database`
       });	
+}
+
+function getPlayersData(req,res){
+    console.log(req.params.team);
+    var TeamName = req.params.team;
+    let team_id = TeamName;
+
+    var MySportsFeeds = require("mysportsfeeds-node");
+
+    var msf = new MySportsFeeds("2.1", true);
+    msf.authenticate(API_KEY, PASSWORD);
+    
+    // Consumimos la API directamente
+    msf.getData('nba', '2026-2027-regular', 'players', 'json', { team: TeamName, force: 'false' })
+    .then(response => { // 'response' ya contiene el objeto JSON parseado de la API
+
+        team_id = utiles.checkNewAPISportsFeeds(TeamName);
+        
+        // Validamos que la respuesta contenga la estructura esperada
+        if (!response || !response.players) {
+            console.warn("No se encontraron jugadores en la respuesta de la API.");
+            return;
+        }
+
+        console.log("Total jugadores recibidos de la API: " + response.players.length);
+
+        response.players.forEach((registro) => {                 
+            let ply = registro.player;
+            
+            // Definimos los campos identificadores únicos
+            const filtro = { 
+                player_id: ply.id, 
+                season_id: "26_27" 
+            };
+
+            // El valor de rookie como booleano puro (true / false)
+            const valorRookie = ply.drafted?.year === 2026 && ply.rookie ? true : false;
+            console.log(utiles.removeDiacritics(ply.firstName) + " " + utiles.removeDiacritics(ply.lastName) + " " + valorRookie);
+
+            // Construimos la operación de actualización
+            const actualizacion = {
+                $set: { 
+                    rookie: valorRookie 
+                },
+                $setOnInsert: {
+                    team_id: team_id,
+                    last_name: utiles.removeDiacritics(ply.lastName), 
+                    first_name: utiles.removeDiacritics(ply.firstName), 
+                    display_name: utiles.removeDiacritics(ply.firstName) + " " + utiles.removeDiacritics(ply.lastName), 
+                    birthdate: ply.birthDate,
+                    age: ply.age, 
+                    birthplace: (ply.birthCity || "") + ", " + (ply.birthCountry || ""),
+                    height_formatted: ply.height,
+                    weight_lb: ply.weight, 
+                    weight_kg: ply.weight,
+                    position: ply.primaryPosition, 
+                    uniform_number: ply.jerseyNumber,
+                    roster_status: ply.currentRosterStatus === "ROSTER" ? "active" : "inactive",
+                    avatar: ply.officialImageSrc
+                }
+            };
+
+            // Usamos updateOne con upsert: true
+            Player.collection.updateOne(filtro, actualizacion, { upsert: true }, function (err, result) {
+                if (err){ 
+                    console.error("Error al procesar el jugador: ", err);
+                } else {
+                    if (result.upsertedCount > 0) {
+                        console.log("Jugador CREADO: " + ply.firstName + " " + ply.lastName);
+                    } else if (result.modifiedCount > 0) {
+                        console.log("Jugador ACTUALIZADO (Rookie): " + ply.firstName + " " + ply.lastName);
+                    } else {
+                        console.log("Jugador sin cambios: " + ply.firstName + " " + ply.lastName);
+                    }
+                }
+            });
+        });
+    })
+    .catch(error => {
+        console.error("Error al conectar con la API de MySportsFeeds:", error);
+    });
+
+    res.status(200).jsonp({
+        "status": 200,
+        "message": `Team ${team_id} processed`
+    });	
 }
 
 function updateDisplayName(req,res) {
@@ -360,6 +447,33 @@ function updatePlayerStatus(req,res) {
         } );
 }
 
+function getRookies(req,res) {
+
+    const seasonId = req.params.season;
+
+    // Usamos .select('player_id -_id') para traer SOLO el player_id y excluir el _id de Mongo
+    Player.find({season_id: seasonId, rookie: true})
+        .select('player_id -_id') 
+        .exec((err, playersStored) => {
+            if(err){
+                res.status(500).send({ message: "Error del servidor."});
+            } else {
+                if(playersStored.length <= 0) {
+                    res.status(404).send({ message: "No se ha encontrado ningun jugador."});
+                } else {
+                    // Mapeamos para devolver un array plano de IDs: [102, 105, 204...]
+                    const rookiesIds = playersStored.map(p => p.player_id);
+                    
+                    res.status(200).send({ 
+                        code: 200, 
+                        players: rookiesIds 
+                    });
+                }
+            }
+        });
+}
+
+
 
 module.exports = {
     getPlayers,
@@ -373,5 +487,6 @@ module.exports = {
     updateAvatar,
     updatePlayerTeam,
     updatePlayerStatus,
-    getPlayersAll
+    getPlayersAll,
+    getRookies
 };

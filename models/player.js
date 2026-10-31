@@ -23,7 +23,8 @@ const PlayerSchema = new Schema(
       position: { type: String, required: true },
       uniform_number: { type: Number, required: true },
       roster_status: { type: String, required: true },
-      avatar: { type: String }
+      avatar: { type: String },
+      rookie: { type: Boolean, required: false },
     }
 );
 
