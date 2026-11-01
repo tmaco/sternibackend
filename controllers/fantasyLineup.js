@@ -1937,6 +1937,166 @@ async function updateAvatarIL(req, res) {
     }
 }
 
+function substituteFantasyPlayer(req, res) {
+    const { id } = req.params; // ID de la alineación (lineupId)
+    const {
+        // Datos del jugador que SALE (desde deletePlayerFantasyLineup)
+        fantasyPlayerId,       // El _id de MongoDB del jugador dentro del array
+        fantasyPlayerName,     // Nombre del jugador viejo
+        fantasyPlayer_id,      // ID numérico del jugador viejo
+        position,              // Posición del jugador viejo
+        
+        // Datos del jugador que ENTRA (desde addPlayerLineup)
+        lineupData,            // El objeto { player_name, position, order, player_id, avatar }
+        
+        // Datos comunes del contexto
+        fantasyUser,
+        seasonId,
+        leagueId,
+        available             // true (para liberar al viejo y bloquear al nuevo)
+    } = req.body;
+
+    // 1. Buscar la alineación actual para validar existencia y propiedad
+    FantasyLineup.findOne({ _id: id })
+        .exec((err, fantasyLimit) => {
+            if (err) return res.status(500).send({ code: 500, message: "Error del servidor." });
+            if (!fantasyLimit) return res.status(404).send({ code: 404, message: "No se ha encontrado la alineación fantasy." });
+
+            // VALIDACIÓN DEL JUGADOR VIEJO: Verificar si el jugador a eliminar sigue en el equipo
+            const playerIndex = fantasyLimit.fantasyLineup.findIndex(player => player._id.toString() === fantasyPlayerId);
+            if (playerIndex === -1) {
+                return res.status(404).send({ code: 404, message: "El jugador a sustituir ya ha sido eliminado de la alineación." });
+            }
+
+            // 2. LÓGICA DE VALIDACIÓN DE LA IL (Copiada de addPlayerLineup)
+            const playersIL = fantasyLimit.injuryList.map(player => player.player_id);
+            
+            // Definimos la función contenedora para continuar con el flujo una vez validada la IL
+            const procederConSustitucion = () => {
+                
+                // 3. LÓGICA DE DISPONIBILIDAD DEL NUEVO JUGADOR (Copiada de addPlayerLineup)
+                FantasyPlayer.findOne({ player_id: lineupData.player_id, season_id: seasonId, league_id: leagueId }, 
+                    (err, fantasyPlayerStored) => {
+                        if (err) return res.status(500).send({ message: "Error del servidor." });
+                        if (!fantasyPlayerStored) return res.status(404).send({ code: 404, message: "El nuevo jugador no existe en la base de datos." });
+                        
+                        if (fantasyPlayerStored.available === false) {
+                            return res.status(403).send({ code: 403, message: "El jugador nuevo ya no está disponible." });
+                        }
+
+                        // 💥 AQUÍ EMPIEZAN LAS MUTACIONES EN LA BASE DE DATOS (Sabiendo que todo es legal)
+                        
+                        // 4. EJECUTAR EL CAMBIO ATÓMICO EN LA ALINEACIÓN (Quitar uno y añadir el otro)
+                        FantasyLineup.updateOne(
+                            { _id: id },
+                            { 
+                                $pull: { fantasyLineup: { _id: fantasyPlayerId } }
+                            }
+                        ).exec((err, updatedLineup) => {
+                            if (err) return res.status(500).send({ message: "Error del servidor al liberar espacio." });
+
+                            // Insertamos el nuevo jugador en el array
+                            FantasyLineup.updateOne(
+                                { _id: id },
+                                { $push: { fantasyLineup: lineupData } }
+                            ).exec((err, finalLineup) => {
+                                if (err) return res.status(500).send({ message: "Error del servidor al insertar el nuevo jugador." });
+
+                                // 5. ACTUALIZAR DISPONIBILIDAD DEL JUGADOR QUE SALE (available: true)
+                                FantasyPlayer.updateOne(
+                                    { player_id: fantasyPlayer_id, season_id: seasonId, league_id: leagueId },
+                                    { available: true }
+                                ).exec((err, oldPlayerStored) => {
+                                    if (err) return res.status(500).send({ message: "Error del servidor." });
+
+                                    // 6. ACTUALIZAR DISPONIBILIDAD DEL JUGADOR QUE ENTRA (available: false)
+                                    FantasyPlayer.updateOne(
+                                        { player_id: lineupData.player_id, season_id: seasonId, league_id: leagueId },
+                                        { available: false }
+                                    ).exec((err, newPlayerStored) => {
+                                        if (err) return res.status(500).send({ message: "Error del servidor." });
+
+                                        // 7. GUARDAR REGISTRO DE BAJA (DROP)
+                                        const registroDrop = new Registro();
+                                        registroDrop.tabla = "fantasyLineup";
+                                        registroDrop.tipo = "drop";
+                                        registroDrop.fecha = Date.now();
+                                        registroDrop.usuario = fantasyUser;
+                                        registroDrop.mensaje = position + " " + fantasyPlayerName;
+                                        registroDrop.league = leagueId;
+                                        registroDrop.player_id = fantasyPlayer_id;
+
+                                        registroDrop.save((err, registroDropCreated) => {
+                                            if (err) return res.status(500).send({ code: 500, message: "Error del servidor." });
+
+                                            // 8. GUARDAR REGISTRO DE ALTA (ADD)
+                                            const registroAdd = new Registro();
+                                            registroAdd.tabla = "fantasyLineup";
+                                            registroAdd.tipo = "add"; 
+                                            registroAdd.fecha = Date.now();
+                                            registroAdd.usuario = fantasyUser; 
+                                            registroAdd.mensaje = lineupData.position + " " + lineupData.player_name;
+                                            registroAdd.league = leagueId;           
+                                            registroAdd.player_id = lineupData.player_id;
+
+                                            registroAdd.save((err, registroAddCreated) => {
+                                                if (err) return res.status(500).send({ code: 500, message: "Error del servidor." });
+
+                                                // RESPUESTA EXITOSA FINAL 200
+                                                return res.status(200).send({ 
+                                                    code: 200, 
+                                                    message: "Sustitución realizada con éxito y guardada en el historial." 
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    }
+                );
+            };
+
+            // Ejecución del cortafuegos de la agregación de la IL si contiene elementos
+            if (playersIL && playersIL.length > 0) {
+                StatusPlayer.aggregate([
+                    {
+                        $match: {
+                            player_id: { $in: playersIL },
+                            currentStatus: { $in: ["INJ", "O", "OFS"] }
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            count: { $sum: 1 }
+                        }
+                    },
+                    {
+                        $project: {
+                            _id: 0,
+                            allPlayersMatch: {
+                                $eq: [ { $literal: playersIL.length }, "$count" ]
+                            }
+                        }
+                    }
+                ]).then(result => {
+                    if (result.length > 0 && !result[0].allPlayersMatch) {
+                        // Si hay un jugador sano en la IL, bloqueamos la acción exactamente como en tu addPlayerLineup
+                        return res.status(400).send({ code: 400, message: "No puedes realizar cambios si tienes jugadores sanos en la lista de lesionados." });
+                    }
+                    // Si todo es correcto con la IL, avanzamos a validar al jugador
+                    procederConSustitucion();
+                }).catch(err => {
+                    return res.status(500).send({ code: 500, message: "Error en la agregación de estados." });
+                });
+            } else {
+                // Si la IL está vacía, no hace falta agregar nada, pasamos directo
+                procederConSustitucion();
+            }
+        });
+}
+
 
 
 module.exports = {
@@ -1970,5 +2130,6 @@ module.exports = {
     removeInjuryList,
     addInjuryListManually,
     dropInjuryList,
-    updateAvatarIL
+    updateAvatarIL,
+    substituteFantasyPlayer
 };
