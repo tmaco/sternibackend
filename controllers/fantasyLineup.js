@@ -1362,7 +1362,7 @@ function updateScoringPointsByJornada(req,res) {
         );
 }
 
-function saveFantasyLineups(req,res){
+function saveFantasyLineupsOld(req,res){
 
     const seasonId = req.query.season;
     const leagueId = req.query.league;
@@ -1402,6 +1402,61 @@ function saveFantasyLineups(req,res){
             }
         });
 
+}
+
+function saveFantasyLineups(req, res) {
+    const seasonId = req.query.season;
+    const leagueId = req.query.league;
+    const match = req.query.match;
+
+    FantasyLineup.find({ season_id: seasonId, league_id: leagueId, number_match: 0 })
+        .exec(async (err, fantasyLineups) => { // Añadimos async aquí
+            if (err) {
+                return res.status(500).send({ code: 500, message: "Error del servidor." });
+            } 
+            
+            if (!fantasyLineups || fantasyLineups.length === 0) {
+                return res.status(404).send({ code: 404, message: "No se han encontrado las fantasy lineups." });
+            }
+
+            try {
+                // CORRECCIÓN ASÍNCRONA: Usamos Promise.all para esperar a que se guarden TODOS los equipos antes de responder
+                const promesasGuardado = fantasyLineups.map((item) => {
+                    return new Promise((resolve, reject) => {
+                        var lineup = new FantasyLineup();
+                        lineup.name_team = item.name_team;
+                        lineup.user_id = item.user_id; 
+                        lineup.league_id = item.league_id; 
+                        lineup.season_id = item.season_id;
+                        lineup.number_match = match;         
+                        lineup.fantasyLineup = item.fantasyLineup;  
+                        
+                        // 🎯 GUARDAR LA IL: Duplicamos el array de lesionados del borrador al histórico
+                        lineup.injuryList = item.injuryList || [];  
+
+                        lineup.save((saveErr, lineupCreated) => {
+                            if (saveErr) {
+                                reject(saveErr);
+                            } else if (!lineupCreated) {
+                                reject(new Error("Error al crear la alineación"));
+                            } else {
+                                resolve();
+                            }
+                        });
+                    });
+                });
+
+                // Esperamos a que terminen todas las operaciones de guardado en la base de datos
+                await Promise.all(promesasGuardado);
+                
+                // Ahora sí respondemos con éxito de forma segura
+                return res.status(200).send({ code: 200, message: "Alineaciones e IL añadidas correctamente." });
+
+            } catch (error) {
+                console.error("Error al guardar alineaciones de la jornada:", error);
+                return res.status(500).send({ code: 500, message: "Error al guardar alguna de las alineaciones en el servidor." });
+            }
+        });
 }
 
 function updateFantasyTeamName(req, res) {
@@ -1473,10 +1528,13 @@ function addInjuryList(req, res) {
                     return (team.number_match > max.number_match) ? team : max;
                 });
                 
-                // Comprobar si el player_id está en fantasyLineup de latestFantasyTeam
+                // Comprobar si el player_id está en fantasyLineup o injuryList de latestFantasyTeam
                 const playerInLineup = latestFantasyTeam.fantasyLineup.some(player => player.player_id === parseInt(playerId, 10));
+                const playerInInjuryList = latestFantasyTeam.injuryList?.some(player => player.player_id === parseInt(playerId, 10)) || false;
 
-                if (!playerInLineup) {
+                const isPlayerInTeam = playerInLineup || playerInInjuryList;
+                      
+                if (!isPlayerInTeam) {
                     return res.status(404).send({ code: 404, message: "El jugador no está en la última alineación del equipo" });
                 }
 
@@ -1492,16 +1550,21 @@ function addInjuryList(req, res) {
                  if (playerToInjured) {
                      firstFantasyTeam.fantasyLineup = firstFantasyTeam.fantasyLineup.filter(player => player.player_id !== parseInt(playerId, 10));
 
-                     // Paso 5: Añadir el jugador a injuryList para number_match === 0
-                     firstFantasyTeam.injuryList.push({
-                         player_id: playerToInjured.player_id,
-                         player_name: playerToInjured.player_name,
-                         position: playerToInjured.position,
-                         avatar: playerToInjured.avatar,
-                         date: new Date()  // Fecha actual
-                     });
+                     // GUARDABARROS: Evita duplicaciones si el usuario hace doble clic o hay reintentos de red
+                    const yaExisteEnIL = firstFantasyTeam.injuryList.some(player => player.player_id === playerToInjured.player_id);
 
-                     // Guardar los cambios en la base de datos
+                    if (!yaExisteEnIL) {
+                        // Paso 5: Añadir el jugador a injuryList para number_match === 0
+                        firstFantasyTeam.injuryList.push({
+                            player_id: playerToInjured.player_id,
+                            player_name: playerToInjured.player_name,
+                            position: playerToInjured.position,
+                            avatar: playerToInjured.avatar,
+                            date: new Date()
+                        });
+                    }
+
+                    // Guardar los cambios en la base de datos
                      firstFantasyTeam.save((saveErr) => {
                          if (saveErr) {
                              return res.status(500).send({ code: 500, message: "Error al guardar el equipo" });
@@ -1525,8 +1588,7 @@ function addInjuryList(req, res) {
                              if (!registroCreated) {
                                  return res.status(404).send({ code: 404, message: "Error al crear el registro." });
                              }
-
-                             FantasyPlayer.updateOne({ player_name: playerToInjured.player_name, season_id: seasonId, league_id: leagueId}, 
+                            FantasyPlayer.updateOne({ player_id: playerToInjured.player_id, season_id: seasonId, league_id: leagueId },
                                  { "isIL" : true }, (err, fantasyStored) => {
                                  if(err) {
                                      return res.status(500).send({ message: "Error del servidor."});
@@ -1587,13 +1649,17 @@ function removeInjuryList(req, res){
                         firstFantasyTeam.injuryList = firstFantasyTeam.injuryList.filter(player => player.player_id !== parseInt(playerId, 10));
 
                         // Paso 4: Añadir el jugador a fantasyLineup para number_match === 0
-                        firstFantasyTeam.fantasyLineup.push({
-                            player_id: playerToInjured.player_id,
-                            player_name: playerToInjured.player_name,
-                            avatar: playerToInjured.avatar,
-                            position: utiles.checkPosition(playerToInjured.position),
-                            order: 3000
-                        });                
+                        const yaEstaEnLineup = firstFantasyTeam.fantasyLineup.some(player => player.player_id === playerToInjured.player_id);
+                            // GUARDABARROS: Evita duplicaciones si el usuario hace doble clic o hay reintentos de red
+                        if (!yaEstaEnLineup) {
+                            firstFantasyTeam.fantasyLineup.push({
+                                player_id: playerToInjured.player_id,
+                                player_name: playerToInjured.player_name,
+                                avatar: playerToInjured.avatar,
+                                position: utiles.checkPosition(playerToInjured.position),
+                                order: 3000
+                            });
+                        }              
 
                         // Guardar los cambios en la base de datos
                         firstFantasyTeam.save((saveErr) => {
@@ -1619,8 +1685,7 @@ function removeInjuryList(req, res){
                                 if (!registroCreated) {
                                     return res.status(404).send({ code: 404, message: "Error al crear el registro." });
                                 }
-
-                                FantasyPlayer.updateOne({ player_name: playerToInjured.player_name, season_id: seasonId, league_id: leagueId}, 
+                                FantasyPlayer.updateOne({ player_id: playerToInjured.player_id, season_id: seasonId, league_id: leagueId },
                                     { "isIL" : false }, (err, fantasyStored) => {
                                     if(err) {
                                         return res.status(500).send({ message: "Error del servidor."});
@@ -1702,8 +1767,7 @@ function dropInjuryList(req, res){
                          if (!registroCreated) {
                              return res.status(404).send({ code: 404, message: "Error al crear el registro." });
                          }
-
-                         FantasyPlayer.updateOne({ player_name: playerToInjured.player_name, season_id: seasonId, league_id: leagueId}, 
+                         FantasyPlayer.updateOne({ player_id: playerToInjured.player_id, season_id: seasonId, league_id: leagueId },
                             { "available" : true, "isIL": false }, (err, fantasyStored) => {
                             if(err) {
                                 return res.status(500).send({ code: 500, message: "Error del servidor."});
