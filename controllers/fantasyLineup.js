@@ -32,12 +32,18 @@ function addPlayerLineup(req,res){
 
 
     const params = req.params;
+    const userEmailFromToken = req.user.email;
+
 
     FantasyLineup.findById({ _id: params.id })
         .exec((err, fantasyLimit) => {
             if(err){
                 res.status(500).send({ code: 500, message: "Error del servidor."});
             } else {
+
+                if (fantasyLimit.user_id.toString() !== userEmailFromToken) {
+                    return res.status(403).send({ code: 403, message: "No puedes modificar una alineación que no es tuya." });
+                }
 
                 if(!fantasyLimit || fantasyLimit.length === 0) {
                     res.status(404).send({ code: 404, message: "No se ha encontrado la alineación fantasy."});
@@ -402,6 +408,9 @@ function updateFantasyLineup(req,res) {
     const {
         _id, order
     } = req.body;
+
+    const userEmailFromToken = req.user.email;
+
         
     FantasyLineup.updateOne({"_id": FantasyLineupId, "fantasyLineup._id": _id},
     { $set: {"fantasyLineup.$.order": order }})
@@ -413,8 +422,11 @@ function updateFantasyLineup(req,res) {
                     if(!fantasyLineup) {
                         res.status(404).send({ message: "No se ha encontrado la fantasy lineup."});
                     } else {
-                        res.status(200).send({ message: "Alineación actualizada correctamente." });
-                    }
+                        if (fantasyLineup.user_id.toString() !== userEmailFromToken) {
+                            return res.status(403).send({ code: 403, message: "No puedes modificar una alineación que no es tuya." });
+                        }else
+                            res.status(200).send({ message: "Alineación actualizada correctamente." });
+                        }
                 }
             }
         );
@@ -481,6 +493,9 @@ function deletePlayerFantasyLineup(req, res) {
         fantasyPlayerId, fantasyPlayerName, fantasyPlayer_id, fantasyUser, season_id, league_id, available, position
     } = req.body;
 
+    const userEmailFromToken = req.user.email;
+
+
     // Buscar la alineación fantasy en la base de datos
     FantasyLineup.findOne({ _id: id })
         .exec((err, fantasyLineup) => {
@@ -490,6 +505,10 @@ function deletePlayerFantasyLineup(req, res) {
 
             if (!fantasyLineup) {
                 return res.status(404).send({ message: "No se ha encontrado la alineación fantasy." });
+            }
+
+            if (fantasyLineup.user_id.toString() !== userEmailFromToken) {
+                    return res.status(403).send({ code: 403, message: "No puedes modificar una alineación que no es tuya." });
             }
 
             // Verificar si el jugador ya ha sido eliminado (si no está en la alineación)
@@ -551,7 +570,6 @@ function deletePlayerFantasyLineup(req, res) {
             });
         });
 }
-
 
 function getUsersFantasyLineups(req,res){
 
@@ -1459,31 +1477,86 @@ function saveFantasyLineups(req, res) {
         });
 }
 
-function updateFantasyTeamName(req, res) {
-    const fantasyName = req.query.name;
-    const seasonId = req.query.season;
-    const leagueId = req.query.season;
+async function updateFantasyTeamName(req, res) {
+    try {
+        const { id } = req.params;
+        // Puedes leerlo de req.body (recomendado en PUT/PATCH) o mantener req.query
+        const fantasyName = req.body.name || req.query.name;
+        const seasonId = req.body.season || req.query.season;
+        const leagueId = req.body.league || req.query.league;
+        const userEmailFromToken = req.user.email;
 
-    FantasyLineup.findByIdAndUpdate({_id: req.params.id, numer_match: 0, season_id: seasonId, league_id: leagueId}, {name_team: fantasyName}, (err, fantasyTeam) => {
-        if(err) {
-            err.status(500).send({ message: "Error del servidor."});
-        } else {
-            if(!fantasyTeam) {
-                err.status(404).send({ message: "Usuario no encontrado."});
-            } else {
-                res.status(200).send({ code: 200, message: "Usuario actualizado correctamente."});
-            }
+        // 1. Validar que llegan los datos obligatorios
+        if (!fantasyName || !seasonId || !leagueId) {
+            return res.status(400).send({
+                code: 400,
+                message: "El nombre, la temporada y la liga son obligatorios."
+            });
         }
-    });
+
+        // 2. Buscar el equipo primero para verificar dueño y condiciones
+        const fantasyTeam = await FantasyLineup.findById(id);
+
+        if (!fantasyTeam) {
+            return res.status(404).send({
+                code: 404,
+                message: "No se ha encontrado el equipo fantasy."
+            });
+        }
+
+        // 3. 🔒 Validar propietario ANTES de modificar nada
+        if (fantasyTeam.user_id.toString() !== userEmailFromToken) {
+            return res.status(403).send({
+                code: 403,
+                message: "No tienes permiso para modificar este equipo."
+            });
+        }
+
+        // 4. Validar tus reglas de negocio (number_match === 0, temporada y liga)
+        if (
+            fantasyTeam.number_match !== 0 ||
+            fantasyTeam.season_id.toString() !== seasonId.toString() ||
+            fantasyTeam.league_id.toString() !== leagueId.toString()
+        ) {
+            return res.status(400).send({
+                code: 400,
+                message: "No se puede cambiar el nombre (la jornada ya empezó o los datos no coinciden)."
+            });
+        }
+
+        // 5. Actualizar y guardar
+        fantasyTeam.name_team = fantasyName.trim();
+        const updatedTeam = await fantasyTeam.save();
+
+        return res.status(200).send({
+            code: 200,
+            message: "Nombre del equipo actualizado correctamente.",
+            team: updatedTeam
+        });
+
+    } catch (err) {
+        return res.status(500).send({
+            code: 500,
+            message: "Error del servidor.",
+            error: err.message
+        });
+    }
 }
+
 
 function addInjuryList(req, res) {
     let userId = req.params.user;
     let playerId = req.query.playerId;
     let seasonId = req.query.seasonId;
     let leagueId = req.query.leagueId;
+    const userEmailFromToken = req.user.email;
+
 
     try {
+
+        if (userId.toString() !== userEmailFromToken) {
+            return res.status(403).send({ code: 403, message: "No puedes modificar una IL que no es tuya." });
+        }
         // Paso 1: Comprobar que player_id está en StatusPlayer y que el currentStatus es INJ
         StatusPlayer.find({ player_id: playerId }, (err, statusPlayers) => {
             if (err) {
@@ -1619,9 +1692,13 @@ function removeInjuryList(req, res){
     let playerId = req.query.playerId;
     let seasonId = req.query.seasonId;
     let leagueId = req.query.leagueId;
+    const userEmailFromToken = req.user.email;
 
 
     try{
+        if (userId.toString() !== userEmailFromToken) {
+            return res.status(403).send({ code: 403, message: "No puedes modificar una IL que no es tuya." });
+        }
                 
         FantasyLineup.find({ user_id: userId, season_id: seasonId, league_id: leagueId }, (err, fantasyTeams) => {
             if (err) {
@@ -1720,9 +1797,14 @@ function dropInjuryList(req, res){
     let playerId = req.query.playerId;
     let seasonId = req.query.seasonId;
     let leagueId = req.query.leagueId;
+    const userEmailFromToken = req.user.email;
+
 
 
     try{
+        if (userId.toString() !== userEmailFromToken) {
+            return res.status(403).send({ code: 403, message: "No puedes modificar una IL que no es tuya." });
+        }
         FantasyLineup.find({ user_id: userId, season_id: seasonId, league_id: leagueId }, (err, fantasyTeams) => {
             if (err) {
                 return res.status(500).json({ success: false, message: 'Error en la búsqueda de equipos' });
@@ -1956,12 +2038,16 @@ function substituteFantasyPlayer(req, res) {
         available             // true (para liberar al viejo y bloquear al nuevo)
     } = req.body;
 
+    const userEmailFromToken = req.user.email;
+
+
     // 1. Buscar la alineación actual para validar existencia y propiedad
     FantasyLineup.findOne({ _id: id })
         .exec((err, fantasyLimit) => {
             if (err) return res.status(500).send({ code: 500, message: "Error del servidor." });
             if (!fantasyLimit) return res.status(404).send({ code: 404, message: "No se ha encontrado la alineación fantasy." });
-
+            if (fantasyLimit.user_id.toString() !== userEmailFromToken) return res.status(403).send({ code: 403, message: "No puedes modificar una alineacion que no es tuya." });
+            
             // VALIDACIÓN DEL JUGADOR VIEJO: Verificar si el jugador a eliminar sigue en el equipo
             const playerIndex = fantasyLimit.fantasyLineup.findIndex(player => player._id.toString() === fantasyPlayerId);
             if (playerIndex === -1) {
@@ -2097,7 +2183,111 @@ function substituteFantasyPlayer(req, res) {
         });
 }
 
+async function addWishList(req, res) {
+    try {
+        const { id } = req.params;
+        const playerId = Number(req.body.playerId);
+        const userEmailFromToken = req.user.email;
 
+        if (!playerId || isNaN(playerId)) {
+            return res.status(400).send({ code: 400, message: "El playerId numérico es obligatorio." });
+        }
+
+        const fantasyLineup = await FantasyLineup.findById(id);
+
+        if (!fantasyLineup) {
+            return res.status(404).send({ code: 404, message: "No se ha encontrado la alineación." });
+        }
+
+        if (fantasyLineup.user_id.toString() !== userEmailFromToken) {
+            return res.status(403).send({ code: 403, message: "No puedes modificar una wishlist que no es tuya." });
+        }
+
+        const alreadyExists = fantasyLineup.wishList.some(
+            (item) => Number(item.player_id) === playerId
+        );
+
+        if (alreadyExists) {
+            return res.status(400).send({ code: 400, message: "El jugador ya está en la wishlist." });
+        }
+
+        fantasyLineup.wishList.push({ player_id: playerId });
+        const updatedLineup = await fantasyLineup.save();
+
+        return res.status(201).send({
+            code: 201,
+            message: "Jugador añadido a la wishlist.",
+            wishList: updatedLineup.wishList
+        });
+
+    } catch (err) {
+        return res.status(500).send({ code: 500, message: "Error del servidor.", error: err.message });
+    }
+}
+
+async function removeWishList(req, res) {
+    try {
+        const { id } = req.params;
+        const playerId = Number(req.body.playerId);
+        const userEmailFromToken = req.user.email;
+
+        if (!playerId || isNaN(playerId)) {
+            return res.status(400).send({ code: 400, message: "El playerId numérico es obligatorio." });
+        }
+
+        const fantasyLineup = await FantasyLineup.findById(id);
+
+        if (!fantasyLineup) {
+            return res.status(404).send({ code: 404, message: "No se ha encontrado la alineación." });
+        }
+
+        if (fantasyLineup.user_id.toString() !== userEmailFromToken) {
+            return res.status(403).send({ code: 403, message: "No puedes modificar una wishlist que no es tuya." });
+        }
+
+        const updatedLineup = await FantasyLineup.findByIdAndUpdate(
+            id,
+            { $pull: { wishList: { player_id: playerId } } },
+            { new: true }
+        );
+
+        return res.status(200).send({
+            code: 200,
+            message: "Jugador eliminado de la wishlist.",
+            wishList: updatedLineup.wishList
+        });
+
+    } catch (err) {
+        return res.status(500).send({ code: 500, message: "Error del servidor.", error: err.message });
+    }
+}
+
+async function getWishList(req, res) {
+    try {
+        const { id } = req.params;
+        const userEmailFromToken = req.user.email;
+
+        // Importante incluir user_id en el .select() para poder validar el dueño
+        const fantasyLineup = await FantasyLineup.findById(id)
+            .select("wishList user_id");
+
+        if (!fantasyLineup) {
+            return res.status(404).send({ code: 404, message: "No se ha encontrado la alineación." });
+        }
+
+        if (fantasyLineup.user_id.toString() !== userEmailFromToken) {
+            return res.status(403).send({ code: 403, message: "No tienes permiso para ver esta wishlist." });
+        }
+
+        return res.status(200).send({
+            code: 200,
+            wishList: fantasyLineup.wishList
+        });
+
+    } catch (err) {
+        return res.status(500).send({ code: 500, message: "Error del servidor.", error: err.message });
+    }
+}
 
 module.exports = {
     addLineup,
@@ -2131,5 +2321,8 @@ module.exports = {
     addInjuryListManually,
     dropInjuryList,
     updateAvatarIL,
-    substituteFantasyPlayer
+    substituteFantasyPlayer,
+    addWishList,
+    removeWishList,
+    getWishList
 };

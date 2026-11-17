@@ -37,5 +37,9 @@ api.delete("/drop-player-IL/:user", [md_auth.ensureAuth],FantasyLineupController
 api.post("/add-player-IL-manual/:user",[md_auth.ensureAdmin], FantasyLineupController.addInjuryListManually);
 api.put("/update-avatar-IL",FantasyLineupController.updateAvatarIL);
 api.post("/substitute-player/:id", [md_auth.ensureAuth], FantasyLineupController.substituteFantasyPlayer);
+api.post("/add-wishlist/:id", [md_auth.ensureAuth], FantasyLineupController.addWishList);
+api.delete("/remove-wishlist/:id", [md_auth.ensureAuth], FantasyLineupController.removeWishList);
+api.get("/get-wishlist/:id", [md_auth.ensureAuth], FantasyLineupController.getWishList);
+
 
 module.exports = api;

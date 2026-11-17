@@ -35,6 +35,10 @@ const fantasyLineupSchema = new Schema(
             avatar: { type: String, required: true },
             position: { type: String, required: true },
             date: { type: Date, required: true }
+        } ],
+        wishList: [ {
+            _id: false, // Evita que genere un ObjectId innecesario por cada jugador
+            player_id: { type: Number, required: true }
         } ]
     }
 );
