@@ -403,33 +403,47 @@ function getUserFantasyLineupMatch(req,res){
         });
 }
 
-function updateFantasyLineup(req,res) {
-    const FantasyLineupId = req.params.id;
-    const {
-        _id, order
-    } = req.body;
+async function updateFantasyLineup(req, res) {
+    try {
+        const fantasyLineupId = req.params.id;
+        const { _id, order } = req.body;
+        const userEmailFromToken = req.user?.email;
 
-    const userEmailFromToken = req.user.email;
+        if (!userEmailFromToken) {
+            return res.status(401).send({ message: "Usuario no autenticado." });
+        }
 
-        
-    FantasyLineup.updateOne({"_id": FantasyLineupId, "fantasyLineup._id": _id},
-    { $set: {"fantasyLineup.$.order": order }})
-    .exec(
-            (err, fantasyLineup) => {
-                if(err){
-                    res.status(500).send({ message: "Error del servidor."});
-                } else {
-                    if(!fantasyLineup) {
-                        res.status(404).send({ message: "No se ha encontrado la fantasy lineup."});
-                    } else {
-                        if (fantasyLineup.user_id.toString() !== userEmailFromToken) {
-                            return res.status(403).send({ code: 403, message: "No puedes modificar una alineación que no es tuya." });
-                        }else
-                            res.status(200).send({ message: "Alineación actualizada correctamente." });
-                        }
-                }
-            }
+        // 1. Buscamos la alineación por su ID
+        const lineup = await FantasyLineup.findById(fantasyLineupId);
+
+        if (!lineup) {
+            return res.status(404).send({ message: "No se ha encontrado la fantasy lineup." });
+        }
+
+        // 2. Validamos que el email coincida
+        if (lineup.user_id !== userEmailFromToken) {
+            return res.status(403).send({ 
+                code: 403, 
+                message: "No puedes modificar una alineación que no es tuya." 
+            });
+        }
+
+        // 3. Actualizamos el orden del jugador dentro del array
+        const result = await FantasyLineup.updateOne(
+            { "_id": fantasyLineupId, "fantasyLineup._id": _id },
+            { $set: { "fantasyLineup.$.order": order } }
         );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).send({ message: "No se ha encontrado el jugador en la alineación." });
+        }
+
+        return res.status(200).send({ message: "Alineación actualizada correctamente." });
+
+    } catch (err) {
+        console.error("Error en updateFantasyLineup:", err);
+        return res.status(500).send({ message: "Error del servidor." });
+    }
 }
 
 /*function deletePlayerFantasyLineup(req, res) {
