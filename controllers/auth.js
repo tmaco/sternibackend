@@ -38,20 +38,20 @@ function refresAccessToken(req, res) {
     }
 }
 
-async function isOK(_req, res) {
-
+function isOK(_req, res) {
     const healthcheck = {
         uptime: process.uptime(),
         message: 'OK',
         timestamp: Date.now(),
     };
     try {
-        await res.send(healthcheck);
+        return res.status(200).json(healthcheck);
     } catch (error) {
-        healthcheck.message = error;
-        await res.status(503).send();
+        healthcheck.message = error.message || 'Error';
+        return res.status(503).json(healthcheck);
     }
-} 
+}
+
 
 module.exports = {
     refresAccessToken,

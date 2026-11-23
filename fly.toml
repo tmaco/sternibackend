@@ -4,7 +4,7 @@
 #
 
 app = 'sterni2k23'
-primary_region = 'mad'
+primary_region = 'cdg'
 kill_signal = 'SIGINT'
 kill_timeout = '5s'
 
@@ -12,9 +12,7 @@ kill_timeout = '5s'
   auto_rollback = true
 
 [build]
-  #builder = 'heroku/builder:24'
   dockerfile = "Dockerfile"
-
 
 [env]
   PORT = '8080'
@@ -34,14 +32,18 @@ kill_timeout = '5s'
     handlers = ['tls', 'http']
 
   [services.concurrency]
-    type = 'connections'
-    hard_limit = 25
-    soft_limit = 20
+    type = 'requests'
+    hard_limit = 250
+    soft_limit = 200
 
-  [[services.tcp_checks]]
-    interval = '15s'
-    timeout = '2s'
+  [[services.http_checks]]
+    interval = '30s'
+    timeout = '5s'
     grace_period = '30s'
+    method = 'GET'
+    path = '/api/v1/health'
 
 [[vm]]
   size = 'shared-cpu-1x'
+  memory = '512mb'
+

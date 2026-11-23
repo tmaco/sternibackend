@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require('morgan');
 const cors = require('cors');
+const compression = require('compression');
 
 const app = express();
 const { API_VERSION } = require('./config');
@@ -25,13 +26,33 @@ const statusPlayerRoutes = require("./routers/statusPlayer");
 const newsPlayerRoutes = require("./routers/newsPlayer");
 
 
-//Configure Body Parser
+// 1. Logs filtrados con etiqueta [SLOW] para > 500ms
+app.use(morgan((tokens, req, res) => {
+  const rawTime = tokens['response-time'](req, res);
+  const time = rawTime ? parseFloat(rawTime) : 0;
+  const tag = time > 500 ? '[SLOW] ' : '';
 
+  return [
+    tag + tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    time.toFixed(3), 'ms -',
+    tokens.res(req, res, 'content-length') || '-'
+  ].join(' ');
+}, {
+  skip: (req, res) =>
+    req.originalUrl.endsWith('/health') ||
+    (req.originalUrl === '/' && res.statusCode === 404)
+}));
+
+// 2. Compresión Gzip/Brotli automática (sin tocar nada en frontend)
+app.use(compression());
+
+// 3. Parsers y CORS
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(morgan('dev'));
 
-//Configure static folder
+/// 4. Archivos estáticos
 app.use(express.static("uploads"));
 
 // Configure Header HTTP - CORS
@@ -48,7 +69,7 @@ app.use(express.static("uploads"));
 
 app.use(cors());
 
-// Router Basic
+// 5. Rutas de la API
 app.use(`/api/${API_VERSION}`, authRoutes);
 app.use(`/api/${API_VERSION}`, userRoutes);
 app.use(`/api/${API_VERSION}`, menuRoutes);
